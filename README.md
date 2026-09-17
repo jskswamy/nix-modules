@@ -91,6 +91,9 @@ that is not in one of its tools.
 | `ssh` | `ssh` |
 | `terminal` | `alacritty`, `ghostty`, `tmux`, `tmuxp` |
 
+Per-tool detail — what each one writes, what it installs, what it brings
+with it — is in **[docs/tools.md](docs/tools.md)**.
+
 All 23 tools: `alacritty`, `beads`, `ccstatusline`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `mcp`, `nbdime`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
