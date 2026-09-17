@@ -1,0 +1,11 @@
+{
+  "diff": {
+    "ignore": [
+      "/cells/*/execution_count",
+      "/cells/*/outputs/*/execution_count",
+      "/cells/*/metadata/ExecuteTime",
+      "/metadata/kernelspec/version",
+      "/metadata/language_info/version"
+    ]
+  }
+}

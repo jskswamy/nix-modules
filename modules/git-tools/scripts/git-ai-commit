@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+set -e
+
+# Color definitions for gum styling
+RED=196
+ORANGE=214
+
+# Global variables for parsed arguments
+USER_CONTEXT=""
+GIT_FLAGS=()
+
+check_staged_changes() {
+  if git diff --cached --quiet; then
+    gum style --foreground $ORANGE "No staged changes to commit. Use 'git add' to stage changes first."
+    exit 1
+  fi
+}
+
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -m|--message|--context)
+        if [[ -n "$2" && "$2" != -* ]]; then
+          USER_CONTEXT="$2"
+          shift 2
+        else
+          gum style --foreground $RED "Error: $1 requires an argument"
+          exit 1
+        fi
+        ;;
+      *)
+        # All other arguments are git commit flags
+        GIT_FLAGS+=("$1")
+        shift
+        ;;
+    esac
+  done
+}
+
+get_user_context() {
+  # If context not provided via flag, optionally prompt for it
+  if [ -z "$USER_CONTEXT" ]; then
+    USER_CONTEXT=$(gum input --placeholder "Optional: Provide context about your changes (press Enter to skip)" --width 80 || echo "")
+  fi
+}
+
+get_fabric_pattern() {
+  if [ -n "$FABRIC_COMMIT_PATTERN" ]; then
+    echo "$FABRIC_COMMIT_PATTERN"
+    return
+  fi
+
+  # Separate arrays for descriptions and pattern names
+  local descriptions=(
+    "Semantic Git commit"
+    "Conventional commits"
+  )
+
+  local patterns=(
+    "semantic_commit"
+    "conventional_commit"
+  )
+
+  # Let user select from descriptions
+  local selected_description
+  selected_description=$(printf "%s\n" "${descriptions[@]}" | gum choose --header "Select a fabric pattern for commit message generation:")
+
+  # Find the index of selected description and return corresponding pattern
+  for i in "${!descriptions[@]}"; do
+    if [[ "${descriptions[$i]}" == "$selected_description" ]]; then
+      echo "${patterns[$i]}"
+      return
+    fi
+  done
+}
+
+generate_commit_message() {
+  local pattern="$1"
+  local git_root
+
+  # Find git root directory
+  git_root=$(git rev-parse --show-toplevel) || {
+    gum style --foreground $RED "Error: Not in a git repository"
+    exit 1
+  }
+
+  # Check if --amend flag is present
+  local is_amend=false
+  for flag in "${GIT_FLAGS[@]}"; do
+    if [[ "$flag" == "--amend" ]]; then
+      is_amend=true
+      break
+    fi
+  done
+
+  # Prepare input for fabric
+  local fabric_input=""
+
+  # Add current commit message if amending
+  if [ "$is_amend" = true ]; then
+    local current_commit_msg
+    current_commit_msg=$(git log -1 --pretty=%B)
+    fabric_input+="Current commit message being amended:
+$current_commit_msg
+
+"
+  fi
+
+  # Add user context if provided
+  if [ -n "$USER_CONTEXT" ]; then
+    fabric_input+="User's intention and context:
+$USER_CONTEXT
+
+"
+  fi
+
+  # Add staged changes
+  fabric_input+="Staged changes:
+$(git dc)"
+
+  # Run fabric command and write directly to COMMIT_EDITMSG
+  echo "$fabric_input" | fabric -p "$pattern" >"$git_root/.git/COMMIT_EDITMSG" || exit 1
+}
+
+main() {
+  # Parse arguments to extract context and git flags
+  parse_arguments "$@"
+
+  check_staged_changes
+
+  # Get user context (from flag or interactive prompt)
+  get_user_context
+
+  local pattern
+  pattern=$(get_fabric_pattern)
+
+  local git_root
+  git_root=$(git rev-parse --show-toplevel)
+
+  generate_commit_message "$pattern"
+
+  # Use git commit with the generated message, allowing editing
+  # Forward any git commit flags (e.g., --no-verify, --amend)
+  git commit --edit --file="$git_root/.git/COMMIT_EDITMSG" "${GIT_FLAGS[@]}"
+}
+
+main "$@"

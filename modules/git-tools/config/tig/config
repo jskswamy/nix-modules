@@ -1,0 +1,136 @@
+# Tig configuration with terminal-native colors and delta integration
+# Uses 'default' colors to inherit from terminal theme (Ghostty/cmux)
+
+# ========================================
+# COLOR SCHEME (terminal-native)
+# ========================================
+
+# Basic UI colors (inherits terminal theme)
+color default           default     default
+color cursor            default     default     reverse
+color status            green       default
+color delimiter         cyan        default
+color date              blue        default
+color mode              cyan        default
+color overflow          red         default
+
+# Header and title colors
+color header            yellow      default     bold
+color title-focus       default     default     reverse
+color title-blur        white       default
+
+# Main view colors (git history)
+color main-commit       default     default
+color main-tag          magenta     default     bold
+color main-local-tag    magenta     default
+color main-remote       yellow      default
+color main-replace      cyan        default
+color main-tracked      yellow      default
+color main-ref          cyan        default
+color main-head         cyan        default     bold
+
+# Graph commit visualization
+color graph-commit      cyan        default
+
+# Diff colors (for code changes)
+color diff-header       yellow      default     bold
+color diff-index        blue        default
+color diff-chunk        magenta     default     bold
+color diff-add          green       default
+color diff-del          red         default
+color diff-oldmode      yellow      default
+color diff-newmode      yellow      default
+color "copy from "      yellow      default
+color "copy to "        yellow      default
+color diff-similarity   yellow      default
+
+# Tree view colors (file browser)
+color tree.directory    yellow      default     bold
+color tree.file         default     default
+
+# Search highlighting
+color search-result     default     default     reverse
+
+# Help view colors
+color help-group        blue        default     bold
+color help-action       yellow      default
+
+# ========================================
+# GENERAL SETTINGS
+# ========================================
+
+# Basic settings for better usability
+set wrap-lines = yes
+set tab-size = 2
+set mouse = false                    # Disable mouse to allow terminal text selection
+set mouse-scroll = 3                 # Allow mouse wheel scrolling
+set ignore-case = yes                # Case-insensitive search
+
+# Editor settings for better diff viewing
+set diff-context = 3                 # Show 3 lines of context in diffs
+set line-graphics = utf-8            # Use UTF-8 line graphics
+set truncation-delimiter = ~         # Show ~ for truncated lines
+
+# ========================================
+# KEY BINDINGS - VIM-LIKE NAVIGATION
+# ========================================
+
+# Vim-like navigation
+bind generic g move-first-line
+bind generic G move-last-line
+bind generic <C-f> scroll-page-down
+bind generic <C-b> scroll-page-up
+bind generic <PageDown> scroll-page-down
+bind generic <PageUp> scroll-page-up
+
+# Alternative navigation (since Ctrl+d/u conflict with existing bindings)
+bind generic <Space> scroll-page-down
+bind generic <Backspace> scroll-page-up
+
+# ========================================
+# KEY BINDINGS - COPY OPERATIONS
+# ========================================
+
+# Copy operations (using pbcopy for macOS)
+bind main y !@sh -c "echo %(commit) | pbcopy"
+bind diff y !@sh -c "echo %(commit) | pbcopy"
+bind log y !@sh -c "echo %(commit) | pbcopy"
+bind main Y !@sh -c "echo '%(commit) %(subject)' | pbcopy"  # Copy commit + subject
+bind diff D !@sh -c "tig show %(commit) | pbcopy"          # Copy full diff
+
+# ========================================
+# KEY BINDINGS - EDITOR INTEGRATION
+# ========================================
+
+# Open files in editor
+bind diff e !sh -c "${EDITOR:-nvim} %(file)"
+bind tree e !sh -c "${EDITOR:-nvim} %(file)"
+
+# ========================================
+# KEY BINDINGS - SEARCH
+# ========================================
+
+# Search bindings
+bind generic / search
+bind generic ? search-back
+bind generic n find-next
+bind generic N find-prev
+
+# ========================================
+# DELTA INTEGRATION
+# ========================================
+# View diffs with delta for better syntax highlighting
+# Using 'd' for delta (lowercase to avoid conflict with 'D' for copy)
+# Using '<' and '>' for side-by-side (think of arrows pointing to/from)
+
+# Diff view: Show commit diffs with delta
+bind diff d >sh -c "git show %(commit) | delta --paging always"
+bind diff > >sh -c "git show %(commit) | delta --paging always --side-by-side"
+
+# Stage view: Show file diffs with delta
+bind stage d >sh -c "git diff HEAD -- %(file) | delta --paging always"
+bind stage > >sh -c "git diff HEAD -- %(file) | delta --paging always --side-by-side"
+
+# Status view: Show working directory changes with delta
+bind status d >sh -c "git diff HEAD -- %(file) | delta --paging always"
+bind status > >sh -c "git diff HEAD -- %(file) | delta --paging always --side-by-side"

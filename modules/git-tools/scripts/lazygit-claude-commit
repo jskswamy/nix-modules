@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -e
+
+RED=196
+ORANGE=214
+
+# Check for staged changes
+if git diff --cached --quiet; then
+	gum style --foreground $ORANGE "No staged changes. Use 'git add' first."
+	exit 1
+fi
+
+# Get pattern from env var or prompt
+get_pattern() {
+	if [ -n "$FABRIC_COMMIT_PATTERN" ]; then
+		echo "$FABRIC_COMMIT_PATTERN"
+		return
+	fi
+
+	# fzf selection only if env var not set
+	local descriptions=("Semantic Git commit" "Conventional commits")
+
+	local selected
+	selected=$(printf "%s\n" "${descriptions[@]}" | fzf \
+		--height=10 \
+		--layout=reverse \
+		--prompt="Select pattern: ")
+
+	case "$selected" in
+	"Semantic Git commit") echo "semantic_commit" ;;
+	"Conventional commits") echo "conventional_commit" ;;
+	*) return 1 ;;
+	esac
+}
+
+PATTERN=$(get_pattern)
+if [ -z "$PATTERN" ]; then
+	gum style --foreground $RED "No pattern selected"
+	exit 1
+fi
+
+# Read template
+PATTERNS_DIR="$HOME/.config/fabric/patterns"
+TEMPLATE_PATH="$PATTERNS_DIR/$PATTERN/system.md"
+if [ ! -f "$TEMPLATE_PATH" ]; then
+	gum style --foreground $RED "Template not found: $TEMPLATE_PATH"
+	exit 1
+fi
+TEMPLATE=$(cat "$TEMPLATE_PATH")
+
+# Get git root and staged diff
+GIT_ROOT=$(git rev-parse --show-toplevel)
+DIFF=$(git diff --staged)
+
+# Generate commit message via Claude
+gum spin --spinner dot --title "Generating commit message with Claude..." -- \
+	bash -c "echo \"\$1\" | claude -p --system-prompt \"\$2\" > \"\$3\"" -- \
+	"$DIFF" "$TEMPLATE" "$GIT_ROOT/.git/COMMIT_EDITMSG"
+
+# Open in editor for tweaking, then commit
+git commit --edit --file="$GIT_ROOT/.git/COMMIT_EDITMSG"

@@ -1,0 +1,5 @@
+#!/bin/bash
+# GPG wrapper that re-learns smartcard stubs before signing
+# Fixes the "please insert card X" prompt when switching YubiKeys
+gpg-connect-agent "scd serialno" "learn --force" /bye 2>/dev/null
+exec gpg "$@"

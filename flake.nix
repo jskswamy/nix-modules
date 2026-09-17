@@ -27,6 +27,7 @@
       "editor"
       "ssh"
       "agent-tools"
+      "git-tools"
     ];
 
     groupModules =

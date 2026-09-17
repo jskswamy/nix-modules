@@ -1,0 +1,8 @@
+# hunk configuration — https://www.hunk.dev/docs/configure/configuration/
+
+# Query the terminal background at startup and pick github-light-default
+# or github-dark-default to match, instead of hunk's hardcoded dark
+# default. May not detect correctly when nested inside herdr panes —
+# same class of query-forwarding issue we hit with herdr's own
+# experimental.kitty_graphics.
+theme = "auto"
