@@ -25,6 +25,7 @@
       "shell"
       "terminal"
       "editor"
+      "ssh"
     ];
 
     groupModules =
