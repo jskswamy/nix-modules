@@ -23,6 +23,7 @@
     # groups import them at once.
     groups = [
       "shell"
+      "terminal"
     ];
 
     groupModules =

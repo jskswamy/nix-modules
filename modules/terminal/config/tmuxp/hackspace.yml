@@ -1,0 +1,10 @@
+---
+session_name: ${HACKSPACE_NAME}
+start_directory: "$PWD"
+windows:
+  - window_name: ${HACKSPACE_NAME}
+    layout: cad9,232x56,0,0{163x56,0,0[163x43,0,0,0,163x12,0,44,4],68x56,164,0,1}
+    panes:
+      - vim .
+      - echo "Welcome to ${HACKSPACE_NAME}"
+      - claude

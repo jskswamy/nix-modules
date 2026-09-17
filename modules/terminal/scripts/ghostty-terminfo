@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+
+# Ghostty Terminfo Helper
+# Helps set up terminfo on remote machines for proper Ghostty support
+
+set -euo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+print_usage() {
+    echo "Usage: $0 [COMMAND] [OPTIONS]"
+    echo ""
+    echo "Commands:"
+    echo "  install HOST       Install terminfo on remote host"
+    echo "  check              Check local terminfo status"
+    echo "  help               Show this help"
+    echo ""
+    echo "Note: SSH config automatically sets TERM=xterm-256color for compatibility"
+    echo ""
+    echo "Examples:"
+    echo "  $0 check                           # Check local terminfo"
+    echo "  $0 install user@server.com         # Install terminfo on remote (if needed)"
+}
+
+check_local_terminfo() {
+    echo -e "${BLUE}🔍 Checking local Ghostty terminfo...${NC}"
+
+    if infocmp xterm-ghostty >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ xterm-ghostty terminfo is available locally${NC}"
+        echo -e "${BLUE}ℹ️  Current TERM: $TERM${NC}"
+
+        # Show terminfo details
+        echo -e "\n${BLUE}📋 Terminfo details:${NC}"
+        infocmp -1 xterm-ghostty | head -10
+        echo "..."
+    else
+        echo -e "${RED}❌ xterm-ghostty terminfo not found locally${NC}"
+        echo -e "${YELLOW}💡 This might be expected if using an older ncurses version${NC}"
+        echo -e "${YELLOW}💡 Ghostty will fall back to a compatible terminfo automatically${NC}"
+    fi
+
+    echo -e "\n${BLUE}🖥️  Current terminal capabilities:${NC}"
+    echo -e "${BLUE}   Colors: $(tput colors 2>/dev/null || echo "unknown")${NC}"
+    echo -e "${BLUE}   Columns: $(tput cols 2>/dev/null || echo "unknown")${NC}"
+    echo -e "${BLUE}   Lines: $(tput lines 2>/dev/null || echo "unknown")${NC}"
+}
+
+install_terminfo() {
+    local host="$1"
+
+    if [[ -z $host ]]; then
+        echo -e "${RED}❌ Host is required${NC}"
+        print_usage
+        exit 1
+    fi
+
+    echo -e "${BLUE}🚀 Installing Ghostty terminfo on $host...${NC}"
+
+    # Check if we have the terminfo locally first
+    if ! infocmp xterm-ghostty >/dev/null 2>&1; then
+        echo -e "${YELLOW}⚠️  xterm-ghostty terminfo not found locally${NC}"
+        echo -e "${YELLOW}💡 Attempting to use Ghostty's built-in terminfo...${NC}"
+
+        # Try to get terminfo from Ghostty binary if available
+        if command -v ghostty >/dev/null 2>&1; then
+            echo -e "${BLUE}📦 Extracting terminfo from Ghostty binary...${NC}"
+            if ghostty +show-terminfo 2>/dev/null | ssh "$host" -- tic -x -; then
+                echo -e "${GREEN}✅ Successfully installed terminfo using Ghostty binary${NC}"
+                return 0
+            else
+                echo -e "${YELLOW}⚠️  Failed to extract terminfo from Ghostty binary${NC}"
+            fi
+        fi
+
+        echo -e "${YELLOW}💡 Falling back to manual terminfo installation...${NC}"
+        echo -e "${YELLOW}💡 This will create a basic xterm-ghostty entry${NC}"
+
+        # Create a basic terminfo entry as fallback
+        cat << 'EOF' | ssh "$host" -- tic -x -
+xterm-ghostty|Ghostty terminal emulator,
+    use=xterm-256color,
+    Tc,
+    sitm=\E[3m,
+    ritm=\E[23m,
+    smxx=\E[9m,
+    rmxx=\E[29m,
+EOF
+        echo -e "${GREEN}✅ Installed basic xterm-ghostty terminfo${NC}"
+        return 0
+    fi
+
+    echo -e "${BLUE}📤 Copying terminfo to $host...${NC}"
+    if infocmp -x xterm-ghostty | ssh "$host" -- tic -x -; then
+        echo -e "${GREEN}✅ Successfully installed terminfo on $host${NC}"
+        echo -e "${BLUE}💡 You can now SSH to $host with full Ghostty support${NC}"
+    else
+        echo -e "${RED}❌ Failed to install terminfo on $host${NC}"
+        exit 1
+    fi
+}
+
+setup_ssh_config() {
+    local host="$1"
+    local ssh_config="$HOME/.ssh/config"
+
+    if [[ -z $host ]]; then
+        echo -e "${RED}❌ Host is required${NC}"
+        print_usage
+        exit 1
+    fi
+
+    echo -e "${BLUE}⚙️  Setting up SSH config for $host...${NC}"
+
+    # Check if entry already exists
+    if grep -q "^Host $host" "$ssh_config" 2>/dev/null; then
+        echo -e "${YELLOW}⚠️  Host $host already exists in SSH config${NC}"
+        echo -e "${YELLOW}💡 Please manually add: SetEnv TERM=xterm-256color${NC}"
+        return 0
+    fi
+
+    # Create SSH config directory if it doesn't exist
+    mkdir -p "$(dirname "$ssh_config")"
+
+    # Add entry to SSH config
+    cat >> "$ssh_config" << EOF
+
+# Ghostty terminal fallback for $host
+Host $host
+    SetEnv TERM=xterm-256color
+EOF
+
+    echo -e "${GREEN}✅ Added SSH config entry for $host${NC}"
+    echo -e "${BLUE}💡 Added SetEnv TERM=xterm-256color for compatibility${NC}"
+}
+
+main() {
+    if [[ $# -eq 0 ]]; then
+        print_usage
+        exit 1
+    fi
+
+    case "$1" in
+        check)
+            check_local_terminfo
+            ;;
+        install)
+            if [[ $# -lt 2 ]]; then
+                echo -e "${RED}❌ Host is required for install command${NC}"
+                print_usage
+                exit 1
+            fi
+            install_terminfo "$2"
+            ;;
+        help|--help|-h)
+            print_usage
+            ;;
+        *)
+            echo -e "${RED}❌ Unknown command: $1${NC}"
+            print_usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

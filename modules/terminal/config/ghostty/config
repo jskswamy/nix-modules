@@ -1,0 +1,155 @@
+# display configuration
+# auto-switches based on macOS appearance (System Settings → Appearance → Auto)
+# run `ghostty +list-themes` to preview themes interactively
+config-file = ?theme.conf
+# other theme pairs to try:
+#theme = light:Modus Operandi Tinted,dark:Modus Vivendi
+#theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+#theme = light:Rose Pine Dawn,dark:Rose Pine Moon
+#theme = light:Gruvbox Material Light,dark:Gruvbox Material Dark
+#theme = light:Everforest Light,dark:Everforest Dark
+#theme = light:One Half Light,dark:One Half Dark
+#theme = light:Tokyo Night Light,dark:Tokyo Night
+
+# font configuration - Enhanced for Alacritty-like rendering
+font-family = "FiraCode Nerd Font Mono"
+font-size = 13
+#font-variation = wght=450
+
+# Font rendering optimizations for sharper text
+# (freetype-load-flags dropped — no-op on macOS, Ghostty uses CoreText there)
+font-synthetic-style = true
+grapheme-width-method = "unicode"
+font-thicken = true
+
+# Adjustments for better character clarity and spacing
+adjust-font-baseline = 0
+
+# Additional font rendering tweaks for Alacritty-like sharpness
+font-shaping-break = true
+adjust-cell-height = 3%
+adjust-cell-width = 5%
+
+bold-color = bright
+
+# Enhanced rendering for pixel-perfect display
+alpha-blending = "linear"
+minimum-contrast = 3
+
+# Color space optimization for better color accuracy
+window-colorspace = "srgb"
+
+# behavior - Performance optimized
+confirm-close-surface = false
+copy-on-select = clipboard
+unfocused-split-opacity = 0.7
+background-opacity = 1.0
+background-blur-radius = 0
+cursor-style-blink = false
+cursor-style = block
+maximize = true
+scrollback-limit = 50000
+
+# shell related tweaks - Enhanced for terminfo handling
+shell-integration = "fish"
+shell-integration-features = "cursor,title,sudo"
+
+# macos specific tweaks
+macos-titlebar-style = "hidden"
+macos-option-as-alt = true
+macos-auto-secure-input = true
+macos-titlebar-proxy-icon = visible
+
+# =============================================================================
+# GHOSTTY KEYBINDINGS (Ctrl+b prefix)
+# =============================================================================
+# Ctrl+b for Ghostty native (same as tmux prefix). Not ctrl+a — herdr uses
+# ctrl+a as its own prefix, and Ghostty is herdr's host terminal.
+#
+# SPLITS
+#   Ctrl+b |     Split right (vertical divider)
+#   Ctrl+b -     Split down (horizontal divider)
+#   Ctrl+b x     Close current split
+#   Ctrl+b z     Zoom/unzoom current split (toggle fullscreen)
+#   Ctrl+b 0     Equalize all split sizes
+#
+# SPLIT NAVIGATION
+#   Ctrl+b h     Go to split on the left
+#   Ctrl+b j     Go to split below
+#   Ctrl+b k     Go to split above
+#   Ctrl+b l     Go to split on the right
+#   Ctrl+b ;     Go to previous split (by creation order)
+#   Ctrl+b '     Go to next split (by creation order)
+#
+# SPLIT RESIZE (key table — repeat without re-pressing Ctrl+b, Esc to exit)
+#   Ctrl+b r     Enter resize mode
+#   h/j/k/l      Resize left/down/up/right (repeatable)
+#   Esc          Exit resize mode
+#
+# TABS (like tmux windows)
+#   Ctrl+b c     Create new tab
+#   Ctrl+b ,     Rename tab
+#   Ctrl+b n     Next tab
+#   Ctrl+b p     Previous tab
+#   Ctrl+b 1-9   Go to tab 1-9
+#
+# OTHER
+#   Ctrl+b `     Toggle quick terminal (dropdown)
+# =============================================================================
+
+# splits
+keybind = ctrl+b>shift+backslash=new_split:right
+keybind = ctrl+b>minus=new_split:down
+
+# split navigation
+keybind = ctrl+b>h=goto_split:left
+keybind = ctrl+b>j=goto_split:down
+keybind = ctrl+b>k=goto_split:up
+keybind = ctrl+b>l=goto_split:right
+keybind = ctrl+b>semicolon=goto_split:previous
+keybind = ctrl+b>apostrophe=goto_split:next
+
+# split resize (key table — enter once, repeat h/j/k/l, Esc to exit)
+keybind = ctrl+b>r=activate_key_table:resize
+keybind = resize/h=resize_split:left,50
+keybind = resize/j=resize_split:down,50
+keybind = resize/k=resize_split:up,50
+keybind = resize/l=resize_split:right,50
+keybind = resize/escape=deactivate_key_table
+
+# split size
+keybind = ctrl+b>zero=equalize_splits
+keybind = ctrl+b>z=toggle_split_zoom
+
+# close split/tab
+keybind = ctrl+b>x=close_surface
+
+# tabs (like tmux windows)
+keybind = ctrl+b>c=new_tab
+keybind = ctrl+b>comma=prompt_surface_title
+keybind = ctrl+b>n=next_tab
+keybind = ctrl+b>p=previous_tab
+keybind = ctrl+b>one=goto_tab:1
+keybind = ctrl+b>two=goto_tab:2
+keybind = ctrl+b>three=goto_tab:3
+keybind = ctrl+b>four=goto_tab:4
+keybind = ctrl+b>five=goto_tab:5
+keybind = ctrl+b>six=goto_tab:6
+keybind = ctrl+b>seven=goto_tab:7
+keybind = ctrl+b>eight=goto_tab:8
+keybind = ctrl+b>nine=goto_tab:9
+
+# quick terminal
+keybind = ctrl+b>grave_accent=toggle_quick_terminal
+
+# working directory
+window-inherit-working-directory = true
+
+# window styling
+window-decoration = true
+window-padding-x = 24,24
+window-padding-y = 24,24
+keybind = shift+enter=text:\x1b\r
+
+# disable cmd+k clear (use ctrl+l instead)
+keybind = super+k=unbind
