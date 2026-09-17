@@ -23,11 +23,11 @@
     # groups import them at once.
     groups = [
       "shell"
-      "terminal"
-      "editor"
-      "ssh"
-      "agent-tools"
       "git-tools"
+      "editor"
+      "terminal"
+      "agent-tools"
+      "ssh"
     ];
 
     groupModules =
