@@ -22,6 +22,7 @@
     # so that the module system can deduplicate them by path when several
     # groups import them at once.
     groups = [
+      "shell"
     ];
 
     groupModules =
