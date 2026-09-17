@@ -5,49 +5,40 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-  }: let
+  outputs = {nixpkgs, ...}: let
+    inherit (nixpkgs) lib;
+
     systems = [
       "aarch64-darwin"
       "x86_64-darwin"
       "x86_64-linux"
       "aarch64-linux"
     ];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
+    forAllSystems = lib.genAttrs systems;
 
-    # Groups whose module is a function of `self` (they reference files in
-    # this flake's own source tree). `_common` and `theme` are plain paths
-    # so that the module system can deduplicate them by path when several
-    # groups import them at once.
-    groups = [
-      "shell"
-      "git-tools"
-      "editor"
-      "terminal"
-      "agent-tools"
-      "ssh"
-    ];
+    # Every module here is a plain path, so a tool can import another tool
+    # (its dependencies) and a group can import its tools, with the module
+    # system deduplicating shared imports by path.
+    dirNames = dir:
+      builtins.attrNames (lib.filterAttrs (_: t: t == "directory") (builtins.readDir dir));
 
-    groupModules =
-      nixpkgs.lib.genAttrs groups
-      (g: import (./modules + "/${g}") {inherit self;});
+    tools = lib.genAttrs (dirNames ./modules/tools) (n: ./modules/tools + "/${n}");
+    groups =
+      lib.listToAttrs
+      (map (f: lib.nameValuePair (lib.removeSuffix ".nix" f) (./modules/groups + "/${f}"))
+        (builtins.attrNames (builtins.readDir ./modules/groups)));
   in {
     homeManagerModules =
-      groupModules
+      groups
       // {
+        inherit tools;
+
         common = ./modules/_common;
         theme = ./modules/theme;
 
-        # Everything at once. Consumers that want a subset should import
-        # the individual group modules instead.
-        default.imports =
-          [
-            ./modules/_common
-            ./modules/theme
-          ]
-          ++ builtins.attrValues groupModules;
+        # Every tool. Each one can still be switched off individually with
+        # `tools.<name>.enable = false`.
+        default.imports = builtins.attrValues tools;
       };
 
     overlays.default = import ./pkgs/overlay.nix;

@@ -12,31 +12,86 @@ setup without one depending on the other.
 
 ```nix
 {
-  inputs.nix-modules.url = "github:jskswamy/nix-modules";
+  inputs.jskswamy.url = "github:jskswamy/nix-modules";
 
   # ... in a home-manager configuration:
-  imports = [
-    inputs.nix-modules.homeManagerModules.shell
-    inputs.nix-modules.homeManagerModules.terminal
+  imports = with inputs.jskswamy.homeManagerModules; [
+    tools.fish
+    tools.nvim
+    tools.tmux
   ];
 }
 ```
 
-Take `homeManagerModules.default` for everything, or individual groups for a
-subset. Nothing is pulled in that you did not import.
+Three ways in, and they mix freely:
 
-## Modules
-
-| Module | Contents |
+| Import | You get |
 | --- | --- |
-| `shell` | fish, zsh, starship, direnv |
-| `terminal` | alacritty, ghostty, tmux (oh-my-tmux), tmuxp |
-| `editor` | neovim (LazyVim), vim, zed |
-| `git-tools` | git, lazygit, gpg, tig, hunk, nbdime, related scripts |
-| `agent-tools` | herdr, MCP/agentgateway, ccstatusline, beads, fabric, pet |
-| `ssh` | ssh client defaults |
-| `theme` | the `theme.variant` option every themeable tool reads |
-| `common` | the `nixModules.sourceRoot` option |
+| `tools.<name>` | that one tool, plus anything it depends on |
+| `<group>` | every tool in that group (`shell`, `terminal`, `editor`, `git-tools`, `agent-tools`, `ssh`) |
+| `default` | every tool |
+
+Importing a module is what asks for it — there is no separate `enable = true`
+to remember.
+
+### Custom groups
+
+A group here is nothing but a file that imports some tools. Yours works the
+same way, and can cut across the groups below however you like:
+
+```nix
+# my-cloud-box.nix
+{
+  imports = with inputs.jskswamy.homeManagerModules.tools; [
+    fish
+    starship
+    nvim
+    tmux
+  ];
+}
+```
+
+Import that from as many hosts as you want.
+
+### Dependencies come along, and can be sent back
+
+Some tools configure others. lazygit binds two keys to `hunk`; fish ships a
+file that customises starship's prompt. Importing the first brings the
+second with it:
+
+```nix
+imports = [ tools.lazygit ];   # hunk arrives too
+```
+
+If you did not want it, say so, and the parts that depended on it drop out
+cleanly rather than breaking:
+
+```nix
+imports = [ tools.lazygit ];
+tools.hunk.enable = false;     # the two `hunk show` keybindings go too
+```
+
+Every tool takes `tools.<name>.enable`, so this works for anything that
+arrived indirectly.
+
+Current edges: `fish` → `starship`, `lazygit` → `hunk`, `git` → `hunk`
+(as its pager; without hunk, git keeps its own default pager).
+
+## Groups
+
+Each group is only a bundle of tool modules — there is nothing in a group
+that is not in one of its tools.
+
+| Group | Tools |
+| --- | --- |
+| `agent-tools` | `herdr`, `mcp`, `ccstatusline`, `beads`, `fabric`, `pet` |
+| `editor` | `nvim`, `vim` |
+| `git-tools` | `git`, `lazygit`, `gpg`, `tig`, `hunk`, `nbdime` |
+| `shell` | `fish`, `zsh`, `starship`, `direnv` |
+| `ssh` | `ssh` |
+| `terminal` | `alacritty`, `ghostty`, `tmux`, `tmuxp` |
+
+All 23 tools: `alacritty`, `beads`, `ccstatusline`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `mcp`, `nbdime`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
 
