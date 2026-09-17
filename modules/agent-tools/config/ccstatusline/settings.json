@@ -1,0 +1,149 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "22069b26-40c6-4f80-879d-96faee4667fe",
+        "type": "current-working-dir",
+        "backgroundColor": "bgBrightRed",
+        "character": "📁",
+        "rawValue": true,
+        "metadata": {
+          "fishStyle": "true",
+          "segments": "3"
+        }
+      },
+      {
+        "id": "6b512305-7152-4128-8880-420eb11ac4c7",
+        "type": "git-worktree",
+        "backgroundColor": "bgBrightBlue",
+        "rawValue": false
+      },
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan",
+        "rawValue": true
+      },
+      {
+        "id": "3fccd04d-50b7-4d0f-ba49-75216dab566b",
+        "type": "context-percentage",
+        "backgroundColor": "bgBlue",
+        "rawValue": true
+      },
+      {
+        "id": "27b1068e-fed9-4d83-a80f-75d8ba066bb1",
+        "type": "session-cost",
+        "rawValue": true
+      },
+      {
+        "id": "14c4c26c-7f27-4118-9371-324a63e3484c",
+        "type": "compaction-counter",
+        "metadata": {
+          "format": "number",
+          "showReclaimed": "true",
+          "hideZero": "true"
+        }
+      },
+      {
+        "id": "87ffaab2-f8e2-4149-bb63-763950c3b015",
+        "type": "total-speed",
+        "backgroundColor": "bgYellow",
+        "rawValue": true,
+        "metadata": {
+          "windowSeconds": "120"
+        }
+      }
+    ],
+    [
+      {
+        "id": "a403459e-652e-40e2-bf95-b0c89660d986",
+        "type": "claude-account-email",
+        "backgroundColor": "bgMagenta",
+        "rawValue": true
+      },
+      {
+        "id": "d4e55a07-de3b-4b6e-8ef4-87a5a3de76f4",
+        "type": "session-clock",
+        "backgroundColor": "bgBrightGreen",
+        "rawValue": true
+      },
+      {
+        "id": "e17a9c3b-b717-4de5-841f-b09daff1d9fa",
+        "type": "session-usage",
+        "backgroundColor": "bgBrightCyan",
+        "rawValue": true,
+        "metadata": {
+          "display": "time",
+          "invert": "false"
+        }
+      },
+      {
+        "id": "69f72deb-0d0d-4511-89bb-cb309108164e",
+        "type": "reset-timer",
+        "backgroundColor": "bgYellow",
+        "rawValue": true,
+        "metadata": {
+          "display": "time"
+        }
+      },
+      {
+        "id": "f018a346-586b-4242-a313-75bf28155fcd",
+        "type": "weekly-usage",
+        "rawValue": true,
+        "metadata": {
+          "display": "time",
+          "invert": "false"
+        }
+      },
+      {
+        "id": "6f0b73cb-80e9-4221-9b12-db82e30991d0",
+        "type": "weekly-reset-timer",
+        "backgroundColor": "bgRed",
+        "rawValue": true,
+        "metadata": {
+          "display": "time"
+        }
+      }
+    ],
+    [
+      {
+        "id": "0a03924a-1e14-41cd-9c92-3515f1a7ad8b",
+        "type": "custom-command",
+        "backgroundColor": "bgBrightMagenta",
+        "commandPath": "aide statusline --module context"
+      },
+      {
+        "id": "59787e6f-95f3-4d3e-bf4c-50773d4d4060",
+        "type": "custom-command",
+        "backgroundColor": "bgGreen",
+        "commandPath": "aide statusline --module trust"
+      },
+      {
+        "id": "bd324fb5-00a5-4bf4-9931-07e468528a04",
+        "type": "custom-command",
+        "backgroundColor": "bgMagenta",
+        "commandPath": "aide statusline --module sandbox"
+      }
+    ]
+  ],
+  "flexMode": "full-until-compact",
+  "compactThreshold": 60,
+  "colorLevel": 3,
+  "defaultPadding": " ",
+  "defaultPaddingSide": "both",
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": true,
+    "separators": [""],
+    "separatorInvertBackground": [false],
+    "startCaps": [],
+    "endCaps": [""],
+    "theme": "nord-aurora",
+    "autoAlign": false,
+    "continueThemeAcrossLines": true
+  }
+}

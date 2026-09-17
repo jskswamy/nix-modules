@@ -1,0 +1,277 @@
+[[snippets]]
+description = "exec into docker container"
+command = "docker exec -it (docker ps | tail -n +2 | awk '{print $1\" \"$2}' | fzf | awk '{print $1}') bash"
+tag = ["kubernetes", "gcloud"]
+output = "bash shell"
+
+[[snippets]]
+description = "get containers operations list"
+command = "gcloud container operations list --project (gcloud projects list | rg -v PROJECT_ID | awk '{print $1}' | fzf --reverse --height 20) | tztail | fit"
+tag = ["docker", "bash"]
+output = "prints operations list"
+
+[[snippets]]
+description = "delete java temp director"
+command = "fd node[0-9] /var/folders | xargs rm -r"
+output = ""
+
+[[snippets]]
+description = "exec pod"
+command = "kubectl exec -it pod/(kubectl get pod --no-headers | awk '{print $1}' | sk) bash"
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "pod log"
+command = "kubectl logs -f pod/(kubectl get pod --no-headers | awk '{print $1}' | sk)"
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "deploy log"
+command = "kubectl logs -f deploy/(kubectl get deploy --no-headers | awk '{print $1}' | sk)"
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "watch kubernetes resources"
+command = "watch \"kubectl get <resources=pod> -o wide | fit\""
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "watch all specified kubernetes resources"
+command = "watch \"kubectl get <resources=pod> -o wide -A | fit\""
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "watch resource in a namespace"
+command = "watch kubectl get <resources=pod> -n (kubectl get ns --no-headers | awk '{print $1}' | fzf -m)"
+tag = ["kubernetes"]
+output = ""
+
+[[snippets]]
+description = "register ssh agent"
+command = "eval (keychain --quiet --eval --agents ssh id_rsa github thecasualcoder gitlab)"
+tag = ["ssh"]
+output = ""
+
+[[snippets]]
+description = "local chart museum"
+command = "chartmuseum --storage local --storage-local-rootdir /opt/chartmuseum"
+tag = ["kubernetes", "chart"]
+output = ""
+
+[[snippets]]
+description = "helm list releases"
+command = "helm --namespace=(kubens | sk) ls"
+output = ""
+
+[[snippets]]
+description = "Choose and kill tmux sessions"
+command = "tmux-kill"
+output = ""
+
+[[snippets]]
+description = "Close all the other tmux sessions"
+command = "tmux-kill-all"
+output = ""
+
+[[snippets]]
+description = "check router status"
+command = "nmap -p 80 10.11.12.1/24 | rg -C 5 'open'"
+output = ""
+
+[[snippets]]
+description = "ssh fingerprint"
+command = "ssh-keygen -E md5 -lf ~/.ssh/kripa.pub | awk '{print $2}' | sed 's/MD5://'"
+output = ""
+
+[[snippets]]
+description = "kind kubectl"
+command = "KUBECONFIG=(kind get kubeconfig-path --name (kind get clusters | sk)) kubectl"
+output = ""
+
+[[snippets]]
+description = "git pull"
+command = "git pull --rebase"
+output = ""
+
+[[snippets]]
+description = "get pod yaml"
+command = "kubectl get pod/(kubectl get pod --no-headers | awk '{print $1}' | sk) -o yaml | bat -l yaml"
+output = ""
+
+[[snippets]]
+description = "get pod"
+command = "kubectl get pod"
+output = ""
+
+[[snippets]]
+description = "change alacritty-theme"
+command = "alacritty-theme list | tail -n +2 | awk '{print $2}' | sort | sk | xargs -I {} alacritty-theme change {}"
+output = ""
+
+[[snippets]]
+description = "psql into stolon cluster"
+command = "PGPASSWORD=$(cat $STKEEPER_PG_SU_PASSWORDFILE)  psql -h localhost -U $STKEEPER_PG_SU_USERNAME -d postgres"
+output = ""
+
+[[snippets]]
+description = "find all open port in a specified cidr"
+command = "nmap -p <port> <cidr>"
+output = ""
+
+[[snippets]]
+description = "allow app in mac os catalina"
+command = "xattr -d com.apple.quarantine (which <app>)"
+output = ""
+
+[[snippets]]
+description = "restart dns server"
+command = "sudo killall -HUP mDNSResponder"
+output = ""
+
+[[snippets]]
+description = "start influxd locally"
+command = "influxd -config /usr/local/etc/influxdb.conf"
+output = ""
+
+[[snippets]]
+description = "start grafana locally"
+command = "grafana-server --config=/usr/local/etc/grafana/grafana.ini --homepath /usr/local/share/grafana --packaging=brew cfg:default.paths.logs=/usr/local/var/log/grafana cfg:default.paths.data=/usr/local/var/lib/grafana cfg:default.paths.plugins=/usr/local/var/lib/grafana/plugins"
+output = ""
+
+[[snippets]]
+description = "am i connected to vpn"
+command = "curl https://am.i.mullvad.net/connected"
+output = ""
+
+[[snippets]]
+description = "docker build image"
+command = "docker build -t local/<name>:<version>-(git describe --always) ."
+output = ""
+
+[[snippets]]
+description = "install app and skip catalina warning"
+command = "brew install --cask --no-quarantine <app>"
+output = ""
+
+[[snippets]]
+description = "select and remove docker images"
+command = "docker images | tail -n +2 | awk '{print $1\":\"$2}' | fzf -m | xargs docker rmi"
+output = ""
+
+[[snippets]]
+description = "vagrant ssh"
+command = "vagrant ssh (vagrant status | rg 'active' | awk '{print $1}'| fzf)"
+output = ""
+
+[[snippets]]
+description = "find and replace"
+command = "rg <find> -l | xargs -I {} sed -i '' 's/<find>/<replace>/g' {}"
+output = ""
+
+[[snippets]]
+description = "upload to chart museum"
+command = "curl --data-binary \"@<name>-<version>.tgz\" http://localhost:8080/api/charts"
+output = ""
+
+[[snippets]]
+description = "show compute sizes on digital ocean"
+command = "doctl compute size list | tail -n +2 | fzf"
+output = ""
+
+[[snippets]]
+description = "show region list on digital ocean"
+command = "doctl compute region list"
+output = ""
+
+[[snippets]]
+description = "remove hung namespace"
+command = "kubectl replace --raw \"/api/v1/namespaces/<namespace>/finalize\" -f <namespace>.json"
+output = ""
+
+[[snippets]]
+description = "remove all volumes from digital ocean"
+command = "doctl compute volume list | tail -n +2 | awk '{print \"yes | doctl compute volume delete \" $1}' | sh"
+output = ""
+
+[[snippets]]
+description = "list gpg keys"
+command = "gpg --list-secret-keys --keyid-format LONG"
+output = ""
+
+[[snippets]]
+description = "find all virtual box images created by packer"
+command = "fd . --extension box --no-ignore"
+output = ""
+
+[[snippets]]
+description = "search text"
+command = "sk --ansi -i -c 'rg -g \\'*.<ext>\\' --color=always --line-number \"{}\" -C <context>'"
+output = ""
+
+[[snippets]]
+description = "docker exec"
+command = "docker exec -it (docker ps --format {{.Names}} | sk) bash"
+output = ""
+
+[[snippets]]
+description = "docker logs"
+command = "docker logs -f (docker ps --format {{.Names}} | sk)"
+output = ""
+
+[[snippets]]
+description = "generate random password"
+command = "LC_ALL=C tr -dc 'A-Za-z0-9!\"#$%&'\\''()*+,-./:;<=>?@[\\]^_`{|}~' </dev/urandom | head -c 21 ; echo"
+output = ""
+
+[[snippets]]
+description = "start lorri daemon"
+command = "nohup lorri daemon > ~/Library/Logs/lorri.start.log &"
+output = ""
+
+[[snippets]]
+description = "get docker image tags from docker hub"
+command = "curl \"https://hub.docker.com/v2/repositories/<user>/<image>/tags?page_size=20?page=2\" 2> /dev/null | jq '.results[].name'"
+output = ""
+
+[[snippets]]
+description = "run utils image for debugging"
+command = "kubectl run --rm utils -it --generator=run-pod/v1 --image arunvelsriram/utils bash"
+output = ""
+
+[[snippets]]
+description = "port forward to a service"
+command = "kubectl port-forward svc/<servie-name> -n <namespace> <port>:<port>"
+output = ""
+
+[[snippets]]
+description = "checkout pull request"
+command = "git fetch origin pull/12/head:pr-12"
+output = ""
+
+[[snippets]]
+description = "mount credentials from onedrive"
+command = "veracrypt -t -k \"\" --pim=0 --protect-hidden=no ~/OneDrive/Backup/Disks/<name=Credentials> /Volumes/<name=Credentials>"
+tag = ["veracrypt", "credentials", "certificates"]
+output = ""
+
+[[snippets]]
+description = "switch yubikey"
+command = "gpg-connect-agent \"scd serialno\" \"learn --force\" /bye"
+tag = ["gpg", "yubikey"]
+output = ""
+
+[[snippets]]
+description = "search for package in nix"
+command = "nix-env -qaP <package>"
+tag = ["nix"]
+output = ""
+
+[[snippets]]
+description = "select and remove running docker containers"
+command = "docker ps | tail -n +2 | awk '{print $1}' | fzf -m |xargs docker rm -f"
+tag = ["docker"]

@@ -1,0 +1,12 @@
+repo = "*"
+
+[[tabs]]
+name = "aide"
+command = "aide"
+
+[[tabs]]
+name = "code"
+command = "hunk diff --watch"
+
+[[tabs]]
+name = "terminal"

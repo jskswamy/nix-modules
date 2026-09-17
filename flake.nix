@@ -26,6 +26,7 @@
       "terminal"
       "editor"
       "ssh"
+      "agent-tools"
     ];
 
     groupModules =

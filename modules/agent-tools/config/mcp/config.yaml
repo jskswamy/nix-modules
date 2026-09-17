@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://agentgateway.dev/schema/config
+# AgentGateway MCP proxy config.
+# Symlinked to ~/.config/agentgateway/config.yaml via files.nix for instant edits.
+# ${THINGS_CLOUD_AUTH} is expanded from the process environment at load time
+# (agentgateway runs the whole file through shellexpand before parsing) —
+# set by the launchd wrapper script in default.nix.
+#
+# Handles only the HTTP-native servers: context7, serena, nixos, things-cloud.
+# Persistent daemons (see default.nix) — no process spawning, agentgateway
+# just proxies.
+#
+# The stdio-only servers (git, time, sequential-thinking, codebase-memory,
+# chrome-devtools, noteplan) are NOT routed through here.
+# AgentGateway can't share a stdio backend process across sessions (no
+# pooling in 1.4.1 — caused FD exhaustion), so they're run by an internal
+# 1mcp instance instead (default.nix, port 3051). Originally 1mcp was
+# nested behind agentgateway as one more HTTP target here — reverted:
+# agentgateway's tools/list fan-out forwards to each upstream exactly once
+# and discards nextCursor when merging results (handler.rs merge_tools),
+# so any backend with >20 tools (1mcp aggregating 6 servers) got silently
+# truncated with no signal to the client. 1mcp is now registered as its own
+# separate `claude mcp add` connector instead — see default.nix's
+# configureClaudeCodeMcp. Trial: revisit in a week, decide whether
+# agentgateway is earning its complexity for just these 4 servers.
+gateways:
+  default:
+    port: 3050
+mcp:
+  gateways:
+    - default
+  targets:
+    - name: context7
+      mcp:
+        host: "http://127.0.0.1:8081/mcp"
+    - name: serena
+      mcp:
+        host: "http://127.0.0.1:8082/mcp"
+    - name: nixos
+      mcp:
+        host: "http://127.0.0.1:8083/mcp"
+    - name: things-cloud
+      mcp:
+        host: "http://127.0.0.1:8080/mcp"
+  policies:
+    requestHeaderModifier:
+      add:
+        Authorization: "Basic ${THINGS_CLOUD_AUTH}"

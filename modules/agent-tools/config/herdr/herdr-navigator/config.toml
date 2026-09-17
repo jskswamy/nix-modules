@@ -1,0 +1,23 @@
+# herdr-navigator configuration
+# See modules/shared/config/herdr/default.nix for the herdr-lazy sync that
+# installs this plugin; this file is symlinked to its managed config dir
+# (confirmed via `herdr plugin config-dir herdr-navigator`).
+
+[picker.filter_keys]
+# agent defaults to ctrl-a, which collides with herdr's own global
+# prefix key (also ctrl+a) — remapped to alt-a to keep the mnemonic
+# without the clash. (Key is singular "agent" per the plugin's schema —
+# a previous "agents" typo here was silently ignored, leaving ctrl-a active.)
+agent = "alt-a"
+
+[theme]
+# Follow Herdr's own theme/light-dark switching instead of the plugin's
+# built-in fallback palette (was unset, so the navigator ignored
+# herdr's gruvbox/gruvbox-light theme entirely).
+inherit_herdr = true
+
+# ~/source repos as jump targets, independent of zoxide visit history.
+# Layout is ~/source/<host>/<org>/<repo>, so depth 3 reaches the repo dirs.
+[[roots]]
+path = "~/source"
+max_depth = 3
