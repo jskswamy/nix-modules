@@ -40,4 +40,11 @@
       example = false;
       description = "Whether to apply the ${name} configuration.";
     };
+
+  # A package this repo defines. Uses the consumer's own `pkgs` when they
+  # applied `overlays.default` (the common case, and free), and otherwise
+  # applies the overlay locally so that importing a tool module is enough
+  # on its own.
+  ownPkg = pkgs: name:
+    pkgs.${name} or (pkgs.extend (import ../pkgs/overlay.nix)).${name};
 }

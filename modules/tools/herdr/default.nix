@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (import ../../../lib) mkSource mkToolEnable;
+  inherit (import ../../../lib) mkSource mkToolEnable ownPkg;
   src = mkSource config ./config "modules/tools/herdr/config";
   cfg = config.tools.herdr;
 in {
@@ -15,6 +15,18 @@ in {
 
   options.tools.herdr = {
     enable = mkToolEnable lib "herdr";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = ownPkg pkgs "herdr";
+      description = ''
+        Package providing herdr, installed when this tool is enabled.
+
+        Set to null to configure herdr without installing it — for a
+        binary that comes from the system, Homebrew, or a language
+        package manager instead.
+      '';
+    };
 
     projectsDir = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
@@ -37,6 +49,7 @@ in {
   # It is merged in here rather than imported so that it is gated by
   # tools.herdr.enable like everything else.
   config = lib.mkIf cfg.enable (lib.mkMerge [
+    {home.packages = lib.optional (cfg.package != null) cfg.package;}
     (import ./activation.nix {inherit config lib pkgs;})
     {
       home.file =

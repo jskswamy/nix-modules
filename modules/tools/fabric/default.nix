@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (import ../../../lib) mkSource mkToolEnable;
@@ -12,9 +13,25 @@ in {
     ../../theme
   ];
 
-  options.tools.fabric.enable = mkToolEnable lib "fabric";
+  options.tools.fabric = {
+    enable = mkToolEnable lib "fabric";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = pkgs.fabric-ai;
+      description = ''
+        Package providing fabric, installed when this tool is enabled.
+
+        Set to null to configure fabric without installing it — for a
+        binary that comes from the system, Homebrew, or a language
+        package manager instead.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+
     # Individually symlinked so fabric keeps managing the rest of its
     # pattern directory itself.
     home.file = {

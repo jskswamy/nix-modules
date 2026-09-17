@@ -7,6 +7,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (import ../../../lib) mkToolEnable;
@@ -17,9 +18,25 @@ in {
     ../../theme
   ];
 
-  options.tools.ssh.enable = mkToolEnable lib "ssh";
+  options.tools.ssh = {
+    enable = mkToolEnable lib "ssh";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = pkgs.openssh;
+      description = ''
+        Package providing ssh, installed when this tool is enabled.
+
+        Set to null to configure ssh without installing it — for a
+        binary that comes from the system, Homebrew, or a language
+        package manager instead.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+
     programs.ssh = {
       enable = lib.mkDefault true;
       # home-manager's built-in "*" defaults are replaced by the explicit

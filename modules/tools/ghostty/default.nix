@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (import ../../../lib) mkSource mkToolEnable;
@@ -18,9 +19,29 @@ in {
     ../../theme
   ];
 
-  options.tools.ghostty.enable = mkToolEnable lib "ghostty";
+  options.tools.ghostty = {
+    enable = mkToolEnable lib "ghostty";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = null;
+      description = ''
+          Package providing ghostty, installed when this tool is enabled.
+
+          Ghostty is not taken from nixpkgs here — on darwin it comes
+        from the `ghostty` Homebrew cask. Point this at a package if you
+        want Nix to install it.
+
+        Set to null to configure ghostty without installing it — for a
+          binary that comes from the system, Homebrew, or a language
+          package manager instead.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+
     home.file = {
       ".config/ghostty/config".source = src.file "config";
 

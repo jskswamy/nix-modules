@@ -91,6 +91,9 @@ that is not in one of its tools.
 | `ssh` | `ssh` |
 | `terminal` | `alacritty`, `ghostty`, `tmux`, `tmuxp` |
 
+How to consume and override these from your own configuration —
+including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
+
 Per-tool detail — what each one writes, what it installs, what it brings
 with it — is in **[docs/tools.md](docs/tools.md)**.
 

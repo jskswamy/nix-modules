@@ -22,9 +22,25 @@ in {
     ../../theme
   ];
 
-  options.tools.tmux.enable = mkToolEnable lib "tmux";
+  options.tools.tmux = {
+    enable = mkToolEnable lib "tmux";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = pkgs.tmux;
+      description = ''
+        Package providing tmux, installed when this tool is enabled.
+
+        Set to null to configure tmux without installing it — for a
+        binary that comes from the system, Homebrew, or a language
+        package manager instead.
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+
     programs.tmux.enable = lib.mkDefault false;
 
     home.file = {
