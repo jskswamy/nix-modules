@@ -24,6 +24,7 @@
     groups = [
       "shell"
       "terminal"
+      "editor"
     ];
 
     groupModules =
