@@ -22,7 +22,9 @@
     dirNames = dir:
       builtins.attrNames (lib.filterAttrs (_: t: t == "directory") (builtins.readDir dir));
 
-    tools = lib.genAttrs (dirNames ./modules/tools) (n: ./modules/tools + "/${n}");
+    # Underscore-prefixed directories are shared internals, not tools.
+    toolNames = lib.filter (n: !(lib.hasPrefix "_" n)) (dirNames ./modules/tools);
+    tools = lib.genAttrs toolNames (n: ./modules/tools + "/${n}");
     groups =
       lib.listToAttrs
       (map (f: lib.nameValuePair (lib.removeSuffix ".nix" f) (./modules/groups + "/${f}"))
@@ -47,7 +49,11 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
       in
-        import ./pkgs/overlay.nix pkgs pkgs
+        # agentgateway publishes an aarch64-darwin binary only and throws on
+        # other systems, so drop anything that does not evaluate here.
+        # tryEval on the attr alone stops at WHNF, so force outPath.
+        lib.filterAttrs (_: v: (builtins.tryEval v.outPath).success)
+        (import ./pkgs/overlay.nix pkgs pkgs)
     );
 
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);

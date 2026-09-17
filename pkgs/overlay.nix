@@ -5,7 +5,8 @@
 # consumer to repackage it themselves. Each file is an overlay in its own
 # right, so a consumer that wants only one can import it directly.
 final: prev:
-import ./beads.nix final prev
+import ./agentgateway.nix final prev
+// import ./beads.nix final prev
 // import ./ccstatusline.nix final prev
 // import ./herdr.nix final prev
 // import ./hunk.nix final prev

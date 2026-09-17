@@ -6,7 +6,6 @@
 {
   imports = [
     ../tools/herdr
-    ../tools/mcp
     ../tools/ccstatusline
     ../tools/beads
     ../tools/fabric

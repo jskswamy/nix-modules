@@ -84,9 +84,10 @@ that is not in one of its tools.
 
 | Group | Tools |
 | --- | --- |
-| `agent-tools` | `herdr`, `mcp`, `ccstatusline`, `beads`, `fabric`, `pet` |
+| `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet` |
 | `editor` | `nvim`, `vim` |
-| `git-tools` | `git`, `lazygit`, `gpg`, `tig`, `hunk`, `nbdime` |
+| `git-tools` | `git`, `lazygit`, `gpg`, `tig`, `hunk` |
+| `mcp` | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp` |
 | `shell` | `fish`, `zsh`, `starship`, `direnv` |
 | `ssh` | `ssh` |
 | `terminal` | `alacritty`, `ghostty`, `tmux`, `tmuxp` |
@@ -97,7 +98,7 @@ including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
 Per-tool detail — what each one writes, what it installs, what it brings
 with it — is in **[docs/tools.md](docs/tools.md)**.
 
-All 23 tools: `alacritty`, `beads`, `ccstatusline`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `mcp`, `nbdime`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
+All 26 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
 

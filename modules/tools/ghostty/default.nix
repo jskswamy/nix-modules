@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   inherit (import ../../../lib) mkSource mkToolEnable;
@@ -25,16 +24,20 @@ in {
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
+      example = "pkgs.ghostty-bin";
       description = ''
-          Package providing ghostty, installed when this tool is enabled.
+        Package providing ghostty, installed when this tool is enabled.
 
-          Ghostty is not taken from nixpkgs here — on darwin it comes
-        from the `ghostty` Homebrew cask. Point this at a package if you
-        want Nix to install it.
+        Defaults to null — this module configures ghostty but does not
+        install it, because the usual macOS source is the `ghostty@tip`
+        Homebrew cask and upstream publishes no stable Nix build of the
+        macOS app. Ghostty's own flake builds the terminal on Linux only;
+        on darwin it exposes just libghostty-vt.
 
-        Set to null to configure ghostty without installing it — for a
-          binary that comes from the system, Homebrew, or a language
-          package manager instead.
+        To install it with Nix instead, set this to `pkgs.ghostty` on
+        Linux or `pkgs.ghostty-bin` on aarch64-darwin. Note that
+        ghostty-bin tracks stable releases, so it is a downgrade from the
+        nightly cask.
       '';
     };
   };
