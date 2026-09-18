@@ -5,7 +5,7 @@
 # (launchd.agents.agentgateway is Darwin-only). Add other platform hashes
 # from https://github.com/agentgateway/agentgateway/releases when needed.
 _final: prev: let
-  agentgatewayVersion = "1.4.1";
+  agentgatewayVersion = "1.5.0";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
@@ -13,7 +13,7 @@ _final: prev: let
       # executable = true flips fetchurl's outputHashMode to "recursive"
       # (NAR hash), not a flat file hash — this hash covers the NAR
       # serialization of the executable, not `sha256sum` of the raw bytes.
-      hash = "sha256-PGE+bdsq4cOuFAMZUR0VjrZWfLdvLEkRazzj09Hf1Es=";
+      hash = "sha256-bcCWsmr8yfPz7k47ycaj9iq2CeGnuwhkZYiex37iGsA=";
       executable = true;
     };
   };
