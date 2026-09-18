@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "lines": [
     [
       {
@@ -42,7 +42,7 @@
         "metadata": {
           "format": "number",
           "showReclaimed": "true",
-          "hideZero": "true"
+          "hide": "zero"
         }
       },
       {
@@ -138,10 +138,16 @@
   "minimalistMode": false,
   "powerline": {
     "enabled": true,
-    "separators": [""],
-    "separatorInvertBackground": [false],
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
     "startCaps": [],
-    "endCaps": [""],
+    "endCaps": [
+      ""
+    ],
     "theme": "nord-aurora",
     "autoAlign": false,
     "continueThemeAcrossLines": true
