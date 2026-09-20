@@ -12,7 +12,7 @@ is not distributed through nixpkgs or because it runs another way.
 Every tool takes `tools.<name>.package`: set it to another package to swap
 what gets installed, or to `null` to keep the config and install nothing.
 
-**Installs the package** (21): `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `direnv`, `fabric`, `fish`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
+**Installs the package** (23): `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
 **Config only by default** (5): `agentgateway`, `ghostty`, `local-mcp`, `mcp-nixos`, `serena-mcp`.
 
@@ -37,22 +37,24 @@ Two of those are platform-dependent, and this page was generated on
 | [`beads`](#toolsk-beads) | yes | — | — | 1 |
 | [`ccstatusline`](#toolsk-ccstatusline) | yes | — | `tools.ccstatusline.claude` | 1 |
 | [`context7-mcp`](#toolsk-context7-mcp) | yes | — | — | 0 |
+| [`delta`](#toolsk-delta) | yes | — | — | 0 |
+| [`difftastic`](#toolsk-difftastic) | yes | — | — | 0 |
 | [`direnv`](#toolsk-direnv) | yes | — | — | 3 |
 | [`fabric`](#toolsk-fabric) | yes | — | — | 4 |
-| [`fish`](#toolsk-fish) | yes | `starship` | `tools.fish.env`, `tools.fish.repoContext` | 23 |
+| [`fish`](#toolsk-fish) | yes | — | `tools.fish.env`, `tools.fish.repoContext` | 21 |
 | [`ghostty`](#toolsk-ghostty) | no | — | — | 3 |
-| [`git`](#toolsk-git) | yes | `hunk` | — | 4 |
+| [`git`](#toolsk-git) | yes | — | — | 3 |
 | [`gpg`](#toolsk-gpg) | yes | — | — | 2 |
 | [`herdr`](#toolsk-herdr) | yes | — | `tools.herdr.projectsDir` | 4 |
 | [`hunk`](#toolsk-hunk) | yes | — | — | 1 |
-| [`lazygit`](#toolsk-lazygit) | yes | `hunk` | — | 3 |
+| [`lazygit`](#toolsk-lazygit) | yes | — | — | 2 |
 | [`local-mcp`](#toolsk-local-mcp) | no | — | `tools.local-mcp.port` | 0 |
 | [`mcp-nixos`](#toolsk-mcp-nixos) | no | — | — | 0 |
 | [`nvim`](#toolsk-nvim) | yes | — | — | 1 |
 | [`pet`](#toolsk-pet) | yes | — | — | 2 |
 | [`serena-mcp`](#toolsk-serena-mcp) | no | — | — | 0 |
 | [`ssh`](#toolsk-ssh) | yes | — | — | 1 |
-| [`starship`](#toolsk-starship) | yes | — | — | 1 |
+| [`starship`](#toolsk-starship) | yes | — | — | 2 |
 | [`tig`](#toolsk-tig) | yes | — | — | 1 |
 | [`tmux`](#toolsk-tmux) | yes | — | — | 2 |
 | [`tmuxp`](#toolsk-tmuxp) | yes | — | — | 1 |
@@ -109,6 +111,24 @@ Context7 MCP server, run as a persistent HTTP daemon on port 8081 so agentgatewa
 - **Installs the package:** yes
 - **Writes:** _none_
 
+<a id="toolsk-delta"></a>
+
+### `tools.delta`
+
+Syntax-highlighting diff pager. Installs delta and configures it for git and lazygit: git's interactive diff filter and delta styling, and lazygit's diff renderer.
+
+- **Installs the package:** yes
+- **Writes:** nothing of its own; it adds lines to git's and lazygit's config
+
+<a id="toolsk-difftastic"></a>
+
+### `tools.difftastic`
+
+Structural diff. Installs difftastic and adds the `dft` and `dftlog` git aliases and a `difftastic` difftool to git.
+
+- **Installs the package:** yes
+- **Writes:** nothing of its own; it adds lines to git's config
+
 <a id="toolsk-direnv"></a>
 
 ### `tools.direnv`
@@ -135,10 +155,9 @@ Four commit-message patterns for `fabric`, symlinked individually so fabric keep
 The daily-driver shell. Config lives in `conf.d/*.fish` and `functions/*.fish`, symlinked one file at a time so home-manager plugins can coexist.
 
 - **Installs the package:** yes
-- **Enables:** `programs.fish`, `programs.starship`
-- **Brings with it:** `tools.starship` — send back with `tools.starship.enable = false`
+- **Enables:** `programs.fish`
 - **Options:** `tools.fish.env`, `tools.fish.repoContext`
-- **Writes:** `~/.config/fish/config.fish`<br>`~/.config/starship.toml`<br>`~/.local/share/fish/home-manager/generated_completions`<br>`~/.manpath`<br>`~/.config/fish/conf.d/` — 8 files<br>`~/.config/fish/functions/` — 11 files
+- **Writes:** `~/.config/fish/config.fish`<br>`~/.local/share/fish/home-manager/generated_completions`<br>`~/.manpath`<br>`~/.config/fish/conf.d/` — 7 files<br>`~/.config/fish/functions/` — 11 files
 
 <a id="toolsk-ghostty"></a>
 
@@ -153,12 +172,11 @@ Terminal emulator config, a generated `theme.conf` derived from `theme.variant`,
 
 ### `tools.git`
 
-Aliases, delta styling, diff/merge tool wiring, signing format. Carries no identity — see Scope in the README.
+Aliases, diff/merge tool wiring, signing format. Carries no identity — see Scope in the README.
 
 - **Installs the package:** yes
 - **Enables:** `programs.git`
-- **Brings with it:** `tools.hunk` — send back with `tools.hunk.enable = false`
-- **Writes:** `~/.config/git/config`<br>`~/.config/git/ignore`<br>`~/.config/hunk/config.toml`<br>`~/.local/bin/git-ai-commit`
+- **Writes:** `~/.config/git/config`<br>`~/.config/git/ignore`<br>`~/.local/bin/git-ai-commit`
 
 <a id="toolsk-gpg"></a>
 
@@ -193,12 +211,11 @@ Review-first terminal diff viewer.
 
 ### `tools.lazygit`
 
-Terminal git UI: delta rendering, line-by-line staging, an AI-commit key and two `hunk show` review keys.
+Terminal git UI: line-by-line staging and an AI-commit key. `delta` adds its diff renderer and `hunk` adds two review keys.
 
 - **Installs the package:** yes
 - **Enables:** `programs.lazygit`
-- **Brings with it:** `tools.hunk` — send back with `tools.hunk.enable = false`
-- **Writes:** `~/.config/hunk/config.toml`<br>`~/.config/lazygit/config.yml`<br>`~/.local/bin/lazygit-claude-commit`
+- **Writes:** `~/.config/lazygit/config.yml`<br>`~/.local/bin/lazygit-claude-commit`
 
 <a id="toolsk-local-mcp"></a>
 
@@ -260,11 +277,11 @@ Client defaults: opts out of home-manager's built-in `*` block, includes `~/.ssh
 
 ### `tools.starship`
 
-Cross-shell prompt. `starship.toml` is symlinked, so edits take effect on the next prompt.
+Cross-shell prompt. `starship.toml` is symlinked, so edits take effect on the next prompt. It also ships fish's prompt tweak as a drop-in.
 
 - **Installs the package:** yes
 - **Enables:** `programs.starship`
-- **Writes:** `~/.config/starship.toml`
+- **Writes:** `~/.config/starship.toml`<br>`~/.config/fish/conf.d/starship.fish`
 
 <a id="toolsk-tig"></a>
 

@@ -141,11 +141,12 @@ imports = [ tools.tig ];
 home.file.".config/tig/config".text = lib.mkForce "# my own tig config";
 ```
 
-### Drop a tool that arrived as a dependency
+### Drop a tool a group brought
 
 ```nix
-imports = [ tools.lazygit ];   # brings hunk
-tools.hunk.enable = false;     # ...and the two `hunk show` keys go with it
+imports = [ git-tools ];       # includes hunk
+tools.hunk.enable = false;     # git keeps its default pager, and lazygit
+                               # loses the two `hunk show` keys
 ```
 
 ### Switch themes everywhere at once

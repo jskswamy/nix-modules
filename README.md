@@ -27,7 +27,7 @@ Three ways in, and they mix freely:
 
 | Import | You get |
 | --- | --- |
-| `tools.<name>` | that one tool, plus anything it depends on |
+| `tools.<name>` | that one tool |
 | `<group>` | every tool in that group (`shell`, `terminal`, `editor`, `git-tools`, `agent-tools`, `ssh`) |
 | `default` | every tool |
 
@@ -53,29 +53,35 @@ same way, and can cut across the groups below however you like:
 
 Import that from as many hosts as you want.
 
-### Dependencies come along, and can be sent back
+### Tools that work together
 
-Some tools configure others. lazygit binds two keys to `hunk`; fish ships a
-file that customises starship's prompt. Importing the first brings the
-second with it:
-
-```nix
-imports = [ tools.lazygit ];   # hunk arrives too
-```
-
-If you did not want it, say so, and the parts that depended on it drop out
-cleanly rather than breaking:
+Some tools add lines to others. hunk sets git's pager and adds two review
+keys to lazygit; delta and difftastic add their diff settings to git (delta
+also adds lazygit's diff renderer); starship ships a small file that tweaks
+its prompt in fish. That wiring belongs to the tool that provides the
+behaviour, so it is present exactly when that tool is enabled, and
+importing one tool never brings another with it:
 
 ```nix
-imports = [ tools.lazygit ];
-tools.hunk.enable = false;     # the two `hunk show` keybindings go too
+imports = [ tools.git ];              # git keeps its own default pager
 ```
 
-Every tool takes `tools.<name>.enable`, so this works for anything that
-arrived indirectly.
+Add hunk and git also pages through it:
 
-Current edges: `fish` → `starship`, `lazygit` → `hunk`, `git` → `hunk`
-(as its pager; without hunk, git keeps its own default pager).
+```nix
+imports = [ tools.git tools.hunk ];   # git now also pages through `hunk pager`
+```
+
+To take one back out of a group, say so:
+
+```nix
+imports = [ git-tools ];              # includes hunk
+tools.hunk.enable = false;            # git keeps its default pager, and
+                                      # lazygit loses the two `hunk show` keys
+```
+
+Every tool takes `tools.<name>.enable`, so this works for anything a group
+brought in.
 
 ## Groups
 
@@ -86,7 +92,7 @@ that is not in one of its tools.
 | --- | --- |
 | `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet` |
 | `editor` | `nvim`, `vim` |
-| `git-tools` | `git`, `lazygit`, `gpg`, `tig`, `hunk` |
+| `git-tools` | `git`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk` |
 | `mcp` | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp` |
 | `shell` | `fish`, `zsh`, `starship`, `direnv` |
 | `ssh` | `ssh` |
@@ -95,10 +101,10 @@ that is not in one of its tools.
 How to consume and override these from your own configuration —
 including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
 
-Per-tool detail — what each one writes, what it installs, what it brings
-with it — is in **[docs/tools.md](docs/tools.md)**.
+Per-tool detail — what each one writes, what it installs, and what it adds
+to other tools — is in **[docs/tools.md](docs/tools.md)**.
 
-All 26 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
+All 28 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
 
