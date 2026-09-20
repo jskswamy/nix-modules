@@ -39,7 +39,7 @@ Two of those are platform-dependent, and this page was generated on
 | [`context7-mcp`](#toolsk-context7-mcp) | yes | — | — | 0 |
 | [`direnv`](#toolsk-direnv) | yes | — | — | 3 |
 | [`fabric`](#toolsk-fabric) | yes | — | — | 4 |
-| [`fish`](#toolsk-fish) | yes | `starship` | `tools.fish.repoContext` | 23 |
+| [`fish`](#toolsk-fish) | yes | `starship` | `tools.fish.env`, `tools.fish.repoContext` | 23 |
 | [`ghostty`](#toolsk-ghostty) | no | — | — | 3 |
 | [`git`](#toolsk-git) | yes | `hunk` | — | 4 |
 | [`gpg`](#toolsk-gpg) | yes | — | — | 2 |
@@ -136,7 +136,7 @@ The daily-driver shell. Config lives in `conf.d/*.fish` and `functions/*.fish`, 
 - **Installs the package:** yes
 - **Enables:** `programs.fish`, `programs.starship`
 - **Brings with it:** `tools.starship` — send back with `tools.starship.enable = false`
-- **Option:** `tools.fish.repoContext`
+- **Options:** `tools.fish.env`, `tools.fish.repoContext`
 - **Writes:** `~/.config/fish/config.fish`<br>`~/.config/starship.toml`<br>`~/.local/share/fish/home-manager/generated_completions`<br>`~/.manpath`<br>`~/.config/fish/conf.d/` — 8 files<br>`~/.config/fish/functions/` — 11 files
 
 <a id="toolsk-ghostty"></a>

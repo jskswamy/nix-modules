@@ -32,7 +32,6 @@ set -gx ALTERNATE_EDITOR ""
 set -gx GIT_WORKSPACE "$HOME/source"
 set -gx GOPATH "$HOME/go"
 set -gx GO111MODULE on
-set -gx GOPRIVATE source.golabs.io
 set -gx NIX_IGNORE_SYMLINK_STORE 1
 command -q bat; and set -gx MANPAGER "bat -l man -p"
 set -gx BAT_THEME "ansi"
