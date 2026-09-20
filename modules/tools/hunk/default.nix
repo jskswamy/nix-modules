@@ -35,5 +35,27 @@ in {
     # hunk — diff review TUI wrapped by herdr-hunk-diff
     home.file.".config/hunk/config.toml".source =
       src.file "config.toml";
+
+    # hunk is wired into git and lazygit from here, not the other way
+    # round: neither host imports it, so without hunk git keeps its own
+    # default pager and lazygit simply has no review keys.
+    programs.git.settings.core.pager = "hunk pager";
+
+    programs.lazygit.settings.customCommands = [
+      {
+        key = "H";
+        context = "commits, subCommits, reflogCommits";
+        description = "Review commit with hunk";
+        command = "hunk show {{.SelectedCommit.Sha}}";
+        output = "terminal";
+      }
+      {
+        key = "H";
+        context = "localBranches";
+        description = "Review branch tip with hunk";
+        command = "hunk show {{.SelectedLocalBranch.Name}}";
+        output = "terminal";
+      }
+    ];
   };
 }

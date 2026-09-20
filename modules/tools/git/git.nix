@@ -2,11 +2,7 @@
 # key path, work-config includes and any url.insteadOf routing are
 # deliberately absent: they are per-person and per-employer, and belong in
 # the consumer's own configuration layered on top of this.
-{
-  config,
-  lib,
-  hunkEnabled,
-}: {
+{config}: {
   enable = true;
   ignores = [
     "*.swp"
@@ -98,14 +94,10 @@
     };
     format.pretty = "format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset";
     init.defaultBranch = "main";
-    core =
-      {
-        editor = "vim";
-        autocrlf = "input";
-      }
-      # Dropping hunk leaves git on its own default pager rather than
-      # pointing at a binary that is no longer configured.
-      // lib.optionalAttrs hunkEnabled {pager = "hunk pager";};
+    core = {
+      editor = "vim";
+      autocrlf = "input";
+    };
     commit.gpgsign = true;
     tag.gpgsign = true;
     # Written by the writeAllowedSigners activation entry. Signing needs
