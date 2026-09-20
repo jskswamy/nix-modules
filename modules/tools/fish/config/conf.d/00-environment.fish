@@ -1,10 +1,28 @@
 # Environment variables and PATH configuration
 # Edit this file directly - changes take effect immediately (just restart fish)
 
-# Locale and general environment
-set -gx LC_CTYPE en_US.UTF-8
-set -gx LANG en_US.UTF-8
-set -gx LC_ALL en_US.UTF-8
+# Locale: name one only if the system has it, so a minimal image without
+# en_US does not get "cannot change locale" warnings from every tool.
+# C.UTF-8 is built into glibc and so is the fallback there. `locale -a`
+# spells these en_US.utf8 / C.utf8 on Linux; the UTF-8 spelling below is
+# accepted by both.
+set -l available
+command -q locale; and set available (locale -a 2>/dev/null)
+set -l loc
+if set -q available[1]
+    if string match -qri '^en_US\.utf-?8$' -- $available
+        set loc en_US.UTF-8
+    else if string match -qri '^C\.utf-?8$' -- $available
+        set loc C.UTF-8
+    end
+end
+if test -n "$loc"
+    set -gx LC_CTYPE $loc
+    set -gx LANG $loc
+    set -gx LC_ALL $loc
+end
+
+# General environment
 set -gx EDITOR "nvim"
 set -gx VISUAL "nvim"
 set -gx GPG_TTY (tty)
@@ -16,9 +34,11 @@ set -gx GOPATH "$HOME/go"
 set -gx GO111MODULE on
 set -gx GOPRIVATE source.golabs.io
 set -gx NIX_IGNORE_SYMLINK_STORE 1
-set -gx MANPAGER "bat -l man -p"
+command -q bat; and set -gx MANPAGER "bat -l man -p"
 set -gx BAT_THEME "ansi"
-set -gx DOCKER_HOST "unix://$HOME/.colima/default/docker.sock"
+# Only where colima has been set up; elsewhere this would point docker at a
+# socket that does not exist and hide the real one.
+test -d "$HOME/.colima"; and set -gx DOCKER_HOST "unix://$HOME/.colima/default/docker.sock"
 # Set SSH_AUTH_SOCK for GPG agent SSH support
 # Check multiple paths since gpgconf may not be in PATH during early startup
 if command -q gpgconf

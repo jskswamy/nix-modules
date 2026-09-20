@@ -4,9 +4,13 @@
 if status --is-interactive
     # Initialize shell navigation tools
     # jump - directory bookmarking
-    source (jump shell fish | psub)
+    if command -q jump
+        source (jump shell fish | psub)
+    end
     # any-nix-shell - nix-shell detection
-    any-nix-shell fish | source
+    if command -q any-nix-shell
+        any-nix-shell fish | source
+    end
     # zoxide is managed by Home Manager (programs.zoxide.enableFishIntegration)
 
     # Source additional fish functions from functions/
