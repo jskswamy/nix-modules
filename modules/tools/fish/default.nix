@@ -17,13 +17,6 @@
 
   confd = mirrorDir ".config/fish/conf.d" "conf.d";
 
-  # 40-starship.fish only customises a prompt starship itself installs, so
-  # it is dropped along with starship rather than left behind as a no-op.
-  confdForStarship =
-    if config.tools.starship.enable
-    then confd
-    else lib.filterAttrs (n: _: n != ".config/fish/conf.d/40-starship.fish") confd;
-
   # Single quotes are the one fish quoting form with no expansion; inside
   # them only \\ and \' are escapes.
   fishQuote = v: "'" + lib.replaceStrings ["\\" "'"] ["\\\\" "\\'"] v + "'";
@@ -31,9 +24,6 @@ in {
   imports = [
     ../../_common
     ../../theme
-    # conf.d/40-starship.fish configures starship's prompt, so fish brings
-    # starship with it. Drop it again with `tools.starship.enable = false`.
-    ../starship
   ];
 
   options.tools.fish = {
@@ -96,7 +86,7 @@ in {
 
     home.file =
       mirrorDir ".config/fish/functions" "functions"
-      // confdForStarship
+      // confd
       // lib.optionalAttrs (cfg.env != {}) {
         ".config/fish/conf.d/05-extra-env.fish".text =
           lib.concatStringsSep "\n"
