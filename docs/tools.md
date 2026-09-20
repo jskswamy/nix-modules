@@ -35,7 +35,7 @@ Two of those are platform-dependent, and this page was generated on
 | [`agentgateway`](#toolsk-agentgateway) | no | — | `tools.agentgateway.port` | 1 |
 | [`alacritty`](#toolsk-alacritty) | yes | — | — | 2 |
 | [`beads`](#toolsk-beads) | yes | — | — | 1 |
-| [`ccstatusline`](#toolsk-ccstatusline) | yes | — | — | 1 |
+| [`ccstatusline`](#toolsk-ccstatusline) | yes | — | `tools.ccstatusline.claude` | 1 |
 | [`context7-mcp`](#toolsk-context7-mcp) | yes | — | — | 0 |
 | [`direnv`](#toolsk-direnv) | yes | — | — | 3 |
 | [`fabric`](#toolsk-fabric) | yes | — | — | 4 |
@@ -94,9 +94,10 @@ Memory system for AI coding agents (`bd`).
 
 ### `tools.ccstatusline`
 
-Status line formatter for Claude Code.
+Status line formatter for Claude Code. `tools.ccstatusline.claude.enable` (off by default) also merges the `statusLine` entry into `~/.claude/settings.json`, which ccstatusline can otherwise only do from its interactive menu.
 
 - **Installs the package:** yes
+- **Option:** `tools.ccstatusline.claude`
 - **Writes:** `~/.config/ccstatusline/settings.json`
 
 <a id="toolsk-context7-mcp"></a>
