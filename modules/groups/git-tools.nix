@@ -7,6 +7,7 @@
   imports = [
     ../tools/git
     ../tools/delta
+    ../tools/difftastic
     ../tools/lazygit
     ../tools/gpg
     ../tools/tig

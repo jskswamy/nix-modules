@@ -56,8 +56,6 @@
       d = "diff";
       dc = "diff --cached";
       last = "diff HEAD^";
-      dft = "difftool";
-      dftlog = "-c diff.external=difft log -p --ext-diff";
       l = "log --graph --date=short";
       changes = "log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\" --name-status";
       short = "log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\"";
@@ -128,11 +126,9 @@
     diff = {
       algorithm = "patience";
       mnemonicprefix = true;
-      tool = "difftastic";
       jupyternotebook.command = "git-nbdiffdriver diff --ignore-metadata --ignore-details";
     };
     difftool = {
-      difftastic.cmd = "difft \"$LOCAL\" \"$REMOTE\"";
       nbdime.cmd = "git-nbdifftool diff $LOCAL $REMOTE $BASE";
       prompt = false;
     };
