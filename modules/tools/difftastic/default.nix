@@ -34,7 +34,7 @@ in {
 
     # difftastic is wired into git from here, not the other way round.
     # Home-manager's programs.difftastic is not used because it rewrites
-    # `git diff` itself, while today's setup only adds a difftool and a
+    # `git diff` itself, while this module adds only a difftool and a
     # log alias and leaves plain `git diff` alone.
     programs.git.settings = {
       alias = {

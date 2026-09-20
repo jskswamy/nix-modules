@@ -30,9 +30,9 @@
   # The `enable` option every tool module declares.
   #
   # Importing a tool module is what asks for that tool, so this defaults
-  # to true. The option exists so a tool that arrived only as another
-  # tool's dependency can be dropped again — `tools.hunk.enable = false`
-  # when you wanted lazygit but not hunk.
+  # to true. The option exists so a tool that arrived as part of a group
+  # can be dropped again — `tools.hunk.enable = false` when you took the
+  # `git-tools` group but do not want hunk.
   mkToolEnable = lib: name:
     lib.mkOption {
       type = lib.types.bool;

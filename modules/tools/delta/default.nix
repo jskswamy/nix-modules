@@ -38,9 +38,9 @@ in {
     # show, and without it the binary is wrapped in a --config file; both
     # move where these settings live.
     programs.git.settings = {
-      # hunk needs a real TTY to render (falls back to plain passthrough
-      # otherwise, confirmed by testing), so the non-interactive filter
-      # paths below stay on delta.
+      # The filter runs where there is no TTY to draw on (a pager UI falls
+      # back to plain passthrough there, confirmed by testing), so it stays
+      # on delta.
       interactive.diffFilter = "delta --color-only";
       delta = {
         syntax-theme = "ansi";
