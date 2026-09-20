@@ -21,14 +21,7 @@ let
         ++ modules;
     }).config;
 
-  # A module that does not exist yet imports as an empty module, so its cases
-  # fail on their own instead of aborting the whole evaluation.
-  T =
-    nm.homeManagerModules.tools
-    // {
-      delta = nm.homeManagerModules.tools.delta or {};
-      difftastic = nm.homeManagerModules.tools.difftastic or {};
-    };
+  T = nm.homeManagerModules.tools;
   installs = c: prefix: builtins.any (p: lib.hasPrefix prefix (p.name or "")) c.home.packages;
   commands = c: map (x: x.description) (c.programs.lazygit.settings.customCommands or []);
 
@@ -46,7 +39,7 @@ in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
   "git alone keeps the default pager" = !(git.programs.git.settings.core ? pager);
-  "git with hunk sets the pager" = gitHunk.programs.git.settings.core.pager == "hunk pager";
+  "git with hunk sets the pager" = (gitHunk.programs.git.settings.core.pager or null) == "hunk pager";
   "lazygit alone does not bring hunk" = !(installs lazygit "hunk");
   "lazygit alone has only its own command" = commands lazygit == ["AI commit with Claude"];
   "lazygit with hunk gains both hunk commands" =
@@ -61,21 +54,21 @@ in {
 
   # delta: owns the diff filter, its own settings, and lazygit's renderer.
   "git alone has no delta lines" = !(git.programs.git.settings ? delta) && !(git.programs.git.settings ? interactive);
-  "git with delta sets the filter" = gitDelta.programs.git.settings.interactive.diffFilter == "delta --color-only";
-  "git with delta keeps its settings" = gitDelta.programs.git.settings.delta.line-numbers == true;
+  "git with delta sets the filter" = (gitDelta.programs.git.settings.interactive.diffFilter or null) == "delta --color-only";
+  "git with delta keeps its settings" = (gitDelta.programs.git.settings.delta.line-numbers or null) == true;
   "delta installs its package" = installs gitDelta "delta";
   "lazygit alone has no diff renderer" = !(lazygit.programs.lazygit.settings ? git && lazygit.programs.lazygit.settings.git ? diffRenderers);
   "lazygit with delta gains the renderer" =
-    (builtins.head lazygitDelta.programs.lazygit.settings.git.diffRenderers).command == "delta --paging=never";
+    (builtins.head (lazygitDelta.programs.lazygit.settings.git.diffRenderers or [{}])).command or null == "delta --paging=never";
 
   # difftastic: owns the difftool and the two aliases.
   "git alone has no difftastic lines" =
     !(git.programs.git.settings.alias ? dft) && !(git.programs.git.settings.diff ? tool);
   "git with difftastic sets the difftool" =
-    gitDifft.programs.git.settings.diff.tool
+    (gitDifft.programs.git.settings.diff.tool or null)
     == "difftastic"
-    && gitDifft.programs.git.settings.alias.dft == "difftool"
-    && gitDifft.programs.git.settings.difftool.difftastic.cmd == ''difft "$LOCAL" "$REMOTE"'';
+    && (gitDifft.programs.git.settings.alias.dft or null) == "difftool"
+    && (gitDifft.programs.git.settings.difftool.difftastic.cmd or null) == ''difft "$LOCAL" "$REMOTE"'';
   "difftastic installs its package" = installs gitDifft "difftastic";
 
   # starship: ships its own fish tweak; fish does not import it.
