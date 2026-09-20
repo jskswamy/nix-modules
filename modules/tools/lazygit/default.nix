@@ -25,15 +25,7 @@ in {
           selectedLineBgColor = ["reverse"];
           selectedRangeBgColor = ["reverse"];
         };
-        git = {
-          autoFetch = lib.mkDefault false;
-          diffRenderers = [
-            {
-              colorArg = "always";
-              command = "delta --paging=never";
-            }
-          ];
-        };
+        git.autoFetch = lib.mkDefault false;
         staging = {
           # false = line-by-line mode by default, true = hunk mode
           useHunkModeInStagingView = lib.mkDefault false;

@@ -6,6 +6,7 @@
 {
   imports = [
     ../tools/git
+    ../tools/delta
     ../tools/lazygit
     ../tools/gpg
     ../tools/tig
