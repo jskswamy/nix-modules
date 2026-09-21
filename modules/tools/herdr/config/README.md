@@ -21,17 +21,15 @@ installs) to pick up changes without a full rebuild.
 
 ## Plugins
 
-| Key              | Plugin                                                              | Action                    |
-| ---------------- | ------------------------------------------------------------------- | ------------------------- |
-| `prefix+p`       | [herdr-plus](https://github.com/cloudmanic/herdr-plus)              | Open projects picker      |
-| `prefix+f`       | [herdr-file-viewer](https://github.com/smarzban/herdr-file-viewer)  | Open file viewer in split |
-| `prefix+shift+h` | [herdr-hunk-diff](https://github.com/jhochenbaum/herdr-hunk-diff)   | Review changes            |
-| `prefix+shift+s` | herdr-hunk-diff                                                     | Send review to agent      |
-| `prefix+shift+c` | herdr-hunk-diff                                                     | Review the last commit    |
-| `prefix+shift+z` | [herdr-snooze](https://github.com/mrolafsson/herdr-snooze)          | Snooze or wake agent      |
-| `prefix+alt+z`   | herdr-snooze                                                        | Toggle snoozed view       |
-| `prefix+alt+r`   | [herdr-agent-quota](https://github.com/levi-qiao/herdr-agent-quota) | Refresh agent quotas      |
-| `prefix+shift+q` | herdr-agent-quota                                                   | Open quota settings       |
+| Key              | Plugin                                                             | Action                    |
+| ---------------- | ------------------------------------------------------------------ | ------------------------- |
+| `prefix+p`       | [herdr-plus](https://github.com/cloudmanic/herdr-plus)             | Open projects picker      |
+| `prefix+f`       | [herdr-file-viewer](https://github.com/smarzban/herdr-file-viewer) | Open file viewer in split |
+| `prefix+shift+h` | [herdr-hunk-diff](https://github.com/jhochenbaum/herdr-hunk-diff)  | Review changes            |
+| `prefix+shift+s` | herdr-hunk-diff                                                    | Send review to agent      |
+| `prefix+shift+c` | herdr-hunk-diff                                                    | Review the last commit    |
+| `prefix+shift+z` | [herdr-snooze](https://github.com/mrolafsson/herdr-snooze)         | Snooze or wake agent      |
+| `prefix+alt+z`   | herdr-snooze                                                       | Toggle snoozed view       |
 
 The `herdr-hunk-diff` block in `config.toml` is managed by the plugin's own
 `setup-keys` command — edit it there, not by hand.
