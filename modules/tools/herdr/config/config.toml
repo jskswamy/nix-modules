@@ -173,6 +173,18 @@ type = "plugin_action"
 command = "herdr-navigator.open"
 description = "navigator: fuzzy jump (workspaces, agents, ...)"
 
+[[keys.command]]
+key = "prefix+shift+z"
+type = "plugin_action"
+command = "herdr-snooze.agent"
+description = "snooze: snooze or wake agent"
+
+[[keys.command]]
+key = "prefix+alt+z"
+type = "plugin_action"
+command = "herdr-snooze.toggle"
+description = "snooze: agents panel snoozed <-> active"
+
 # Size of the virtual terminal used when no client is attached.
 # Attached clients always use their own terminal size.
 [server]
