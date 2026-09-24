@@ -10,5 +10,6 @@
     ../tools/serena-mcp
     ../tools/mcp-nixos
     ../tools/local-mcp
+    ../tools/codebase-memory-mcp
   ];
 }

@@ -6,9 +6,10 @@
 # right, so a consumer that wants only one can import it directly.
 final: prev:
 import ./agentgateway.nix final prev
+// import ./aide.nix final prev
 // import ./beads.nix final prev
 // import ./ccstatusline.nix final prev
+// import ./codebase-memory-mcp.nix final prev
 // import ./herdr.nix final prev
 // import ./hunk.nix final prev
 // import ./moshi-hook.nix final prev
-// import ./claide.nix final prev

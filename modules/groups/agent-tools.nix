@@ -10,5 +10,6 @@
     ../tools/beads
     ../tools/fabric
     ../tools/pet
+    ../tools/aide
   ];
 }
