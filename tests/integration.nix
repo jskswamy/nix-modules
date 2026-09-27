@@ -35,6 +35,19 @@ let
   hunkOnly = mk [T.hunk];
   fish = mk [T.fish];
   fishStarship = mk [T.fish T.starship];
+
+  eza = mk [T.eza];
+  bat = mk [T.bat];
+  fd = mk [T.fd];
+  ripgrep = mk [T.ripgrep];
+  fzf = mk [T.fzf];
+  zoxide = mk [T.zoxide];
+  jump = mk [T.jump];
+  anyNixShell = mk [T."any-nix-shell"];
+  cliTools = mk [nm.homeManagerModules.cli-tools];
+  gitTools = mk [nm.homeManagerModules.git-tools];
+  gitLfs = mk [T."git-lfs"];
+  gitLfsTransfer = mk [T."git-lfs-transfer"];
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
@@ -77,4 +90,46 @@ in {
   "fish with starship gets the tweak" =
     fishStarship.programs.starship.enable && fishStarship.home.file ? ".config/fish/conf.d/starship.fish";
   "the old numbered file is gone" = !(fishStarship.home.file ? ".config/fish/conf.d/40-starship.fish");
+
+  # package-only CLI tools: install only their package for now; aliases and
+  # shell snippets move in later issues.
+  "eza installs its package" = installs eza "eza";
+  "eza with package null installs nothing" = !(installs (mk [T.eza {tools.eza.package = null;}]) "eza");
+  "bat installs its package" = installs bat "bat";
+  "bat with package null installs nothing" = !(installs (mk [T.bat {tools.bat.package = null;}]) "bat");
+  "fd installs its package" = installs fd "fd";
+  "fd with package null installs nothing" = !(installs (mk [T.fd {tools.fd.package = null;}]) "fd");
+  "ripgrep installs its package" = installs ripgrep "ripgrep";
+  "ripgrep with package null installs nothing" = !(installs (mk [T.ripgrep {tools.ripgrep.package = null;}]) "ripgrep");
+  "fzf installs its package" = installs fzf "fzf";
+  "fzf with package null installs nothing" = !(installs (mk [T.fzf {tools.fzf.package = null;}]) "fzf");
+  "jump installs its package" = installs jump "jump";
+  "jump with package null installs nothing" = !(installs (mk [T.jump {tools.jump.package = null;}]) "jump");
+  "any-nix-shell installs its package" = installs anyNixShell "any-nix-shell";
+  "any-nix-shell with package null installs nothing" = !(installs (mk [T."any-nix-shell" {tools."any-nix-shell".package = null;}]) "any-nix-shell");
+
+  # zoxide intentionally wraps home-manager's module so it owns shell
+  # integration later instead of being package-only.
+  "zoxide enables programs.zoxide" = zoxide.programs.zoxide.enable;
+  "zoxide off does not enable it" = !(mk [T.zoxide {tools.zoxide.enable = false;}]).programs.zoxide.enable;
+  "zoxide installs its package" = installs zoxide "zoxide";
+
+  "cli-tools installs all eight" = builtins.all (prefix: installs cliTools prefix) [
+    "any-nix-shell"
+    "bat"
+    "eza"
+    "fd"
+    "fzf"
+    "jump"
+    "ripgrep"
+    "zoxide"
+  ];
+
+  # Git LFS tools requested as git-tool modules.
+  "git-lfs enables git lfs" = gitLfs.programs.git.lfs.enable;
+  "git-lfs installs its package" = installs gitLfs "git-lfs";
+  "git-lfs off does not enable it" = !(mk [T."git-lfs" {tools."git-lfs".enable = false;}]).programs.git.lfs.enable;
+  "git-lfs-transfer installs its package" = installs gitLfsTransfer "git-lfs-transfer";
+  "git-lfs-transfer with package null installs nothing" = !(installs (mk [T."git-lfs-transfer" {tools."git-lfs-transfer".package = null;}]) "git-lfs-transfer");
+  "git-tools includes lfs tools" = gitTools.programs.git.lfs.enable && installs gitTools "git-lfs-transfer";
 }

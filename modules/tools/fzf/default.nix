@@ -1,0 +1,34 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  inherit (import ../../../lib) mkToolEnable;
+  cfg = config.tools.fzf;
+in {
+  imports = [
+    ../../_common
+    ../../theme
+  ];
+
+  options.tools.fzf = {
+    enable = mkToolEnable lib "fzf";
+
+    package = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = pkgs.fzf;
+      description = ''
+        Package providing fzf, installed when this tool is enabled.
+
+        Set to null to configure fzf without installing it — for a
+        binary that comes from the system, Homebrew, or a language
+        package manager instead.
+      '';
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+  };
+}

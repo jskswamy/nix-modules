@@ -88,15 +88,16 @@ brought in.
 Each group is only a bundle of tool modules — there is nothing in a group
 that is not in one of its tools.
 
-| Group         | Tools                                                                  |
-| ------------- | ---------------------------------------------------------------------- |
-| `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`                      |
-| `editor`      | `nvim`, `vim`                                                          |
-| `git-tools`   | `git`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk`          |
-| `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp` |
-| `shell`       | `fish`, `zsh`, `starship`, `direnv`                                    |
-| `ssh`         | `ssh`                                                                  |
-| `terminal`    | `alacritty`, `ghostty`, `tmux`, `tmuxp`                                |
+| Group         | Tools                                                                                        |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`                                            |
+| `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                      |
+| `editor`      | `nvim`, `vim`                                                                                |
+| `git-tools`   | `git`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk` |
+| `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                       |
+| `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                          |
+| `ssh`         | `ssh`                                                                                        |
+| `terminal`    | `alacritty`, `ghostty`, `tmux`, `tmuxp`                                                      |
 
 How to consume and override these from your own configuration —
 including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
@@ -109,11 +110,12 @@ and install the local pre-commit hooks.
 Per-tool detail — what each one writes, what it installs, and what it adds
 to other tools — is in **[docs/tools.md](docs/tools.md)**.
 
-All 28 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`,
-`context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`,
-`ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`,
-`mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`,
-`tmuxp`, `vim`, `zsh`.
+All 40 tools: `agentgateway`, `aide`, `alacritty`, `any-nix-shell`, `bat`,
+`beads`, `ccstatusline`, `codebase-memory-mcp`, `context7-mcp`, `delta`,
+`difftastic`, `direnv`, `eza`, `fabric`, `fd`, `fish`, `fzf`, `ghostty`,
+`git`, `git-lfs`, `git-lfs-transfer`, `gpg`, `herdr`, `hunk`, `jump`,
+`lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `ripgrep`, `serena-mcp`,
+`ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zoxide`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
 

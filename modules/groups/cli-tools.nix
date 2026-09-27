@@ -1,18 +1,17 @@
-# Git and the tools built around it.
+# General command-line tools used by shell/editor integrations.
 #
 # A group is only a bundle: it imports its tools and nothing else. Take the
 # group for all of them, or import the individual tools you want. Either
 # way, drop any one of them again with `tools.<name>.enable = false`.
 {
   imports = [
-    ../tools/git
-    ../tools/git-lfs
-    ../tools/git-lfs-transfer
-    ../tools/delta
-    ../tools/difftastic
-    ../tools/lazygit
-    ../tools/gpg
-    ../tools/tig
-    ../tools/hunk
+    ../tools/eza
+    ../tools/bat
+    ../tools/fd
+    ../tools/ripgrep
+    ../tools/fzf
+    ../tools/zoxide
+    ../tools/jump
+    ../tools/any-nix-shell
   ];
 }
