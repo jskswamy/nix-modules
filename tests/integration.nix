@@ -50,6 +50,7 @@ let
   gitLfsTransfer = mk [T."git-lfs-transfer"];
   nvim = mk [T.nvim];
   vim = mk [T.vim];
+  tmux = mk [T.tmux];
   nvimVim = mk [T.nvim T.vim];
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
@@ -76,6 +77,8 @@ in {
   "lazygit alone has no diff renderer" = !(lazygit.programs.lazygit.settings ? git && lazygit.programs.lazygit.settings.git ? diffRenderers);
   "lazygit with delta gains the renderer" =
     (builtins.head (lazygitDelta.programs.lazygit.settings.git.diffRenderers or [{}])).command or null == "delta --paging=never";
+  "lazygit sets the lg alias" = lazygit.home.shellAliases.lg == "lazygit";
+  "tmux sets its alias" = tmux.home.shellAliases.tmux == "tmux new-session -A";
 
   # difftastic: owns the difftool and the two aliases.
   "git alone has no difftastic lines" =

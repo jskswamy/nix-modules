@@ -14,6 +14,8 @@ in {
   options.tools.lazygit.enable = mkToolEnable lib "lazygit";
 
   config = lib.mkIf cfg.enable {
+    home.shellAliases.lg = "lazygit";
+
     programs.lazygit = {
       enable = lib.mkDefault true;
       settings = {

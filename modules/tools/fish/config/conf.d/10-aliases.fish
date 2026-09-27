@@ -1,12 +1,10 @@
 # Shell aliases
 # Edit this file directly - changes take effect immediately (just restart fish)
 
-alias lg="lazygit"
 alias gw="git-workspace"
 alias gll="gita ll"      # Quick repo status across all repos
 alias gf="gita fetch"    # Fetch all repos in parallel
 alias gp="gita pull"     # Pull all repos
-alias tmux="tmux new-session -A"
 
 alias weather='curl "wttr.in/chennai"'
 alias ips="ifconfig | rg 'inet ' | rg -v 127.0.0.1 | cut -d\\  -f2 | sort"

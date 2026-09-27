@@ -40,6 +40,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.shellAliases.tmux = "tmux new-session -A";
 
     programs.tmux.enable = lib.mkDefault false;
 
