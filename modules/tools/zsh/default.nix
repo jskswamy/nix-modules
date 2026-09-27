@@ -45,10 +45,8 @@ in {
         # Remove history data we don't want to see
         export HISTIGNORE="pwd:ls:cd"
 
-        # Vim is my editor
+        # Emacs client fallback; editor ownership lives with vim/nvim.
         export ALTERNATE_EDITOR=""
-        export EDITOR="vim"
-        export VISUAL="vim"
 
         # nix shortcuts
         shell() {

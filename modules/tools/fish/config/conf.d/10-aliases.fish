@@ -8,13 +8,6 @@ alias gf="gita fetch"    # Fetch all repos in parallel
 alias gp="gita pull"     # Pull all repos
 alias tmux="tmux new-session -A"
 
-# These replace a command that always exists, so alias them only where the
-# replacement is installed; otherwise vim would break.
-if command -q nvim
-    alias vim="nvim"
-    alias vi="nvim"
-end
-
 alias weather='curl "wttr.in/chennai"'
 alias ips="ifconfig | rg 'inet ' | rg -v 127.0.0.1 | cut -d\\  -f2 | sort"
 alias picocom="ls -l /dev | rg --regexp 'tty.\\w*UART' | awk '{print \"/dev/\"\$9}'"

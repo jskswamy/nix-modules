@@ -48,6 +48,9 @@ let
   gitTools = mk [nm.homeManagerModules.git-tools];
   gitLfs = mk [T."git-lfs"];
   gitLfsTransfer = mk [T."git-lfs-transfer"];
+  nvim = mk [T.nvim];
+  vim = mk [T.vim];
+  nvimVim = mk [T.nvim T.vim];
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
@@ -91,6 +94,12 @@ in {
   "fish with starship gets the tweak" =
     fishStarship.programs.starship.enable && fishStarship.home.file ? ".config/fish/conf.d/starship.fish";
   "the old numbered file is gone" = !(fishStarship.home.file ? ".config/fish/conf.d/40-starship.fish");
+
+  # editors: nvim wins when both editor modules are enabled.
+  "nvim sets EDITOR" = nvim.home.sessionVariables.EDITOR == "nvim";
+  "vim alone sets EDITOR to vim" = vim.home.sessionVariables.EDITOR == "vim";
+  "nvim wins over vim" = nvimVim.home.sessionVariables.EDITOR == "nvim";
+  "nvim sets the vim and vi aliases" = nvim.home.shellAliases.vim == "nvim" && nvim.home.shellAliases.vi == "nvim";
 
   # package-only CLI tools: install only their package for now; aliases and
   # shell snippets move in later issues.

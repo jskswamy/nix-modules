@@ -15,6 +15,11 @@ in {
   options.tools.vim.enable = mkToolEnable lib "vim";
 
   config = lib.mkIf cfg.enable {
+    home.sessionVariables = {
+      EDITOR = lib.mkOverride 1100 "vim";
+      VISUAL = lib.mkOverride 1100 "vim";
+    };
+
     # Kept in its own file so the long extraConfig stays exactly as written.
     programs.vim = import ./vim.nix {inherit pkgs;};
   };

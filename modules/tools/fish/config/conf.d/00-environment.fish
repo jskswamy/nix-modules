@@ -23,8 +23,6 @@ if test -n "$loc"
 end
 
 # General environment
-set -gx EDITOR "nvim"
-set -gx VISUAL "nvim"
 set -gx GPG_TTY (tty)
 set -gx ALTERNATE_EDITOR ""
 

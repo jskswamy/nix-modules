@@ -33,6 +33,14 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
+    home.shellAliases = {
+      vim = "nvim";
+      vi = "nvim";
+    };
 
     home.file.".config/nvim".source = src.dir;
   };
