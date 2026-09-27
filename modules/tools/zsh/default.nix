@@ -53,12 +53,6 @@ in {
             nix-shell '<nixpkgs>' -A "$1"
         }
 
-        # Use difftastic, syntax-aware diffing
-        alias diff=difft
-
-        # Always color ls and group directories
-        alias ls='ls --color=auto'
-
         # Claude Code profile aliases
         # Default 'claude' uses ~/.claude (personal) - no alias needed
         alias claude-work='CLAUDE_CONFIG_DIR=$HOME/.claude-work claude'

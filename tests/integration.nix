@@ -52,6 +52,18 @@ let
   vim = mk [T.vim];
   tmux = mk [T.tmux];
   nvimVim = mk [T.nvim T.vim];
+  aliasParity = mk [
+    T.fish
+    T.zsh
+    T.eza
+    T.bat
+    T.difftastic
+    T.nvim
+    T.lazygit
+    T.tmux
+    {programs.bash.enable = true;}
+  ];
+  zshSource = builtins.readFile ../modules/tools/zsh/default.nix;
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
@@ -103,6 +115,14 @@ in {
   "vim alone sets EDITOR to vim" = vim.home.sessionVariables.EDITOR == "vim";
   "nvim wins over vim" = nvimVim.home.sessionVariables.EDITOR == "nvim";
   "nvim sets the vim and vi aliases" = nvim.home.shellAliases.vim == "nvim" && nvim.home.shellAliases.vi == "nvim";
+  "aliases are equal in fish, zsh and bash" =
+    aliasParity.programs.fish.shellAliases
+    == aliasParity.programs.zsh.shellAliases
+    && aliasParity.programs.zsh.shellAliases == aliasParity.programs.bash.shellAliases
+    && aliasParity.programs.fish.shellAliases.ls == "eza --icons=always";
+  "zsh does not redefine ls or diff" =
+    !(lib.hasInfix "alias diff=" zshSource)
+    && !(lib.hasInfix "alias ls=" zshSource);
 
   # package-only CLI tools: install only their package for now; aliases and
   # shell snippets move in later issues.
