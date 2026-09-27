@@ -4,7 +4,8 @@
   pkgs,
   ...
 }: let
-  inherit (import ../../../lib) mkToolEnable;
+  inherit (import ../../../lib) mkSource mkToolEnable;
+  fishSrc = mkSource config ./fish "modules/tools/any-nix-shell/fish";
   cfg = config.tools.any-nix-shell;
 in {
   imports = [
@@ -30,5 +31,6 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.file.".config/fish/conf.d/any-nix-shell.fish".source = fishSrc.file "any-nix-shell.fish";
   };
 }

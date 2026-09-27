@@ -145,8 +145,11 @@ in {
   "fzf with package null installs nothing" = !(installs (mk [T.fzf {tools.fzf.package = null;}]) "fzf");
   "jump installs its package" = installs jump "jump";
   "jump with package null installs nothing" = !(installs (mk [T.jump {tools.jump.package = null;}]) "jump");
+  "jump ships its fish snippet" = jump.home.file ? ".config/fish/conf.d/jump.fish";
+  "disabled jump ships nothing" = !((mk [T.jump {tools.jump.enable = false;}]).home.file ? ".config/fish/conf.d/jump.fish");
   "any-nix-shell installs its package" = installs anyNixShell "any-nix-shell";
   "any-nix-shell with package null installs nothing" = !(installs (mk [T."any-nix-shell" {tools."any-nix-shell".package = null;}]) "any-nix-shell");
+  "any-nix-shell ships its fish snippet" = anyNixShell.home.file ? ".config/fish/conf.d/any-nix-shell.fish";
 
   # zoxide intentionally wraps home-manager's module so it owns shell
   # integration later instead of being package-only.

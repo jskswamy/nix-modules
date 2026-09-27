@@ -2,15 +2,6 @@
 # Edit this file directly - changes take effect immediately (just restart fish)
 
 if status --is-interactive
-    # Initialize shell navigation tools
-    # jump - directory bookmarking
-    if command -q jump
-        source (jump shell fish | psub)
-    end
-    # any-nix-shell - nix-shell detection
-    if command -q any-nix-shell
-        any-nix-shell fish | source
-    end
     # zoxide is managed by Home Manager (programs.zoxide.enableFishIntegration)
 
     # Source additional fish functions from functions/
