@@ -149,7 +149,7 @@ window-inherit-working-directory = true
 window-decoration = true
 window-padding-x = 24,24
 window-padding-y = 24,24
-keybind = shift+enter=text:\x1b\r
+keybind = alt+backspace=text:\x1b\x7f
 
 # disable cmd+k clear (use ctrl+l instead)
 keybind = super+k=unbind
