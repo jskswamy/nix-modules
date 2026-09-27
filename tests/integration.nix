@@ -35,6 +35,7 @@ let
   hunkOnly = mk [T.hunk];
   fish = mk [T.fish];
   fishStarship = mk [T.fish T.starship];
+  direnv = mk [T.direnv];
 
   eza = mk [T.eza];
   bat = mk [T.bat];
@@ -116,6 +117,9 @@ in {
   "fish with starship gets the tweak" =
     fishStarship.programs.starship.enable && fishStarship.home.file ? ".config/fish/conf.d/starship.fish";
   "the old numbered file is gone" = !(fishStarship.home.file ? ".config/fish/conf.d/40-starship.fish");
+  "direnv ships mkenvrc" = direnv.home.file ? ".config/fish/functions/mkenvrc.fish";
+  "disabled direnv ships no mkenvrc" = !((mk [T.direnv {tools.direnv.enable = false;}]).home.file ? ".config/fish/functions/mkenvrc.fish");
+  "fish alone does not ship mkenvrc" = !(fish.home.file ? ".config/fish/functions/mkenvrc.fish");
 
   # editors: nvim wins when both editor modules are enabled.
   "nvim sets EDITOR" = nvim.home.sessionVariables.EDITOR == "nvim";

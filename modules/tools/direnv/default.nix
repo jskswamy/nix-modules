@@ -3,7 +3,8 @@
   lib,
   ...
 }: let
-  inherit (import ../../../lib) mkToolEnable;
+  inherit (import ../../../lib) mkSource mkToolEnable;
+  fishSrc = mkSource config ./fish "modules/tools/direnv/fish";
   cfg = config.tools.direnv;
 in {
   imports = [
@@ -51,5 +52,7 @@ in {
         }
       '';
     };
+
+    home.file.".config/fish/functions/mkenvrc.fish".source = fishSrc.file "functions/mkenvrc.fish";
   };
 }
