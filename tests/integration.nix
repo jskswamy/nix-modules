@@ -52,9 +52,11 @@ let
   nvim = mk [T.nvim];
   vim = mk [T.vim];
   tmux = mk [T.tmux];
+  tmuxp = mk [T.tmuxp];
   nvimVim = mk [T.nvim T.vim];
   gpg = mk [T.gpg];
   fishEnvSource = builtins.readFile ../modules/tools/fish/config/conf.d/00-environment.fish;
+  fishFunctionsSource = builtins.readFile ../modules/tools/fish/config/conf.d/30-functions.fish;
   aliasParity = mk [
     T.fish
     T.zsh
@@ -99,6 +101,9 @@ in {
     (builtins.head (lazygitDelta.programs.lazygit.settings.git.diffRenderers or [{}])).command or null == "delta --paging=never";
   "lazygit sets the lg alias" = lazygit.home.shellAliases.lg == "lazygit";
   "tmux sets its alias" = tmux.home.shellAliases.tmux == "tmux new-session -A";
+  "tmuxp ships hackspace" = tmuxp.home.file ? ".config/fish/functions/hackspace.fish";
+  "disabled tmuxp ships no hackspace" = !((mk [T.tmuxp {tools.tmuxp.enable = false;}]).home.file ? ".config/fish/functions/hackspace.fish");
+  "fish conf.d no longer defines hackspace" = !(lib.hasInfix "function hackspace" fishFunctionsSource);
 
   # difftastic: owns the difftool and the two aliases.
   "git alone has no difftastic lines" =

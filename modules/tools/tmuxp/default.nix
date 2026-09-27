@@ -6,6 +6,7 @@
 }: let
   inherit (import ../../../lib) mkSource mkToolEnable;
   src = mkSource config ./config "modules/tools/tmuxp/config";
+  fishSrc = mkSource config ./fish "modules/tools/tmuxp/fish";
   cfg = config.tools.tmuxp;
 in {
   imports = [
@@ -32,6 +33,9 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
 
-    home.file.".config/tmuxp".source = src.dir;
+    home.file = {
+      ".config/tmuxp".source = src.dir;
+      ".config/fish/functions/hackspace.fish".source = fishSrc.file "functions/hackspace.fish";
+    };
   };
 }
