@@ -32,6 +32,8 @@ in {
     full.programs.lazygit.settings
     // {customCommands = byDescription (full.programs.lazygit.settings.customCommands or []);};
   fishInit = full.programs.fish.interactiveShellInit;
+  shellAliases = full.home.shellAliases;
+  sessionVariables = full.home.sessionVariables;
   homeFiles = sorted (builtins.attrNames full.home.file);
   packages = sorted (map (p: p.name or "?") full.home.packages);
 }
