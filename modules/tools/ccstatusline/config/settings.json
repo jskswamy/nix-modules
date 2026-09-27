@@ -138,16 +138,10 @@
   "minimalistMode": false,
   "powerline": {
     "enabled": true,
-    "separators": [
-      ""
-    ],
-    "separatorInvertBackground": [
-      false
-    ],
+    "separators": [""],
+    "separatorInvertBackground": [false],
     "startCaps": [],
-    "endCaps": [
-      ""
-    ],
+    "endCaps": [""],
     "theme": "nord-aurora",
     "autoAlign": false,
     "continueThemeAcrossLines": true

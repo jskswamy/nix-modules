@@ -1,6 +1,7 @@
 # Tig Configuration Guide
 
-Tig is a text-mode interface for Git with enhanced navigation and visualization capabilities.
+Tig is a text-mode interface for Git with enhanced navigation and visualization
+capabilities.
 
 ## Quick Start
 
@@ -118,7 +119,8 @@ tig diff               # View working directory diff
 1. **Quick commit info**: Hover over any commit to see details
 2. **Branch visualization**: Main view shows git graph
 3. **File history**: Use `tig <file>` to see file-specific history
-4. **Blame navigation**: In blame view, press `<Enter>` on a commit to see full diff
+4. **Blame navigation**: In blame view, press `<Enter>` on a commit to see full
+   diff
 5. **Multiple windows**: Use `:` commands to open multiple views
 6. **Refresh**: Press `r` to refresh current view
 

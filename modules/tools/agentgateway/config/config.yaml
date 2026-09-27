@@ -1,6 +1,8 @@
+---
 # yaml-language-server: $schema=https://agentgateway.dev/schema/config
 # AgentGateway MCP proxy config.
-# Symlinked to ~/.config/agentgateway/config.yaml via files.nix for instant edits.
+# Symlinked to ~/.config/agentgateway/config.yaml via files.nix for instant
+# edits.
 # ${THINGS_CLOUD_AUTH} is expanded from the process environment at load time
 # (agentgateway runs the whole file through shellexpand before parsing) —
 # set by the launchd wrapper script in default.nix.

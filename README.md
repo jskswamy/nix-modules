@@ -25,11 +25,11 @@ setup without one depending on the other.
 
 Three ways in, and they mix freely:
 
-| Import | You get |
-| --- | --- |
-| `tools.<name>` | that one tool |
-| `<group>` | every tool in that group (`shell`, `terminal`, `editor`, `git-tools`, `agent-tools`, `ssh`) |
-| `default` | every tool |
+| Import         | You get                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| `tools.<name>` | that one tool                                                                               |
+| `<group>`      | every tool in that group (`shell`, `terminal`, `editor`, `git-tools`, `agent-tools`, `ssh`) |
+| `default`      | every tool                                                                                  |
 
 Importing a module is what asks for it — there is no separate `enable = true`
 to remember.
@@ -88,23 +88,32 @@ brought in.
 Each group is only a bundle of tool modules — there is nothing in a group
 that is not in one of its tools.
 
-| Group | Tools |
-| --- | --- |
-| `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet` |
-| `editor` | `nvim`, `vim` |
-| `git-tools` | `git`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk` |
-| `mcp` | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp` |
-| `shell` | `fish`, `zsh`, `starship`, `direnv` |
-| `ssh` | `ssh` |
-| `terminal` | `alacritty`, `ghostty`, `tmux`, `tmuxp` |
+| Group         | Tools                                                                  |
+| ------------- | ---------------------------------------------------------------------- |
+| `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`                      |
+| `editor`      | `nvim`, `vim`                                                          |
+| `git-tools`   | `git`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk`          |
+| `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp` |
+| `shell`       | `fish`, `zsh`, `starship`, `direnv`                                    |
+| `ssh`         | `ssh`                                                                  |
+| `terminal`    | `alacritty`, `ghostty`, `tmux`, `tmuxp`                                |
 
 How to consume and override these from your own configuration —
 including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
 
+## Contributing
+
+Run `nix develop ./dev` before committing to get the repository's hook tools
+and install the local pre-commit hooks.
+
 Per-tool detail — what each one writes, what it installs, and what it adds
 to other tools — is in **[docs/tools.md](docs/tools.md)**.
 
-All 28 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`, `ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
+All 28 tools: `agentgateway`, `alacritty`, `beads`, `ccstatusline`,
+`context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`,
+`ghostty`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `local-mcp`,
+`mcp-nixos`, `nvim`, `pet`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`,
+`tmuxp`, `vim`, `zsh`.
 
 `overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
 

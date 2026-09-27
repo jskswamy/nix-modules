@@ -171,12 +171,12 @@ instead, which is what a disposable box wants.
 Each cookbook entry is evaluated against a bare home-manager configuration
 and the result asserted, so the snippets cannot drift from the modules:
 
-| Claim | Checked |
-| --- | --- |
-| importing a tool installs it | `tools.nvim` puts neovim in `home.packages` |
-| `package` swaps it | `tools.tig.package = pkgs.hello` installs hello, not tig |
-| `package = null` keeps config | `~/.config/tig/config` written, nothing installed |
-| settings are overridable | `window.opacity` ends up `0.8` |
-| files are replaceable | `mkForce` text wins |
-| `theme.variant` propagates | alacritty imports `catppuccin_dark.toml` |
-| overlay is optional | `tools.hunk` installs hunk with no overlay applied |
+| Claim                         | Checked                                                  |
+| ----------------------------- | -------------------------------------------------------- |
+| importing a tool installs it  | `tools.nvim` puts neovim in `home.packages`              |
+| `package` swaps it            | `tools.tig.package = pkgs.hello` installs hello, not tig |
+| `package = null` keeps config | `~/.config/tig/config` written, nothing installed        |
+| settings are overridable      | `window.opacity` ends up `0.8`                           |
+| files are replaceable         | `mkForce` text wins                                      |
+| `theme.variant` propagates    | alacritty imports `catppuccin_dark.toml`                 |
+| overlay is optional           | `tools.hunk` installs hunk with no overlay applied       |
