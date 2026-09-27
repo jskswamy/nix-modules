@@ -3,7 +3,8 @@
   lib,
   ...
 }: let
-  inherit (import ../../../lib) mkToolEnable;
+  inherit (import ../../../lib) mkSource mkToolEnable;
+  fishSrc = mkSource config ./fish "modules/tools/gpg/fish";
   cfg = config.tools.gpg;
 in {
   imports = [
@@ -17,9 +18,12 @@ in {
     # Kept in its own file so the long settings block stays as written.
     programs.gpg = import ./gpg.nix {};
 
-    home.file.".local/bin/gpg-sign-wrapper" = {
-      source = ./scripts/gpg-sign-wrapper;
-      executable = true;
+    home.file = {
+      ".config/fish/conf.d/gpg.fish".source = fishSrc.file "gpg.fish";
+      ".local/bin/gpg-sign-wrapper" = {
+        source = ./scripts/gpg-sign-wrapper;
+        executable = true;
+      };
     };
   };
 }

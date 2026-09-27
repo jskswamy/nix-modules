@@ -52,6 +52,8 @@ let
   vim = mk [T.vim];
   tmux = mk [T.tmux];
   nvimVim = mk [T.nvim T.vim];
+  gpg = mk [T.gpg];
+  fishEnvSource = builtins.readFile ../modules/tools/fish/config/conf.d/00-environment.fish;
   aliasParity = mk [
     T.fish
     T.zsh
@@ -69,6 +71,11 @@ in {
   "git alone does not bring hunk" = !(installs git "hunk");
   "git alone keeps the default pager" = !(git.programs.git.settings.core ? pager);
   "git with hunk sets the pager" = (gitHunk.programs.git.settings.core.pager or null) == "hunk pager";
+  "gpg ships its fish snippet" = gpg.home.file ? ".config/fish/conf.d/gpg.fish";
+  "disabled gpg ships no fish snippet" = !((mk [T.gpg {tools.gpg.enable = false;}]).home.file ? ".config/fish/conf.d/gpg.fish");
+  "the fish module no longer mentions gpg" =
+    !(lib.hasInfix "GPG_TTY" fishEnvSource)
+    && !(lib.hasInfix "gpgconf" fishEnvSource);
   "lazygit alone does not bring hunk" = !(installs lazygit "hunk");
   "lazygit alone has only its own command" = commands lazygit == ["AI commit with Claude"];
   "lazygit with hunk gains both hunk commands" =
