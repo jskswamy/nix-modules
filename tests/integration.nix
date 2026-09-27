@@ -143,6 +143,15 @@ in {
   "ripgrep with package null installs nothing" = !(installs (mk [T.ripgrep {tools.ripgrep.package = null;}]) "ripgrep");
   "fzf installs its package" = installs fzf "fzf";
   "fzf with package null installs nothing" = !(installs (mk [T.fzf {tools.fzf.package = null;}]) "fzf");
+  "fzf brings fd" = installs fzf "fd";
+  "fzf ships fzf_fd_opts snippet" = fzf.home.file ? ".config/fish/conf.d/fzf.fish";
+  "fzf sets FZF_TMUX" = fzf.home.sessionVariables.FZF_TMUX == "1";
+  "fzf sets FZF_TMUX_HEIGHT" = fzf.home.sessionVariables.FZF_TMUX_HEIGHT == "80";
+  "fzf sets FZF_ALT_C_COMMAND" = fzf.home.sessionVariables.FZF_ALT_C_COMMAND == "fd -t d . $HOME";
+  "fzf sets FZF_CTRL_T_COMMAND" = fzf.home.sessionVariables.FZF_CTRL_T_COMMAND == "fd . $HOME/source/ --exclude vendor --exclude node_modules";
+  "fzf sets FZF_CTRL_T_OPTS" = fzf.home.sessionVariables.FZF_CTRL_T_OPTS == "--preview 'bat --color always {} 2>/dev/null or cat -n {} || eza --color always -l --git --git-ignore {} 2>/dev/null || tree -C {} 2>/dev/null | head -200' --select-1 --exit-0";
+  "fzf sets FZF_CTRL_R_OPTS" = fzf.home.sessionVariables.FZF_CTRL_R_OPTS == "--sort --exact --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'";
+  "fzf sets FZF_DEFAULT_OPTS" = fzf.home.sessionVariables.FZF_DEFAULT_OPTS == "--color=16,fg+:-1:reverse,bg+:-1,hl+:-1:reverse";
   "jump installs its package" = installs jump "jump";
   "jump with package null installs nothing" = !(installs (mk [T.jump {tools.jump.package = null;}]) "jump");
   "jump ships its fish snippet" = jump.home.file ? ".config/fish/conf.d/jump.fish";

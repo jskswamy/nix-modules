@@ -63,21 +63,6 @@ set -gx FABRIC_COMMIT_PATTERN semantic_commit
 set -gx DEVBOX_NO_PROMPT 1
 set -g devbox_no_prompt 1
 
-# FZF configuration
-set -gx FZF_TMUX 1
-set -gx FZF_TMUX_HEIGHT 80
-set -gx FZF_ALT_C_COMMAND "fd -t d . $HOME"
-set -l find_source_code_command "fd . $HOME/source/ --exclude vendor --exclude node_modules"
-set -gx FZF_CTRL_T_COMMAND $find_source_code_command
-set -gx FZF_CTRL_T_OPTS "--preview 'bat --color always {} 2>/dev/null or cat -n {} || eza --color always -l --git --git-ignore {} 2>/dev/null || tree -C {} 2>/dev/null | head -200' --select-1 --exit-0"
-set -gx FZF_CTRL_R_OPTS "--sort --exact --preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
-# Use terminal's 16 ANSI palette so fzf colors follow the active theme
-# (dark/light auto). Selection row uses `reverse` on default fg/bg so the
-# terminal inverts its own colors — same trick as tig, guaranteed readable
-# on any theme without picking a fixed shade that clashes somewhere.
-set -gx FZF_DEFAULT_OPTS "--color=16,fg+:-1:reverse,bg+:-1,hl+:-1:reverse"
-set -gx fzf_fd_opts --hidden --exclude=.git --exclude=node_modules
-
 # PATH additions (use fish_add_path to avoid duplicates)
 fish_add_path -g $GOPATH/bin
 fish_add_path -g "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
