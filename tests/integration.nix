@@ -83,6 +83,7 @@ in {
     && (gitDifft.programs.git.settings.alias.dft or null) == "difftool"
     && (gitDifft.programs.git.settings.difftool.difftastic.cmd or null) == ''difft "$LOCAL" "$REMOTE"'';
   "difftastic installs its package" = installs gitDifft "difftastic";
+  "difftastic sets the diff alias" = (mk [T.difftastic]).home.shellAliases.diff == "difft";
 
   # starship: ships its own fish tweak; fish does not import it.
   "fish alone does not bring starship" =
@@ -95,8 +96,15 @@ in {
   # shell snippets move in later issues.
   "eza installs its package" = installs eza "eza";
   "eza with package null installs nothing" = !(installs (mk [T.eza {tools.eza.package = null;}]) "eza");
+  "eza sets the ls alias" = eza.home.shellAliases.ls == "eza --icons=always";
+  "disabled eza sets no ls alias" = !((mk [T.eza {tools.eza.enable = false;}]).home.shellAliases ? ls);
   "bat installs its package" = installs bat "bat";
   "bat with package null installs nothing" = !(installs (mk [T.bat {tools.bat.package = null;}]) "bat");
+  "bat sets cat, MANPAGER and BAT_THEME" =
+    bat.home.shellAliases.cat
+    == "bat"
+    && bat.home.sessionVariables.MANPAGER == "bat -l man -p"
+    && bat.home.sessionVariables.BAT_THEME == "ansi";
   "fd installs its package" = installs fd "fd";
   "fd with package null installs nothing" = !(installs (mk [T.fd {tools.fd.package = null;}]) "fd");
   "ripgrep installs its package" = installs ripgrep "ripgrep";

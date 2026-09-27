@@ -33,8 +33,6 @@ set -gx GIT_WORKSPACE "$HOME/source"
 set -gx GOPATH "$HOME/go"
 set -gx GO111MODULE on
 set -gx NIX_IGNORE_SYMLINK_STORE 1
-command -q bat; and set -gx MANPAGER "bat -l man -p"
-set -gx BAT_THEME "ansi"
 # Only where colima has been set up; elsewhere this would point docker at a
 # socket that does not exist and hide the real one.
 test -d "$HOME/.colima"; and set -gx DOCKER_HOST "unix://$HOME/.colima/default/docker.sock"

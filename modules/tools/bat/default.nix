@@ -30,5 +30,10 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.shellAliases.cat = "bat";
+    home.sessionVariables = {
+      MANPAGER = "bat -l man -p";
+      BAT_THEME = "ansi";
+    };
   };
 }

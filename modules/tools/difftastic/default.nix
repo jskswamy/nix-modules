@@ -31,6 +31,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.shellAliases.diff = "difft";
 
     # difftastic is wired into git from here, not the other way round.
     # Home-manager's programs.difftastic is not used because it rewrites

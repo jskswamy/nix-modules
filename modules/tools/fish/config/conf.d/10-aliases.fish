@@ -9,10 +9,7 @@ alias gp="gita pull"     # Pull all repos
 alias tmux="tmux new-session -A"
 
 # These replace a command that always exists, so alias them only where the
-# replacement is installed; otherwise ls, cat, diff and vim would break.
-command -q difft; and alias diff="difft"
-command -q eza; and alias ls="eza --icons=always"
-command -q bat; and alias cat="bat"
+# replacement is installed; otherwise vim would break.
 if command -q nvim
     alias vim="nvim"
     alias vi="nvim"
