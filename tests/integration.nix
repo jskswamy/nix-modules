@@ -49,6 +49,20 @@ let
   zoxide = mk [T.zoxide];
   jump = mk [T.jump];
   anyNixShell = mk [T."any-nix-shell"];
+  bivouac = mk [T.bivouac {programs.bivouac.enable = true;}];
+  bivouacText = bivouac.home.file.".config/bivouac/base.pkl".text;
+  bivouacCustom = mk [
+    T.bivouac
+    {
+      programs.bivouac = {
+        enable = true;
+        sshKeys = ["machine-key"];
+        nixModules.workspaceRoot = "workspaces";
+        extraSettings."custom.option" = "value";
+      };
+    }
+  ];
+  bivouacCustomText = bivouacCustom.home.file.".config/bivouac/base.pkl".text;
   cliTools = mk [nm.homeManagerModules.cli-tools];
   gitTools = mk [nm.homeManagerModules.git-tools];
   gitLfs = mk [T."git-lfs"];
@@ -168,6 +182,16 @@ in {
     == "bat"
     && bat.home.sessionVariables.MANPAGER == "bat -l man -p"
     && bat.home.sessionVariables.BAT_THEME == "ansi";
+  "bivouac writes base config" = bivouac.home.file ? ".config/bivouac/base.pkl";
+  "bivouac defaults workspace root" = lib.hasInfix ''["nixModules.workspaceRoot"] = "sessions"'' bivouacText;
+  "bivouac does not force git identity" =
+    !(lib.hasInfix "programs.git.settings.user.name" bivouacText)
+    && !(lib.hasInfix "programs.git.settings.user.email" bivouacText);
+  "bivouac accepts machine overrides" =
+    lib.hasInfix ''"machine-key"'' bivouacCustomText
+    && lib.hasInfix ''["nixModules.workspaceRoot"] = "workspaces"'' bivouacCustomText
+    && lib.hasInfix ''["custom.option"] = "value"'' bivouacCustomText;
+  "disabled bivouac writes no base config" = !((mk [T.bivouac]).home.file ? ".config/bivouac/base.pkl");
   "fd installs its package" = installs fd "fd";
   "fd with package null installs nothing" = !(installs (mk [T.fd {tools.fd.package = null;}]) "fd");
   "ripgrep installs its package" = installs ripgrep "ripgrep";
