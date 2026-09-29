@@ -26,7 +26,6 @@ end
 set -gx ALTERNATE_EDITOR ""
 
 # Tooling environment variables
-set -gx GIT_WORKSPACE "$HOME/source"
 set -gx GOPATH "$HOME/go"
 set -gx GO111MODULE on
 set -gx NIX_IGNORE_SYMLINK_STORE 1

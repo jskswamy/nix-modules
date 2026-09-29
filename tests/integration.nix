@@ -35,6 +35,10 @@ let
   hunkOnly = mk [T.hunk];
   fish = mk [T.fish];
   fishStarship = mk [T.fish T.starship];
+  workspaceRelative = mk [T.fish {nixModules.workspaceRoot = "src";}];
+  workspaceTilde = mk [T.fish {nixModules.workspaceRoot = "~/code";}];
+  workspaceHome = mk [T.fish {nixModules.workspaceRoot = "$HOME/projects";}];
+  workspaceAbsolute = mk [T.fish {nixModules.workspaceRoot = "/Volumes/work/source";}];
   direnv = mk [T.direnv];
 
   eza = mk [T.eza];
@@ -57,6 +61,7 @@ let
   gpg = mk [T.gpg];
   fishEnvSource = builtins.readFile ../modules/tools/fish/config/conf.d/00-environment.fish;
   fishFunctionsSource = builtins.readFile ../modules/tools/fish/config/conf.d/30-functions.fish;
+  godirSource = builtins.readFile ../modules/tools/fish/config/functions/godir.fish;
   aliasParity = mk [
     T.fish
     T.zsh
@@ -104,6 +109,16 @@ in {
   "tmuxp ships hackspace" = tmuxp.home.file ? ".config/fish/functions/hackspace.fish";
   "disabled tmuxp ships no hackspace" = !((mk [T.tmuxp {tools.tmuxp.enable = false;}]).home.file ? ".config/fish/functions/hackspace.fish");
   "fish conf.d no longer defines hackspace" = !(lib.hasInfix "function hackspace" fishFunctionsSource);
+  "workspaceRoot defaults relative to home" = fish.home.sessionVariables.GIT_WORKSPACE == "/home/t/source";
+  "workspaceRoot accepts relative paths" = workspaceRelative.home.sessionVariables.GIT_WORKSPACE == "/home/t/src";
+  "workspaceRoot accepts tilde paths" = workspaceTilde.home.sessionVariables.GIT_WORKSPACE == "/home/t/code";
+  "workspaceRoot accepts HOME paths" = workspaceHome.home.sessionVariables.GIT_WORKSPACE == "/home/t/projects";
+  "workspaceRoot accepts absolute paths" = workspaceAbsolute.home.sessionVariables.GIT_WORKSPACE == "/Volumes/work/source";
+  "fish environment does not set GIT_WORKSPACE" = !(lib.hasInfix "GIT_WORKSPACE" fishEnvSource);
+  "godir uses configurable workspace" =
+    lib.hasInfix "fd . $GIT_WORKSPACE" godirSource
+    && lib.hasInfix ''set -gx GIT_WORKSPACE "$HOME/source"'' godirSource
+    && !(lib.hasInfix "fd . $HOME/source" godirSource);
 
   # difftastic: owns the difftool and the two aliases.
   "git alone has no difftastic lines" =
