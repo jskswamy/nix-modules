@@ -32,7 +32,7 @@ introspect_overlay_packages() {
 
 latest_github_release() {
 	local owner="$1" repo="$2"
-	gh release view --repo "${owner}/${repo}" --json tagName -q '.tagName' 2>/dev/null | sed 's/^v//'
+	gh release view --repo "${owner}/${repo}" --json tagName -q '.tagName' 2>/dev/null | sed 's/^v//' || true
 }
 
 discover_overlay_packages() {
@@ -61,7 +61,7 @@ discover_flake_inputs() {
 			owner=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.owner' <<<"$meta")
 			repo=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.repo' <<<"$meta")
 			rev=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' <<<"$meta")
-			latest=$(git ls-remote "https://github.com/${owner}/${repo}" HEAD 2>/dev/null | cut -f1)
+			latest=$(git ls-remote "https://github.com/${owner}/${repo}" HEAD 2>/dev/null | cut -f1 || true)
 			[[ -z $latest ]] && continue
 			up_to_date=$([[ $rev == "$latest" ]] && echo true || echo false)
 			jq -n --arg name "$name" --arg current "${rev:0:8}" --arg latest "${latest:0:8}" --argjson upToDate "$up_to_date" \

@@ -7,7 +7,7 @@
 final: prev: {
   nix-upgrade = prev.writeShellApplication {
     name = "nix-upgrade";
-    runtimeInputs = with prev; [nix-update gh jq gum git];
+    runtimeInputs = with prev; [nix nix-update gh jq gum git gnused util-linux];
     text =
       ''
         export NIX_UPGRADE_INTROSPECT_NIX=${./nix-upgrade/introspect.nix}
