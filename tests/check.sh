@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # tests/check.sh integration        assert every integration case holds
+# tests/check.sh nix-upgrade        assert nix-upgrade introspection holds
 # tests/check.sh fish-bare          assert fish config is quiet without tools
 # tests/check.sh snapshot OUT.json  write the full-tool-set snapshot
 set -euo pipefail
@@ -11,6 +12,11 @@ integration)
 	jq -r 'to_entries[] | "\(if .value then "PASS" else "FAIL" end)  \(.key)"' <<<"$out"
 	jq -e 'all(.[]; . == true)' <<<"$out" >/dev/null
 	;;
+nix-upgrade)
+	out=$(nix eval --impure --json -f tests/nix-upgrade.nix)
+	jq -r 'to_entries[] | "\(if .value then "PASS" else "FAIL" end)  \(.key)"' <<<"$out"
+	jq -e 'all(.[]; . == true)' <<<"$out" >/dev/null
+	;;
 fish-bare)
 	tests/fish-bare.sh
 	;;
@@ -18,7 +24,7 @@ snapshot)
 	nix eval --impure --json -f tests/snapshot.nix | jq -S . >"${2:?usage: check.sh snapshot OUT.json}"
 	;;
 *)
-	echo "usage: $0 integration | fish-bare | snapshot OUT.json" >&2
+	echo "usage: $0 integration | nix-upgrade | fish-bare | snapshot OUT.json" >&2
 	exit 2
 	;;
 esac
