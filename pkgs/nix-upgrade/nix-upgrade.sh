@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# pkgs/nix-upgrade/nix-upgrade.sh
+#
+# Harness-agnostic: every subcommand here is a plain shell invocation a
+# human or any coding agent can run directly. No step requires model
+# judgment. NIX_UPGRADE_INTROSPECT_NIX is set by the Nix wrapper
+# (../nix-upgrade.nix) to the store path of introspect.nix.
+set -euo pipefail
+
+usage() {
+	cat <<'USAGE'
+usage: nix-upgrade discover [--json]
+       nix-upgrade apply <name>
+       nix-upgrade [--all | --check-only]
+USAGE
+}
+
+repo_root() {
+	git rev-parse --show-toplevel
+}
+
+current_system() {
+	nix eval --impure --raw --expr 'builtins.currentSystem'
+}
+
+# shellcheck disable=SC2154  # exported by pkgs/nix-upgrade.nix
+introspect_overlay_packages() {
+	local root="$1" system="$2"
+	nix eval --impure --json --expr \
+		"import ${NIX_UPGRADE_INTROSPECT_NIX} { flakePath = \"${root}\"; system = \"${system}\"; }"
+}
+
+latest_github_release() {
+	local owner="$1" repo="$2"
+	gh release view --repo "${owner}/${repo}" --json tagName -q '.tagName' 2>/dev/null | sed 's/^v//'
+}
+
+discover_overlay_packages() {
+	local root="$1" system="$2" entries entry name owner repo version latest up_to_date
+	entries=$(introspect_overlay_packages "$root" "$system")
+	jq -c '.[]' <<<"$entries" | while read -r entry; do
+		name=$(jq -r '.name' <<<"$entry")
+		owner=$(jq -r '.owner' <<<"$entry")
+		repo=$(jq -r '.repo' <<<"$entry")
+		version=$(jq -r '.version' <<<"$entry")
+		[[ $owner == "null" || $repo == "null" ]] && continue
+		latest=$(latest_github_release "$owner" "$repo")
+		[[ -z $latest ]] && continue
+		up_to_date=$([[ $version == "$latest" ]] && echo true || echo false)
+		jq -n --arg name "$name" --arg current "$version" --arg latest "$latest" --argjson upToDate "$up_to_date" \
+			'{name: $name, kind: "overlay", current: $current, latest: $latest, upToDate: $upToDate}'
+	done
+}
+
+discover_flake_inputs() {
+	local root="$1" meta name owner repo rev latest up_to_date
+	meta=$(nix flake metadata "$root" --json)
+	jq -r '.locks.nodes | to_entries[] | select(.value.locked.type == "github") | .key' <<<"$meta" |
+		while read -r name; do
+			[[ $name == "root" ]] && continue
+			owner=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.owner' <<<"$meta")
+			repo=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.repo' <<<"$meta")
+			rev=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' <<<"$meta")
+			latest=$(git ls-remote "https://github.com/${owner}/${repo}" HEAD 2>/dev/null | cut -f1)
+			[[ -z $latest ]] && continue
+			up_to_date=$([[ $rev == "$latest" ]] && echo true || echo false)
+			jq -n --arg name "$name" --arg current "${rev:0:8}" --arg latest "${latest:0:8}" --argjson upToDate "$up_to_date" \
+				'{name: $name, kind: "flake-input", current: $current, latest: $latest, upToDate: $upToDate}'
+		done
+}
+
+cmd_discover() {
+	local json_only=false root system rows
+	for arg in "$@"; do
+		[[ $arg == "--json" ]] && json_only=true
+	done
+	root=$(repo_root)
+	system=$(current_system)
+	rows=$( (
+		discover_overlay_packages "$root" "$system"
+		discover_flake_inputs "$root"
+	) | jq -s '.')
+	if $json_only; then
+		echo "$rows"
+	else
+		echo "$rows" | jq -r '["NAME","KIND","CURRENT","LATEST","UP-TO-DATE"], (.[] | [.name,.kind,.current,.latest,(.upToDate|tostring)]) | @tsv' | column -t
+	fi
+}
+
+main() {
+	case "${1:-}" in
+	discover)
+		shift
+		cmd_discover "$@"
+		;;
+	-h | --help | "")
+		usage
+		;;
+	*)
+		usage
+		exit 2
+		;;
+	esac
+}
+
+main "$@"
