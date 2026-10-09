@@ -125,16 +125,21 @@ cmd_apply_overlay() {
 		'{name: $name, oldVersion: $old, newVersion: $new, success: $success, error: (if $error == "" then null else $error end)}'
 }
 
+locked_rev() {
+	local root="$1" name="$2"
+	nix flake metadata "$root" --json 2>/dev/null | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' || echo ""
+}
+
 cmd_apply_flake_input() {
 	local root="$1" name="$2" old_rev new_rev success error
-	old_rev=$(nix flake metadata "$root" --json | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev')
+	old_rev=$(locked_rev "$root" "$name")
 	success=true
 	error=""
 	if ! nix flake lock "$root" --update-input "$name"; then
 		success=false
 		error="nix flake lock failed for ${name}"
 	fi
-	new_rev=$(nix flake metadata "$root" --json | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev')
+	new_rev=$(locked_rev "$root" "$name")
 	if $success && ! nix flake check "$root"; then
 		success=false
 		error="build verification failed"
