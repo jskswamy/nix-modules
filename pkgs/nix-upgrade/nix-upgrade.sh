@@ -87,11 +87,93 @@ cmd_discover() {
 	fi
 }
 
+package_version() {
+	local root="$1" system="$2" name="$3"
+	nix eval --impure --raw --expr \
+		"(builtins.getFlake \"path:${root}\").packages.${system}.${name}.version" 2>/dev/null || echo ""
+}
+
+package_platforms() {
+	local root="$1" system="$2" name="$3"
+	nix eval --impure --json --expr \
+		"(builtins.getFlake \"path:${root}\").packages.${system}.${name}.meta.platforms or [\"${system}\"]"
+}
+
+cmd_apply_overlay() {
+	local root="$1" name="$2" system="$3" old_version new_version platform success error
+	old_version=$(package_version "$root" "$system" "$name")
+	success=true
+	error=""
+	while read -r platform; do
+		local build_flag=()
+		[[ $platform == "$system" ]] && build_flag=(--build)
+		if ! (cd "$root" && nix-update --flake "${build_flag[@]}" --system "$platform" "$name"); then
+			success=false
+			error="nix-update failed for ${platform}"
+		fi
+	done < <(package_platforms "$root" "$system" "$name" | jq -r '.[]')
+	new_version=$(package_version "$root" "$system" "$name")
+	[[ -z $new_version ]] && new_version="$old_version"
+	if $success; then
+		if ! nix build "${root}#packages.${system}.${name}" --no-link; then
+			success=false
+			error="build verification failed"
+		fi
+	fi
+	jq -n --arg name "$name" --arg old "$old_version" --arg new "$new_version" \
+		--argjson success "$success" --arg error "$error" \
+		'{name: $name, oldVersion: $old, newVersion: $new, success: $success, error: (if $error == "" then null else $error end)}'
+}
+
+cmd_apply_flake_input() {
+	local root="$1" name="$2" old_rev new_rev success error
+	old_rev=$(nix flake metadata "$root" --json | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev')
+	success=true
+	error=""
+	if ! nix flake lock "$root" --update-input "$name"; then
+		success=false
+		error="nix flake lock failed for ${name}"
+	fi
+	new_rev=$(nix flake metadata "$root" --json | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev')
+	if $success && ! nix flake check "$root"; then
+		success=false
+		error="build verification failed"
+	fi
+	jq -n --arg name "$name" --arg old "${old_rev:0:8}" --arg new "${new_rev:0:8}" \
+		--argjson success "$success" --arg error "$error" \
+		'{name: $name, oldVersion: $old, newVersion: $new, success: $success, error: (if $error == "" then null else $error end)}'
+}
+
+cmd_apply() {
+	local name="$1" root system is_package
+	root=$(repo_root)
+	system=$(current_system)
+	if nix eval --impure --json --expr "(builtins.getFlake \"path:${root}\").packages.${system} or {}" |
+		jq -e --arg n "$name" 'has($n)' >/dev/null 2>&1; then
+		is_package=true
+	else
+		is_package=false
+	fi
+	if $is_package; then
+		cmd_apply_overlay "$root" "$name" "$system"
+	else
+		cmd_apply_flake_input "$root" "$name"
+	fi
+}
+
 main() {
 	case "${1:-}" in
 	discover)
 		shift
 		cmd_discover "$@"
+		;;
+	apply)
+		shift
+		[[ $# -eq 1 ]] || {
+			usage
+			exit 2
+		}
+		cmd_apply "$1"
 		;;
 	-h | --help | "")
 		usage
