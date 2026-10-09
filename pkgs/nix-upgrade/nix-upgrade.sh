@@ -166,6 +166,20 @@ cmd_apply() {
 	fi
 }
 
+cmd_all_or_check() {
+	local mode="$1" table name
+	table=$(cmd_discover --json)
+	jq -r '.[] | select(.upToDate == false) | .name' <<<"$table" | while read -r name; do
+		if [[ $mode == "--check-only" ]]; then
+			echo "outdated: ${name}"
+			continue
+		fi
+		if gum confirm "Upgrade ${name}?"; then
+			cmd_apply "$name"
+		fi
+	done
+}
+
 main() {
 	case "${1:-}" in
 	discover)
@@ -179,6 +193,9 @@ main() {
 			exit 2
 		}
 		cmd_apply "$1"
+		;;
+	--all | --check-only)
+		cmd_all_or_check "$1"
 		;;
 	-h | --help | "")
 		usage
