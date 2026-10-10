@@ -53,31 +53,28 @@ discover_overlay_packages() {
 }
 
 discover_flake_inputs() {
-	local root="$1" meta name owner repo rev ref latest up_to_date
+	local root="$1" meta pairs name node_key owner repo rev ref latest up_to_date
 	meta=$(nix flake metadata "$root" --json)
-	# Only real top-level inputs (names reachable as a value under
-	# .locks.nodes.root.inputs), not every github-type node in the lock
-	# graph — that would include transitive/internal nodes you can't
-	# `nix flake lock --update-input`.
-	jq -r '
-		([.locks.nodes.root.inputs[]] | flatten) as $topLevel
-		| .locks.nodes | to_entries[]
-		| select(.value.locked.type == "github")
-		| select(.key as $k | $topLevel | index($k) != null)
-		| .key
-	' <<<"$meta" |
-		while read -r name; do
-			[[ $name == "root" ]] && continue
-			owner=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.owner' <<<"$meta")
-			repo=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.repo' <<<"$meta")
-			rev=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' <<<"$meta")
-			ref=$(jq -r --arg n "$name" '.locks.nodes[$n].original.ref // .locks.nodes[$n].locked.ref // "HEAD"' <<<"$meta")
-			latest=$(git ls-remote "https://github.com/${owner}/${repo}" "$ref" 2>/dev/null | cut -f1 || true)
-			[[ -z $latest ]] && continue
-			up_to_date=$([[ $rev == "$latest" ]] && echo true || echo false)
-			jq -n --arg name "$name" --arg current "${rev:0:8}" --arg latest "${latest:0:8}" --argjson upToDate "$up_to_date" \
-				'{name: $name, kind: "flake-input", current: $current, latest: $latest, upToDate: $upToDate}'
-		done
+	# .locks.nodes.root.inputs maps each top-level input's declared alias
+	# (what flake.nix writes and what --update-input expects) to its node
+	# key in the lock graph, which can differ (e.g. de-duplicated as
+	# `darwin_2`). Emit the alias, but look up owner/repo/rev via the node
+	# key. `// {}` guards a flake with zero inputs from crashing to_entries.
+	pairs=$(jq -c '.locks.nodes.root.inputs // {} | to_entries[]' <<<"$meta")
+	jq -c '.' <<<"$pairs" 2>/dev/null | while read -r pair; do
+		name=$(jq -r '.key' <<<"$pair")
+		node_key=$(jq -r '.value' <<<"$pair")
+		[[ $(jq -r --arg n "$node_key" '.locks.nodes[$n].locked.type' <<<"$meta") == "github" ]] || continue
+		owner=$(jq -r --arg n "$node_key" '.locks.nodes[$n].locked.owner' <<<"$meta")
+		repo=$(jq -r --arg n "$node_key" '.locks.nodes[$n].locked.repo' <<<"$meta")
+		rev=$(jq -r --arg n "$node_key" '.locks.nodes[$n].locked.rev' <<<"$meta")
+		ref=$(jq -r --arg n "$node_key" '.locks.nodes[$n].original.ref // .locks.nodes[$n].locked.ref // "HEAD"' <<<"$meta")
+		latest=$(git ls-remote "https://github.com/${owner}/${repo}" "$ref" 2>/dev/null | cut -f1 || true)
+		[[ -z $latest ]] && continue
+		up_to_date=$([[ $rev == "$latest" ]] && echo true || echo false)
+		jq -n --arg name "$name" --arg current "${rev:0:8}" --arg latest "${latest:0:8}" --argjson upToDate "$up_to_date" \
+			'{name: $name, kind: "flake-input", current: $current, latest: $latest, upToDate: $upToDate}'
+	done
 }
 
 cmd_discover() {
