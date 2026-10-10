@@ -53,15 +53,26 @@ discover_overlay_packages() {
 }
 
 discover_flake_inputs() {
-	local root="$1" meta name owner repo rev latest up_to_date
+	local root="$1" meta name owner repo rev ref latest up_to_date
 	meta=$(nix flake metadata "$root" --json)
-	jq -r '.locks.nodes | to_entries[] | select(.value.locked.type == "github") | .key' <<<"$meta" |
+	# Only real top-level inputs (names reachable as a value under
+	# .locks.nodes.root.inputs), not every github-type node in the lock
+	# graph — that would include transitive/internal nodes you can't
+	# `nix flake lock --update-input`.
+	jq -r '
+		([.locks.nodes.root.inputs[]] | flatten) as $topLevel
+		| .locks.nodes | to_entries[]
+		| select(.value.locked.type == "github")
+		| select(.key as $k | $topLevel | index($k) != null)
+		| .key
+	' <<<"$meta" |
 		while read -r name; do
 			[[ $name == "root" ]] && continue
 			owner=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.owner' <<<"$meta")
 			repo=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.repo' <<<"$meta")
 			rev=$(jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' <<<"$meta")
-			latest=$(git ls-remote "https://github.com/${owner}/${repo}" HEAD 2>/dev/null | cut -f1 || true)
+			ref=$(jq -r --arg n "$name" '.locks.nodes[$n].original.ref // .locks.nodes[$n].locked.ref // "HEAD"' <<<"$meta")
+			latest=$(git ls-remote "https://github.com/${owner}/${repo}" "$ref" 2>/dev/null | cut -f1 || true)
 			[[ -z $latest ]] && continue
 			up_to_date=$([[ $rev == "$latest" ]] && echo true || echo false)
 			jq -n --arg name "$name" --arg current "${rev:0:8}" --arg latest "${latest:0:8}" --argjson upToDate "$up_to_date" \
@@ -111,7 +122,16 @@ cmd_apply_overlay() {
 			success=false
 			error="nix-update failed for ${platform}"
 		fi
-	done < <(package_platforms "$root" "$system" "$name" | jq -r '.[]')
+		# Limit the loop to the handful of systems this tool knows how to
+		# drive nix-update for. meta.platforms can expand to dozens of
+		# entries (e.g. lib.platforms.unix); intersect against the known
+		# set, falling back to the current system alone when there's no
+		# overlap at all (e.g. an impossible platform list).
+	done < <(package_platforms "$root" "$system" "$name" | jq -r --arg sys "$system" '
+		(["aarch64-darwin", "x86_64-darwin", "x86_64-linux", "aarch64-linux"]) as $known
+		| (map(select(. as $p | $known | index($p) != null))) as $intersect
+		| if ($intersect | length) > 0 then $intersect[] else $sys end
+	')
 	new_version=$(package_version "$root" "$system" "$name")
 	[[ -z $new_version ]] && new_version="$old_version"
 	if $success; then
@@ -169,7 +189,9 @@ cmd_apply() {
 cmd_all_or_check() {
 	local mode="$1" table name
 	table=$(cmd_discover --json)
-	jq -r '.[] | select(.upToDate == false) | .name' <<<"$table" | while read -r name; do
+	# Read names via fd 3 (fed by process substitution) so stdin stays
+	# free for `gum confirm` to read the terminal inside the loop body.
+	while read -r name <&3; do
 		if [[ $mode == "--check-only" ]]; then
 			echo "outdated: ${name}"
 			continue
@@ -177,7 +199,7 @@ cmd_all_or_check() {
 		if gum confirm "Upgrade ${name}?"; then
 			cmd_apply "$name"
 		fi
-	done
+	done 3< <(jq -r '.[] | select(.upToDate == false) | .name' <<<"$table")
 }
 
 main() {
