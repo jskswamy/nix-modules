@@ -11,3 +11,6 @@ result-*
 # Implementation plans are working documents for one change; the specs and
 # ADRs they implement stay tracked
 docs/superpowers/plans/
+
+# Local git worktrees
+.worktrees/
