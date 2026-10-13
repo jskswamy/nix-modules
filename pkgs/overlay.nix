@@ -10,6 +10,11 @@ import ./agentgateway.nix final prev
 // import ./beads.nix final prev
 // import ./ccstatusline.nix final prev
 // import ./codebase-memory-mcp.nix final prev
+// import ./things-cloud-mcp.nix final prev
+// import ./tala.nix final prev
+// import ./gastown.nix final prev
+// import ./feather-font.nix final prev
+// import ./entire.nix final prev
 // import ./herdr.nix final prev
 // import ./hunk.nix final prev
 // import ./moshi-hook.nix final prev

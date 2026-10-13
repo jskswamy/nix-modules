@@ -4,24 +4,24 @@
 # Upstream ships raw binaries (no archive) via https://herdr.dev/latest.json,
 # the same manifest `herdr update` reads.
 _final: prev: let
-  herdrVersion = "0.9.3";
+  herdrVersion = "0.9.4";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-macos-aarch64";
-      hash = "sha256-UXOj4K5C1dGrfr+l1eYyn3w9I/jho2d8fOMjHaKIQVc=";
+      hash = "sha256-6iC//5y4yDqZYIHJJub/k3DejlQ7qoWbykjRkXXYlf8=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-macos-x86_64";
-      hash = "sha256-22LVSP8+gysIepaxiUoI0mvjkF8YMDCc1VZ4PyFdQFQ=";
+      hash = "sha256-IBXKHePpO4TNzMv9lPu9Zd1WM4zqTT5XqGYOl3o71wA=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-linux-aarch64";
-      hash = "sha256-TeeqPiVniBLpKWDeZPfCqqG8ofD4CjxeVZg34jHh9cA=";
+      hash = "sha256-lRHLcJgsHvEV8jIFjn7Xz5ZAqlosDKeJNM79o66wk/0=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-linux-x86_64";
-      hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c=";
+      hash = "sha256-STME+++w7Q6gRV83O0f0jSTod0vHl09MkWrS6TdnWyM=";
     };
   };
 

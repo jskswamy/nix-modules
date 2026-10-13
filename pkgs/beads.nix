@@ -1,28 +1,28 @@
 # Override beads to latest version using pre-built binaries
 # This avoids needing a specific Go version to compile from source
 _: prev: let
-  beadsVersion = "1.3.0";
+  beadsVersion = "1.3.1";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_darwin_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-qsoepZ852VUNkdGfD6ag8SXKdz+nB0/1deSFIMSvutU=";
+      hash = "sha256-y1FmJYxPZOf8wNxMgy72Q5AisgdkBf/u5HGiwepy+q4=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_darwin_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-ZoBCrtSp3UzestuCZ+KWO72PojdJaeO/FRyJETadJB4=";
+      hash = "sha256-zTNrXUEgLSqQmb27/xQsLjyr6lRM6I6UBBukWJw4VCY=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_linux_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-Ie9TD27mGQd3ctj5FsyDpUC0x2X5eaeNjffXqppQ19U=";
+      hash = "sha256-esWsMAMO1e5El1BSfTK6F3/SkafCsIPBdDbu4dNmBdQ=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_linux_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-WCHyEIS+aHr52ItjH88EACMYnFIkxqBt/J+1OC7VWyE=";
+      hash = "sha256-6DKdgHmiWsoGlMlQsO2X3ftH8nBszfCO2nuN/eSfQZw=";
     };
   };
 
