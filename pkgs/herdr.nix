@@ -4,12 +4,12 @@
 # Upstream ships raw binaries (no archive) via https://herdr.dev/latest.json,
 # the same manifest `herdr update` reads.
 _final: prev: let
-  herdrVersion = "0.9.3";
+  herdrVersion = "0.9.4";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-macos-aarch64";
-      hash = "sha256-UXOj4K5C1dGrfr+l1eYyn3w9I/jho2d8fOMjHaKIQVc=";
+      hash = "sha256-6iC//5y4yDqZYIHJJub/k3DejlQ7qoWbykjRkXXYlf8=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-macos-x86_64";

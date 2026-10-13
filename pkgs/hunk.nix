@@ -1,11 +1,11 @@
 # Provide hunk (review-first terminal diff viewer) using pre-built binaries
 _final: prev: let
-  hunkVersion = "0.22.0";
+  hunkVersion = "0.23.0";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-darwin-arm64.tar.gz";
-      hash = "sha256-ZTXhXPFlhyECpWme5e+LcUE2TuXy8LOxcgzqGKkh6ys=";
+      hash = "sha256-dPT6XVDLtopZ5C0pla6Moxx3CO6nKzS1xQffe0Wq7NQ=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-darwin-x64.tar.gz";

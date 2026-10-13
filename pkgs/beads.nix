@@ -1,13 +1,13 @@
 # Override beads to latest version using pre-built binaries
 # This avoids needing a specific Go version to compile from source
 _: prev: let
-  beadsVersion = "1.3.0";
+  beadsVersion = "1.3.1";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_darwin_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-qsoepZ852VUNkdGfD6ag8SXKdz+nB0/1deSFIMSvutU=";
+      hash = "sha256-y1FmJYxPZOf8wNxMgy72Q5AisgdkBf/u5HGiwepy+q4=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_darwin_amd64.tar.gz";
