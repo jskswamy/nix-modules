@@ -12,17 +12,17 @@ _: prev: let
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_darwin_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-ZoBCrtSp3UzestuCZ+KWO72PojdJaeO/FRyJETadJB4=";
+      hash = "sha256-zTNrXUEgLSqQmb27/xQsLjyr6lRM6I6UBBukWJw4VCY=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_linux_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-Ie9TD27mGQd3ctj5FsyDpUC0x2X5eaeNjffXqppQ19U=";
+      hash = "sha256-esWsMAMO1e5El1BSfTK6F3/SkafCsIPBdDbu4dNmBdQ=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/gastownhall/beads/releases/download/v${beadsVersion}/beads_${beadsVersion}_linux_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-WCHyEIS+aHr52ItjH88EACMYnFIkxqBt/J+1OC7VWyE=";
+      hash = "sha256-6DKdgHmiWsoGlMlQsO2X3ftH8nBszfCO2nuN/eSfQZw=";
     };
   };
 

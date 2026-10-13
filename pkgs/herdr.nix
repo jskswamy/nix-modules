@@ -13,15 +13,15 @@ _final: prev: let
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-macos-x86_64";
-      hash = "sha256-22LVSP8+gysIepaxiUoI0mvjkF8YMDCc1VZ4PyFdQFQ=";
+      hash = "sha256-IBXKHePpO4TNzMv9lPu9Zd1WM4zqTT5XqGYOl3o71wA=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-linux-aarch64";
-      hash = "sha256-TeeqPiVniBLpKWDeZPfCqqG8ofD4CjxeVZg34jHh9cA=";
+      hash = "sha256-lRHLcJgsHvEV8jIFjn7Xz5ZAqlosDKeJNM79o66wk/0=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/herdrdev/herdr/releases/download/v${herdrVersion}/herdr-linux-x86_64";
-      hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c=";
+      hash = "sha256-STME+++w7Q6gRV83O0f0jSTod0vHl09MkWrS6TdnWyM=";
     };
   };
 

@@ -117,7 +117,9 @@ All 40 tools: `agentgateway`, `aide`, `alacritty`, `any-nix-shell`, `bat`,
 `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`, `ripgrep`, `serena-mcp`,
 `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zoxide`, `zsh`.
 
-`overlays.default` provides `beads`, `herdr`, `moshi-hook` and `claide`.
+`overlays.default` provides reusable packages including `beads`, `claude-code`,
+`codebase-memory-mcp`, `entire`, `feather-font`, `gastown`, `herdr`, `hunk`,
+`moshi-hook`, `tala`, and `things-cloud-mcp`.
 
 ## Two options worth knowing
 
