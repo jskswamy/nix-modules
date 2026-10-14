@@ -225,7 +225,7 @@ in {
 
     agents = mkOption {
       type = types.listOf types.str;
-      default = ["claude"];
+      default = ["claude" "pi"];
     };
 
     herdrTabs = mkOption {
