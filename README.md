@@ -119,7 +119,7 @@ All 40 tools: `agentgateway`, `aide`, `alacritty`, `any-nix-shell`, `bat`,
 
 `overlays.default` provides reusable packages including `beads`, `claude-code`,
 `codebase-memory-mcp`, `entire`, `feather-font`, `gastown`, `herdr`, `hunk`,
-`moshi-hook`, `tala`, and `things-cloud-mcp`.
+`moshi-hook`, `pi-coding-agent`, `tala`, and `things-cloud-mcp`.
 
 ## Two options worth knowing
 
