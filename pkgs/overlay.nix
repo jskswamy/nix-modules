@@ -19,6 +19,7 @@ import ./agentgateway.nix final prev
 // import ./hunk.nix final prev
 // import ./moshi-hook.nix final prev
 // import ./nix-upgrade.nix final prev
+// import ./skillshare.nix final prev
 // {
   pi-coding-agent = final.callPackage ./pi-coding-agent.nix {};
 }

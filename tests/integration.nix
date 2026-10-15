@@ -103,6 +103,7 @@ in {
   "lazygit with hunk gains both hunk commands" =
     lib.sort (a: b: a < b) (commands lazygitHunk)
     == ["AI commit with Claude" "Review branch tip with hunk" "Review commit with hunk"];
+  "skillshare package is pinned" = nm.packages.${builtins.currentSystem}.skillshare.version == "0.25.12";
   "hunk alone does not enable git" = !hunkOnly.programs.git.enable;
   # Positive control: git's config is keyed by its absolute path, so a lookup by
   # the relative path would never match and any "writes no config" test would
