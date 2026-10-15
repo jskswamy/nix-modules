@@ -5,28 +5,28 @@
 # lib/default.nix) instead of threading a foreign flake input through this
 # repo's own overlay.
 _final: prev: let
-  version = "2.2.0";
+  version = "2.3.0";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/jskswamy/aide/releases/download/v${version}/aide_${version}_darwin_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-Fat8Apb3QhnmVDNNdmzt/KwmPXs1M5plw4pVjSXoGzw=";
+      hash = "sha256-vVKnYERjpoI25iKgtWBdyY/GTnDSGqhB3r91G6lC3ss=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/jskswamy/aide/releases/download/v${version}/aide_${version}_darwin_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-Z9btLptTPoa5i8hv5Prmy19Dug3YBdWsfDxgS767pjM=";
+      hash = "sha256-SKwLyyg2ETMcBJRXAyz7OPmO31m5y1PioSaxHCLylZo=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/jskswamy/aide/releases/download/v${version}/aide_${version}_linux_amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-M/yq5WiRHeo8RuojIJK0ZkFxyj49LitYOfyDW6fe5bQ=";
+      hash = "sha256-gB4cLx75Hzc7E523PFxj74fbLrWV5g7wqfpymCeI1Bo=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/jskswamy/aide/releases/download/v${version}/aide_${version}_linux_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-EBBetppVxbp5CEp8uVR+HLM+IHZmyfFglr+SNxUfy4Q=";
+      hash = "sha256-RgZhL7ProDq6SGrju0bbKxx6vf83XxGdFo//ggeViIM=";
     };
   };
 
