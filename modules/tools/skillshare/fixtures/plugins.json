@@ -28,47 +28,47 @@
       "skills": ["ask-matt", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-me", "grill-with-docs", "grilling", "handoff", "implement", "implement-spec", "improve-codebase-architecture", "pr", "prototype", "research", "retro", "setup-matt-pocock-skills", "tdd", "teach", "to-questionnaire", "to-spec", "to-tickets", "triage", "wait-what", "wayfinder", "wizard", "writing-for-agents"]
     },
     "codebase": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["codebase-ask", "codebase-explore", "codebase-graph", "codebase-impact", "codebase-index"]
     },
     "commit-tools": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["commit-action", "commit-style", "review-commits", "validate-commits"]
     },
     "craft": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["craft-backlog", "craft-decompose", "craft-deps", "craft-epic", "craft-task", "craft-understand", "execute-tasks", "park-idea", "review-parked", "task-commit"]
     },
     "devenv": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["devenv"]
     },
     "jot": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["jot-capture", "jot-configure", "jot-setup", "sketch-from-capture"]
     },
     "refactor": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["refactor-scan"]
     },
     "sketch-note": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
     },
     "study": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["study-coach", "study-recall", "study-setup"]
     },
     "typst-notes": {
-      "commit": "f2de7442e8",
+      "commit": "327368a51f",
       "agents": ["claude"],
       "skills": ["infographics", "jot-to-publish", "typst-format", "typst-publish"]
     }
