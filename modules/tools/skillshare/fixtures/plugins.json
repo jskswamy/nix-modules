@@ -14,6 +14,19 @@
       "agents": ["claude"],
       "skills": ["beads"]
     },
+    "context7": {
+      "commit": "ea10b21368",
+      "agents": ["claude"]
+    },
+    "gopls-lsp": {
+      "commit": "ea10b21368",
+      "agents": ["claude"]
+    },
+    "mattpocock-skills": {
+      "commit": "49dd158d10",
+      "agents": ["claude"],
+      "skills": ["ask-matt", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-me", "grill-with-docs", "grilling", "handoff", "implement", "implement-spec", "improve-codebase-architecture", "pr", "prototype", "research", "retro", "setup-matt-pocock-skills", "tdd", "teach", "to-questionnaire", "to-spec", "to-tickets", "triage", "wait-what", "wayfinder", "wizard", "writing-for-agents"]
+    },
     "codebase": {
       "commit": "f2de7442e8",
       "agents": ["claude"],

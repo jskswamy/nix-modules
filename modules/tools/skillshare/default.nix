@@ -80,12 +80,17 @@
   compat = (lib.importJSON ./fixtures/plugins.json).plugins;
   jskswamyBundles = ["codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
   # Skillshare package name -> source. Stable Superpowers is the default
-  # branch of obra/superpowers; superpowers-dev is its `dev` ref.
+  # branch of obra/superpowers; superpowers-dev is its `dev` ref. The
+  # official marketplace lists Matt Pocock's skills as an external source,
+  # which Skillshare takes only from its own repository.
   bundles =
     {
       ponytail = "DietrichGebert/ponytail";
       superpowers = "obra/superpowers";
       beads = "steveyegge/beads";
+      context7 = "anthropics/claude-plugins-official";
+      gopls-lsp = "anthropics/claude-plugins-official";
+      mattpocock-skills = "mattpocock/skills";
     }
     // lib.genAttrs jskswamyBundles (_: "jskswamy/skills");
 
@@ -119,6 +124,12 @@
     ++ lib.optional (bundleTargets "beads" != profileNames) {
       name = "beads";
       args = ["install" "steveyegge/beads/plugins/beads/skills/beads" "-y"];
+    }
+    # The repository holds more skills than its bundle; select exactly the
+    # bundle's (`--skill` is noninteractive and refuses `-y`).
+    ++ lib.optional (bundleTargets "mattpocock-skills" != profileNames) {
+      name = "setup-matt-pocock-skills";
+      args = ["install" "mattpocock/skills" "--skill" (lib.concatStringsSep "," compat.mattpocock-skills.skills)];
     };
 
   mcpAdd = name: targets: rest: {
@@ -242,7 +253,8 @@ in {
 
         Defaults to `time`, `chrome-devtools` and, with
         `enableAgentgateway`, `agentgateway`, each on every profile. Names
-        you define are added alongside them.
+        you define are added alongside them. Context7 comes with its plugin
+        bundle, not from here.
 
         An entry is added only while Skillshare does not list its name;
         activation never refreshes it afterwards. Changing `args` or

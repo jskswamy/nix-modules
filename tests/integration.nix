@@ -156,6 +156,9 @@ let
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
   ssBadMcp = mk [T.skillshare {tools.skillshare.mcpServers.extra.profiles = ["nope"];}];
   failedAssertions = c: builtins.filter (a: !a.assertion) c.assertions;
+  # Claude-only bundles beyond jskswamy/skills and Beads.
+  ssClaudeOnly = ["context7" "gopls-lsp" "mattpocock-skills"];
+  ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
   agentTools = mk [nm.homeManagerModules.agent-tools];
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
@@ -361,7 +364,7 @@ in {
 
   # Bundles, from the discovery fixture.
   "skillshare plugins are exactly the approved bundles" =
-    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "ponytail" "superpowers"] ++ jskswamyBundles);
+    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "ponytail" "superpowers"] ++ ssClaudeOnly ++ jskswamyBundles);
   "skillshare fixture covers every bundle" = builtins.all (n: ssCompat ? ${n}) (ssNames "plugins" skillshare);
   "skillshare binds each bundle to every compatible target" = builtins.all (e:
     ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
@@ -369,6 +372,15 @@ in {
   "skillshare binds Ponytail and Superpowers everywhere" = ssTargets (ssEntry "plugins" "ponytail") == ssAll && ssTargets (ssEntry "plugins" "superpowers") == ssAll;
   "skillshare keeps Beads and jskswamy bundles off Pi" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) (["beads"] ++ jskswamyBundles);
+  "skillshare keeps Context7, gopls and Matt Pocock bundles on Claude only" =
+    builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude && ssTargets (ssExtraEntry "plugins" n) == ["claude" "claude-extra"]) ssClaudeOnly;
+  "skillshare installs Context7 and gopls from the official marketplace" =
+    builtins.all (n: (ssEntry "plugins" n).args == ["plugin" "add" "anthropics/claude-plugins-official" "--plugin" n "--target" "claude" "--json"]) ["context7" "gopls-lsp"];
+  "skillshare installs Matt Pocock skills from their repository" =
+    (ssEntry "plugins" "mattpocock-skills").args == ["plugin" "add" "mattpocock/skills" "--plugin" "mattpocock-skills" "--target" "claude" "--json"];
+  "skillshare binds plugins to declared profiles only" =
+    builtins.all (c: builtins.all (e: builtins.all (t: c.tools.skillshare.profiles ? ${t}) (ssTargets e)) c.tools.skillshare.resources.plugins) [skillshare ssExtra];
+  "skillshare leaves Context7 MCP to its plugin" = !(builtins.elem "context7" (ssNames "mcp" skillshare));
   "skillshare installs jskswamy/skills bundles from that repo" =
     builtins.all (n: lib.take 3 (ssEntry "plugins" n).args == ["plugin" "add" "jskswamy/skills"] && builtins.elem n (ssEntry "plugins" n).args) jskswamyBundles;
   "skillshare selects stable Superpowers only" =
@@ -377,13 +389,18 @@ in {
     && !(builtins.any (a: lib.hasInfix "superpowers-dev" a || lib.hasInfix "superpowers-marketplace" a || a == "--source-ref") ssArgs);
   "skillshare installs standalone skills for uncovered targets" =
     ssNames "skills" skillshare
-    == ["beads" "release"]
+    == ["beads" "release" "setup-matt-pocock-skills"]
     && builtins.elem "jskswamy/skills/skills" (ssEntry "skills" "release").args
     && builtins.elem "skill" (ssEntry "skills" "release").args;
+  "skillshare installs exactly the Matt Pocock bundle's skills standalone" =
+    lib.take 2 ssMatt.args
+    == ["install" "mattpocock/skills"]
+    && lib.sort (a: b: a < b) (lib.splitString "," (lib.last ssMatt.args)) == lib.sort (a: b: a < b) (ssBundled "mattpocock-skills")
+    && builtins.elem "setup-matt-pocock-skills" (ssBundled "mattpocock-skills");
   "skillshare skips standalone Beads when every target has the plugin" =
     ssNames "skills" (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]) == ["release"];
   "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
-    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads"] ++ jskswamyBundles)))
+    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "mattpocock-skills"] ++ jskswamyBundles)))
   ssClaude;
   "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "bivouac" (ssExcludes t)) && !(builtins.elem "release" (ssExcludes t))) ssClaude;
   "skillshare excludes nothing on Pi" = ssExcludes "pi" == [];
