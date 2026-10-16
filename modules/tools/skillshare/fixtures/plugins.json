@@ -1,5 +1,5 @@
 {
-  "about": "Facts from `skillshare plugin discover <source> --json` (0.25.12) in a scratch HOME with claude, an account target of claude, and pi. agents: configured agents among each candidate's targets. skills: the bundled skills a standalone install of the same repository also provides, at the discovered commit of the source the module declares.",
+  "about": "Facts from `skillshare plugin discover <source> --json` (0.25.12) in a scratch HOME with claude, an account target of claude, and pi. agents: configured agents among each candidate's targets. skills: the bundled skills a standalone install of the same repository also provides, at the discovered commit of the source the module declares. To refresh after a bundle gains or loses skills (the skills lists are the Claude exclude list), rerun discover for each source in that scratch HOME and copy the new commit, agents and skills here.",
   "plugins": {
     "ponytail": {
       "commit": "84740e3d34",

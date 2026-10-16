@@ -11,5 +11,6 @@
     ../tools/fabric
     ../tools/pet
     ../tools/aide
+    ../tools/skillshare
   ];
 }

@@ -30,6 +30,9 @@ in {
     inherit version src;
 
     sourceRoot = ".";
+    # The release binary carries the Go linker's ad-hoc signature, which
+    # arm64 macOS requires; fixup's strip would invalidate it. Like this
+    # repo's other prebuilt Darwin binaries, it needs no patching.
     dontFixup = prev.stdenv.hostPlatform.isDarwin;
 
     installPhase = ''

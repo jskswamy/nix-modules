@@ -156,6 +156,7 @@ let
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
   ssBadMcp = mk [T.skillshare {tools.skillshare.mcpServers.extra.profiles = ["nope"];}];
   failedAssertions = c: builtins.filter (a: !a.assertion) c.assertions;
+  agentTools = mk [nm.homeManagerModules.agent-tools];
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
@@ -356,6 +357,7 @@ in {
   "skillshare omits AgentGateway on Linux" = !(mkOn "x86_64-linux" [T.skillshare]).tools.skillshare.enableAgentgateway;
   "skillshare reconciles after packages are installed" = builtins.elem "installPackages" skillshare.home.activation.skillshare.after;
   "skillshare reconciles after files are linked" = builtins.elem "linkGeneration" skillshare.home.activation.skillshare.after;
+  "agent-tools group brings skillshare" = agentTools.tools.skillshare.enable && installs agentTools "skillshare";
 
   # Bundles, from the discovery fixture.
   "skillshare plugins are exactly the approved bundles" =
