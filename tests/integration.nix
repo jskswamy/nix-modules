@@ -99,6 +99,63 @@ let
     {programs.bash.enable = true;}
   ];
   zshSource = builtins.readFile ../modules/tools/zsh/default.nix;
+  # Evaluates for another platform; nothing is built.
+  mkOn = system: modules:
+    (hm.lib.homeManagerConfiguration {
+      pkgs = import nm.inputs.nixpkgs {inherit system;};
+      modules =
+        [
+          {
+            home.username = "t";
+            home.homeDirectory = "/home/t";
+            home.stateVersion = "24.05";
+          }
+        ]
+        ++ modules;
+    }).config;
+  skillshare = mk [T.skillshare];
+  skillshareOff = mk [T.skillshare {tools.skillshare.enable = false;}];
+  ss = skillshare.tools.skillshare;
+  ssRes = ss.resources;
+  # Plugin compatibility as `skillshare plugin discover` reported it.
+  ssCompat = (lib.importJSON ../modules/tools/skillshare/fixtures/plugins.json).plugins;
+  ssClaude = ["claude"];
+  ssAll = ssClaude ++ ["pi"];
+  # The --target values of an entry, sorted.
+  ssTargets = e:
+    lib.sort (a: b: a < b) (lib.concatLists (lib.imap0 (i: a:
+      lib.optional (a == "--target") (builtins.elemAt e.args (i + 1)))
+    e.args));
+  ssEntry = kind: name: lib.findFirst (e: e.name == name) null ssRes.${kind};
+  ssNames = kind: c: lib.sort (a: b: a < b) (map (e: e.name) c.tools.skillshare.resources.${kind});
+  ssArgs = lib.concatMap (e: e.args) (ssRes.skills ++ ssRes.plugins ++ ssRes.mcp ++ ssRes.hooks);
+  ssExcludes = t: lib.sort (a: b: a < b) (ssRes.excludes.${t} or []);
+  ssBundled = name: ssCompat.${name}.skills or [];
+  jskswamyBundles = ["codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
+  ssRtk = builtins.fromJSON (builtins.readFile (lib.last (ssEntry "hooks" "rtk").args));
+  # What the activation hands to reconcile.sh.
+  ssDecl = ss.declarations;
+  ssNoGateway = mk [T.skillshare {tools.skillshare.enableAgentgateway = false;}];
+  # A consumer adds an account profile and an MCP server for it alone.
+  ssExtra = mk [
+    T.skillshare
+    {
+      tools.skillshare = {
+        profiles.claude-extra = {
+          agent = "claude";
+          configDir = "/home/t/.claude-extra";
+        };
+        mcpServers.extra = {
+          profiles = ["claude-extra"];
+          args = ["--url" "https://mcp.example.invalid/mcp"];
+        };
+      };
+    }
+  ];
+  ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
+  ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
+  ssBadMcp = mk [T.skillshare {tools.skillshare.mcpServers.extra.profiles = ["nope"];}];
+  failedAssertions = c: builtins.filter (a: !a.assertion) c.assertions;
 in {
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");
@@ -203,6 +260,18 @@ in {
     lib.hasInfix ''"machine-key"'' bivouacCustomText
     && lib.hasInfix ''["nixModules.workspaceRoot"] = "workspaces"'' bivouacCustomText
     && lib.hasInfix ''["custom.option"] = "value"'' bivouacCustomText;
+  "bivouac imports skillshare, not codebase-memory" =
+    lib.hasInfix ''"tools.skillshare"'' bivouacText
+    && !(lib.hasInfix "tools.codebase-memory-mcp" bivouacText);
+  "bivouac takes skillshare defaults: claude and pi, no extra MCP" =
+    !(lib.hasInfix "tools.skillshare.profiles" bivouacText)
+    && !(lib.hasInfix "tools.skillshare.mcpServers" bivouacText)
+    && !(lib.hasInfix "portableProfiles" bivouacText)
+    && builtins.attrNames ss.profiles == ["claude" "pi"]
+    && ssNames "mcp" ssNoGateway == ["chrome-devtools" "time"];
+  "bivouac enables skillshare without AgentGateway" =
+    lib.hasInfix ''["tools.skillshare.enable"] = true'' bivouacText
+    && lib.hasInfix ''["tools.skillshare.enableAgentgateway"] = false'' bivouacText;
   "agentgateway config targets only things-cloud" =
     lib.hasInfix "name: things-cloud" agConfig
     && !(lib.any (n: lib.hasInfix "name: ${n}" agConfig) ["context7" "serena" "nixos"])
@@ -257,4 +326,119 @@ in {
   "git-lfs-transfer installs its package" = installs gitLfsTransfer "git-lfs-transfer";
   "git-lfs-transfer with package null installs nothing" = !(installs (mk [T."git-lfs-transfer" {tools."git-lfs-transfer".package = null;}]) "git-lfs-transfer");
   "git-tools includes lfs tools" = gitTools.programs.git.lfs.enable && installs gitTools "git-lfs-transfer";
+
+  # skillshare: owns mutable state, so Home Manager installs the binary and
+  # reconciles through the CLI but never writes its config.yaml.
+  "skillshare installs its package" = installs skillshare "skillshare";
+  "skillshare with package null installs nothing" = !(installs (mk [T.skillshare {tools.skillshare.package = null;}]) "skillshare");
+  "disabled skillshare installs nothing and does not reconcile" =
+    !(installs skillshareOff "skillshare") && !(skillshareOff.home.activation ? skillshare);
+  "skillshare default profiles are claude and pi" =
+    ss.profiles
+    == {
+      claude = {
+        agent = "claude";
+        configDir = "/home/t/.claude";
+      };
+      pi = {
+        agent = "pi";
+        configDir = "/home/t/.pi/agent";
+      };
+    };
+  "skillshare consumer profiles add to the defaults" =
+    builtins.attrNames ssExtra.tools.skillshare.profiles == ["claude" "claude-extra" "pi"];
+  "skillshare does not own config.yaml" =
+    !(builtins.any (lib.hasInfix "skillshare/config.yaml") (builtins.attrNames skillshare.home.file));
+  "skillshare reconciles after writeBoundary" =
+    builtins.elem "writeBoundary" skillshare.home.activation.skillshare.after
+    && lib.hasInfix "reconcile.sh" skillshare.home.activation.skillshare.data;
+  "skillshare enables AgentGateway on Darwin" = (mkOn "aarch64-darwin" [T.skillshare]).tools.skillshare.enableAgentgateway;
+  "skillshare omits AgentGateway on Linux" = !(mkOn "x86_64-linux" [T.skillshare]).tools.skillshare.enableAgentgateway;
+  "skillshare reconciles after packages are installed" = builtins.elem "installPackages" skillshare.home.activation.skillshare.after;
+  "skillshare reconciles after files are linked" = builtins.elem "linkGeneration" skillshare.home.activation.skillshare.after;
+
+  # Bundles, from the discovery fixture.
+  "skillshare plugins are exactly the approved bundles" =
+    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "ponytail" "superpowers"] ++ jskswamyBundles);
+  "skillshare fixture covers every bundle" = builtins.all (n: ssCompat ? ${n}) (ssNames "plugins" skillshare);
+  "skillshare binds each bundle to every compatible target" = builtins.all (e:
+    ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
+  ssRes.plugins;
+  "skillshare binds Ponytail and Superpowers everywhere" = ssTargets (ssEntry "plugins" "ponytail") == ssAll && ssTargets (ssEntry "plugins" "superpowers") == ssAll;
+  "skillshare keeps Beads and jskswamy bundles off Pi" =
+    builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) (["beads"] ++ jskswamyBundles);
+  "skillshare installs jskswamy/skills bundles from that repo" =
+    builtins.all (n: lib.take 3 (ssEntry "plugins" n).args == ["plugin" "add" "jskswamy/skills"] && builtins.elem n (ssEntry "plugins" n).args) jskswamyBundles;
+  "skillshare selects stable Superpowers only" =
+    lib.take 3 (ssEntry "plugins" "superpowers").args
+    == ["plugin" "add" "obra/superpowers"]
+    && !(builtins.any (a: lib.hasInfix "superpowers-dev" a || lib.hasInfix "superpowers-marketplace" a || a == "--source-ref") ssArgs);
+  "skillshare installs standalone skills for uncovered targets" =
+    ssNames "skills" skillshare
+    == ["beads" "release"]
+    && builtins.elem "jskswamy/skills/skills" (ssEntry "skills" "release").args
+    && builtins.elem "skill" (ssEntry "skills" "release").args;
+  "skillshare skips standalone Beads when every target has the plugin" =
+    ssNames "skills" (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]) == ["release"];
+  "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
+    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads"] ++ jskswamyBundles)))
+  ssClaude;
+  "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "bivouac" (ssExcludes t)) && !(builtins.elem "release" (ssExcludes t))) ssClaude;
+  "skillshare excludes nothing on Pi" = ssExcludes "pi" == [];
+  "skillshare omits OpenSpec and RTK skills" =
+    !(builtins.any (a: lib.hasInfix "openspec" (lib.toLower a) || lib.hasInfix "rtk-ai" a) ssArgs)
+    && !(builtins.any (e: lib.hasInfix "rtk" e.name) (ssRes.skills ++ ssRes.plugins));
+  "skillshare represents RTK only as its rewrite hook" =
+    ssNames "hooks" skillshare
+    == ["rtk"]
+    && lib.sort (a: b: a < b) (builtins.attrNames ssRtk.bindings) == ssClaude
+    && builtins.all (b:
+      b.events.PreToolUse
+      == [
+        {
+          matcher = "Bash";
+          hooks = [
+            {
+              type = "command";
+              command = "rtk hook claude";
+            }
+          ];
+        }
+      ]) (builtins.attrValues ssRtk.bindings);
+  "skillshare creates consumer account targets under their own config dir" =
+    ssExtraTarget.args
+    == ["target" "add" "claude-extra" "--agent" "claude" "--config-dir" "/home/t/.claude-extra"]
+    && ssExtraTarget.dirs == ["/home/t/.claude-extra"];
+  "skillshare binds Claude bundles to consumer account profiles" =
+    ssTargets (ssExtraEntry "plugins" "beads")
+    == ["claude" "claude-extra"]
+    && ssExtra.tools.skillshare.resources.excludes.claude-extra == ssRes.excludes.claude;
+  "skillshare declares only the default targets" = map (t: t.name) ssDecl.targets == ["claude" "pi"];
+  "skillshare declares the agents plugin sync needs" = ssDecl.agents == ["claude" "pi"];
+
+  # MCP routing.
+  "skillshare default MCP servers" = ssNames "mcp" skillshare == ["agentgateway" "chrome-devtools" "time"];
+  "skillshare routes portable MCP to every profile" = builtins.all (n: ssTargets (ssEntry "mcp" n) == ssAll) ["time" "chrome-devtools" "agentgateway"];
+  "skillshare routes a consumer MCP server to its listed profiles only" =
+    ssExtraEntry "mcp" "extra"
+    == {
+      name = "extra";
+      args = ["mcp" "add" "extra" "--target" "claude-extra" "--url" "https://mcp.example.invalid/mcp"];
+    };
+  "skillshare routes default MCP to consumer profiles too" =
+    ssTargets (ssExtraEntry "mcp" "time") == ["claude" "claude-extra" "pi"];
+  "skillshare rejects MCP routed to an unknown profile" =
+    !(builtins.tryEval (builtins.deepSeq ssBadMcp.assertions true)).success
+    && failedAssertions skillshare == [];
+  "skillshare time runs from the stable profile path" =
+    lib.takeEnd 2 (ssEntry "mcp" "time").args == ["--" "${skillshare.home.profileDirectory}/bin/mcp-server-time"];
+  "skillshare installs the time server" = installs skillshare "mcp-server-time";
+  "skillshare time package can be overridden" =
+    !(installs (mk [T.skillshare {tools.skillshare.timeServerPackage = null;}]) "mcp-server-time");
+  "skillshare pins Chrome DevTools MCP" =
+    lib.takeEnd 6 (ssEntry "mcp" "chrome-devtools").args == ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
+  "skillshare points at the AgentGateway endpoint" =
+    lib.takeEnd 2 (ssEntry "mcp" "agentgateway").args == ["--url" "http://127.0.0.1:3050/mcp"];
+  "skillshare omits AgentGateway when disabled" = !(builtins.elem "agentgateway" (ssNames "mcp" ssNoGateway));
+  "skillshare omits AgentGateway on Linux by default" = !(builtins.elem "agentgateway" (ssNames "mcp" (mkOn "x86_64-linux" [T.skillshare])));
 }

@@ -172,7 +172,7 @@ in {
           "tools.hunk"
           "tools.ccstatusline"
           "tools.aide"
-          "tools.codebase-memory-mcp"
+          "tools.skillshare"
         ];
       };
 
@@ -188,7 +188,10 @@ in {
       default = {
         "programs.git.enable" = true;
         "tools.ccstatusline.claude.enable" = true;
-        "tools.codebase-memory-mcp.registerMcp" = true;
+        "tools.skillshare.enable" = true;
+        # The gateway daemon is a Darwin launchd agent; remote Linux
+        # instances keep it disabled.
+        "tools.skillshare.enableAgentgateway" = false;
       };
       example = literalExpression ''{"tools.example.enable" = true;}'';
       description = "Generic Home Manager option overrides for Bivouac instances. Do not set Git identity here; keep it in the consumer's Git identity module.";

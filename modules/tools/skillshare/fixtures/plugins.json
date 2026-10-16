@@ -1,0 +1,63 @@
+{
+  "about": "Facts from `skillshare plugin discover <source> --json` (0.25.12) in a scratch HOME with claude, an account target of claude, and pi. agents: configured agents among each candidate's targets. skills: the bundled skills a standalone install of the same repository also provides, at the discovered commit of the source the module declares.",
+  "plugins": {
+    "ponytail": {
+      "commit": "84740e3d34",
+      "agents": ["claude", "pi"]
+    },
+    "superpowers": {
+      "commit": "bb92a77741",
+      "agents": ["claude", "pi"]
+    },
+    "beads": {
+      "commit": "b911ed28cd",
+      "agents": ["claude"],
+      "skills": ["beads"]
+    },
+    "codebase": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["codebase-ask", "codebase-explore", "codebase-graph", "codebase-impact", "codebase-index"]
+    },
+    "commit-tools": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["commit-action", "commit-style", "review-commits", "validate-commits"]
+    },
+    "craft": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["craft-backlog", "craft-decompose", "craft-deps", "craft-epic", "craft-task", "craft-understand", "execute-tasks", "park-idea", "review-parked", "task-commit"]
+    },
+    "devenv": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["devenv"]
+    },
+    "jot": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["jot-capture", "jot-configure", "jot-setup", "sketch-from-capture"]
+    },
+    "refactor": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["refactor-scan"]
+    },
+    "sketch-note": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
+    },
+    "study": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["study-coach", "study-recall", "study-setup"]
+    },
+    "typst-notes": {
+      "commit": "f2de7442e8",
+      "agents": ["claude"],
+      "skills": ["infographics", "jot-to-publish", "typst-format", "typst-publish"]
+    }
+  }
+}
