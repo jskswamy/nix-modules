@@ -1,4 +1,4 @@
-# AgentGateway: routes Claude Code to the HTTP-native MCP servers.
+# AgentGateway: routes Claude Code to the Things Cloud MCP server.
 #
 # Server definitions live in config.yaml, symlinked for instant edits.
 {
@@ -27,6 +27,16 @@ in {
       description = "Port the gateway listens on, and the one Claude Code is pointed at.";
     };
 
+    registerMcp = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Register the gateway directly with Claude Code through `claude mcp add`.
+
+        Disable when another module, such as `tools.skillshare`, registers it.
+      '';
+    };
+
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default =
@@ -52,11 +62,13 @@ in {
       # Claude Code does not read ~/.claude/.mcp.json; it keeps user-scoped
       # MCP config in ~/.claude.json via the CLI. `claude mcp add` is
       # idempotent, reporting "MCP server already exists" on repeat runs.
-      activation.configureClaudeCodeAgentgateway = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        if command -v claude &> /dev/null; then
-          $DRY_RUN_CMD claude mcp add --transport http agentgateway "${url}" --scope user 2>/dev/null || true
-        fi
-      '';
+      activation = lib.mkIf cfg.registerMcp {
+        configureClaudeCodeAgentgateway = lib.hm.dag.entryAfter ["writeBoundary"] ''
+          if command -v claude &> /dev/null; then
+            $DRY_RUN_CMD claude mcp add --transport http agentgateway "${url}" --scope user 2>/dev/null || true
+          fi
+        '';
+      };
     };
 
     launchd.agents.agentgateway = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
@@ -99,10 +111,9 @@ in {
         Nice = 0;
 
         # macOS launchd's default NOFILE limit (256 soft) is too low for a
-        # proxy holding many concurrent HTTP connections. All 4 targets are
-        # HTTP (context7/serena/nixos/things-cloud — see config.yaml), so
-        # agentgateway itself doesn't spawn stdio subprocesses anymore, but
-        # keep the headroom cheap insurance against connection-count bursts.
+        # proxy holding many concurrent HTTP connections. The only target is
+        # HTTP (things-cloud, see config.yaml), but keep the headroom as cheap
+        # insurance against connection-count bursts.
         SoftResourceLimits.NumberOfFiles = 8192;
         HardResourceLimits.NumberOfFiles = 8192;
       };

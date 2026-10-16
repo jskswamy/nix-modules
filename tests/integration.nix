@@ -63,6 +63,17 @@ let
     }
   ];
   bivouacCustomText = bivouacCustom.home.file.".config/bivouac/base.pkl".text;
+  agConfig = builtins.readFile ../modules/tools/agentgateway/config/config.yaml;
+  agDefault = mk [T.agentgateway {tools.agentgateway.package = null;}];
+  agNoReg = mk [
+    T.agentgateway
+    {
+      tools.agentgateway = {
+        package = null;
+        registerMcp = false;
+      };
+    }
+  ];
   cliTools = mk [nm.homeManagerModules.cli-tools];
   gitTools = mk [nm.homeManagerModules.git-tools];
   gitLfs = mk [T."git-lfs"];
@@ -192,6 +203,12 @@ in {
     lib.hasInfix ''"machine-key"'' bivouacCustomText
     && lib.hasInfix ''["nixModules.workspaceRoot"] = "workspaces"'' bivouacCustomText
     && lib.hasInfix ''["custom.option"] = "value"'' bivouacCustomText;
+  "agentgateway config targets only things-cloud" =
+    lib.hasInfix "name: things-cloud" agConfig
+    && !(lib.any (n: lib.hasInfix "name: ${n}" agConfig) ["context7" "serena" "nixos"])
+    && !(lib.hasInfix "1mcp" agConfig);
+  "agentgateway registers Claude MCP by default" = agDefault.home.activation ? configureClaudeCodeAgentgateway;
+  "agentgateway registration can be disabled" = !(agNoReg.home.activation ? configureClaudeCodeAgentgateway);
   "disabled bivouac writes no base config" = !((mk [T.bivouac]).home.file ? ".config/bivouac/base.pkl");
   "fd installs its package" = installs fd "fd";
   "fd with package null installs nothing" = !(installs (mk [T.fd {tools.fd.package = null;}]) "fd");
