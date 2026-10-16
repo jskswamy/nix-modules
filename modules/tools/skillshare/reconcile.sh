@@ -19,6 +19,7 @@ cfg="${XDG_CONFIG_HOME:-$HOME/.config}/skillshare/config.yaml"
 status=0
 
 warn() { echo "skillshare: warning: $*" >&2; }
+say() { echo "skillshare: $*"; }
 
 # Skillshare writes resolved versions and bindings back into config.yaml,
 # so it must stay a regular file that Skillshare itself created.
@@ -43,21 +44,30 @@ ensure() {
 		warn "could not list $kind; skipped adding any"
 		return
 	fi
+	local todo=() n=0 total
 	while IFS= read -r entry; do
 		name=$(jq -r .name <<<"$entry")
-		grep -qxF -- "$name" <<<"$existing" && continue
+		grep -qxF -- "$name" <<<"$existing" || todo+=("$entry")
+	done < <(jq -c --arg k "$kind" '.[$k] // [] | .[]' "$decl")
+	total=${#todo[@]}
+	((total)) && say "adding $total missing $kind"
+	for entry in "${todo[@]}"; do
+		name=$(jq -r .name <<<"$entry")
+		n=$((n + 1))
+		say "[$n/$total] $kind: $name"
 		local dirs=() args=()
 		mapfile -t dirs < <(jq -r '.dirs // [] | .[]' <<<"$entry")
 		mapfile -t args < <(jq -r '.args[]' <<<"$entry")
 		((${#dirs[@]})) && mkdir -p "${dirs[@]}"
-		"$ss" "${args[@]}" </dev/null >/dev/null || warn "could not add $kind $name; existing state kept"
-	done < <(jq -c --arg k "$kind" '.[$k] // [] | .[]' "$decl")
+		"$ss" "${args[@]}" </dev/null || warn "could not add $kind $name; existing state kept"
+	done
 }
 
 ensure targets '(.targets // [])[].name' "$ss" target list
 
 # Missing excludes go in one call per target; each call costs a second or
 # more, and there are dozens of patterns.
+say "checking target excludes"
 if ! out=$("$ss" target list --json 2>/dev/null) || [[ -z $out ]] || ! jq . >/dev/null 2>&1 <<<"$out"; then
 	warn "could not list targets; skipped adding excludes"
 else
@@ -65,7 +75,7 @@ else
 		mapfile -t missing < <(jq -r '.[]' <<<"$line")
 		t=${missing[0]} args=()
 		for p in "${missing[@]:1}"; do args+=(--add-exclude "$p"); done
-		"$ss" target "$t" "${args[@]}" </dev/null >/dev/null || warn "could not add excludes to target $t; existing state kept"
+		"$ss" target "$t" "${args[@]}" </dev/null || warn "could not add excludes to target $t; existing state kept"
 	done < <(jq -c --argjson cur "$out" '.excludes // {} | to_entries[]
 		| .key as $t
 		| (.value - ([($cur.targets // [])[] | select(.name == $t) | .exclude // []] | add // []))
@@ -81,11 +91,12 @@ if [[ $mode != --no-sync ]]; then
 	# wrote (Aide's RTK hook) is a conflict that blocks every hook write.
 	# --replace takes over only that entry's duplicates.
 	while IFS= read -r name; do
-		"$ss" hooks sync "$name" --replace </dev/null >/dev/null || {
+		"$ss" hooks sync "$name" --replace </dev/null || {
 			warn "could not take over agent entries for hook $name"
 			status=1
 		}
 	done < <(jq -r '.hooks // [] | .[].name' "$decl")
+	say "syncing resources to targets"
 	"$ss" sync --all || {
 		warn "sync --all failed"
 		status=1
@@ -94,6 +105,7 @@ if [[ $mode != --no-sync ]]; then
 	while IFS= read -r agent; do
 		command -v "$agent" >/dev/null || warn "plugin sync needs \`$agent\` on PATH; its plugins stay pending"
 	done < <(jq -r '.agents // [] | .[]' "$decl")
+	say "syncing plugins; each agent CLI installs them, this can take several minutes"
 	"$ss" sync plugins || {
 		warn "sync plugins failed"
 		status=1
