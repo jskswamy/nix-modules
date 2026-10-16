@@ -131,7 +131,7 @@ let
   ssArgs = lib.concatMap (e: e.args) (ssRes.skills ++ ssRes.plugins ++ ssRes.mcp ++ ssRes.hooks);
   ssExcludes = t: lib.sort (a: b: a < b) (ssRes.excludes.${t} or []);
   ssBundled = name: ssCompat.${name}.skills or [];
-  jskswamyBundles = ["codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
+  jskswamyBundles = ["bivouac" "codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
   ssRtk = builtins.fromJSON (builtins.readFile (lib.last (ssEntry "hooks" "rtk").args));
   # What the activation hands to reconcile.sh.
   ssDecl = ss.declarations;
@@ -442,7 +442,7 @@ in {
   "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
     ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "mattpocock-skills"] ++ jskswamyBundles)))
   ssClaude;
-  "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "bivouac" (ssExcludes t)) && !(builtins.elem "release" (ssExcludes t))) ssClaude;
+  "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "release" (ssExcludes t))) ssClaude;
   "skillshare excludes nothing on Pi" = ssExcludes "pi" == [];
   "skillshare omits OpenSpec and RTK skills" =
     !(builtins.any (a: lib.hasInfix "openspec" (lib.toLower a) || lib.hasInfix "rtk-ai" a) ssArgs)

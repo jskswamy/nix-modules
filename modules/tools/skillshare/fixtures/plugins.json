@@ -25,22 +25,77 @@
     "mattpocock-skills": {
       "commit": "49dd158d10",
       "agents": ["claude"],
-      "skills": ["ask-matt", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "grill-me", "grill-with-docs", "grilling", "handoff", "implement", "implement-spec", "improve-codebase-architecture", "pr", "prototype", "research", "retro", "setup-matt-pocock-skills", "tdd", "teach", "to-questionnaire", "to-spec", "to-tickets", "triage", "wait-what", "wayfinder", "wizard", "writing-for-agents"]
+      "skills": [
+        "ask-matt",
+        "code-review",
+        "codebase-design",
+        "diagnosing-bugs",
+        "domain-modeling",
+        "grill-me",
+        "grill-with-docs",
+        "grilling",
+        "handoff",
+        "implement",
+        "implement-spec",
+        "improve-codebase-architecture",
+        "pr",
+        "prototype",
+        "research",
+        "retro",
+        "setup-matt-pocock-skills",
+        "tdd",
+        "teach",
+        "to-questionnaire",
+        "to-spec",
+        "to-tickets",
+        "triage",
+        "wait-what",
+        "wayfinder",
+        "wizard",
+        "writing-for-agents"
+      ]
+    },
+    "bivouac": {
+      "commit": "327368a51f",
+      "agents": ["claude"],
+      "skills": ["bivouac"]
     },
     "codebase": {
       "commit": "327368a51f",
       "agents": ["claude"],
-      "skills": ["codebase-ask", "codebase-explore", "codebase-graph", "codebase-impact", "codebase-index"]
+      "skills": [
+        "codebase-ask",
+        "codebase-explore",
+        "codebase-graph",
+        "codebase-impact",
+        "codebase-index"
+      ]
     },
     "commit-tools": {
       "commit": "327368a51f",
       "agents": ["claude"],
-      "skills": ["commit-action", "commit-style", "review-commits", "validate-commits"]
+      "skills": [
+        "commit-action",
+        "commit-style",
+        "review-commits",
+        "validate-commits"
+      ]
     },
     "craft": {
       "commit": "327368a51f",
       "agents": ["claude"],
-      "skills": ["craft-backlog", "craft-decompose", "craft-deps", "craft-epic", "craft-task", "craft-understand", "execute-tasks", "park-idea", "review-parked", "task-commit"]
+      "skills": [
+        "craft-backlog",
+        "craft-decompose",
+        "craft-deps",
+        "craft-epic",
+        "craft-task",
+        "craft-understand",
+        "execute-tasks",
+        "park-idea",
+        "review-parked",
+        "task-commit"
+      ]
     },
     "devenv": {
       "commit": "327368a51f",
@@ -50,7 +105,12 @@
     "jot": {
       "commit": "327368a51f",
       "agents": ["claude"],
-      "skills": ["jot-capture", "jot-configure", "jot-setup", "sketch-from-capture"]
+      "skills": [
+        "jot-capture",
+        "jot-configure",
+        "jot-setup",
+        "sketch-from-capture"
+      ]
     },
     "refactor": {
       "commit": "327368a51f",
@@ -70,7 +130,12 @@
     "typst-notes": {
       "commit": "327368a51f",
       "agents": ["claude"],
-      "skills": ["infographics", "jot-to-publish", "typst-format", "typst-publish"]
+      "skills": [
+        "infographics",
+        "jot-to-publish",
+        "typst-format",
+        "typst-publish"
+      ]
     }
   }
 }

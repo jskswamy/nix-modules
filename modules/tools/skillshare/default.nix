@@ -78,7 +78,7 @@
   # the repository's standalone install, which compatible targets exclude,
   # so no target holds both copies of a skill.
   compat = (lib.importJSON ./fixtures/plugins.json).plugins;
-  jskswamyBundles = ["codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
+  jskswamyBundles = ["bivouac" "codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
   # Skillshare package name -> source. Stable Superpowers is the default
   # branch of obra/superpowers; superpowers-dev is its `dev` ref. The
   # official marketplace lists Matt Pocock's skills as an external source,
