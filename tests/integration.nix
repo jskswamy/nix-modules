@@ -375,6 +375,8 @@ in {
   # reconciles through the CLI but never writes its config.yaml.
   "skillshare installs its package" = installs skillshare "skillshare";
   "skillshare with package null installs nothing" = !(installs (mk [T.skillshare {tools.skillshare.package = null;}]) "skillshare");
+  "skillshare installs rtk for its hook" = installs skillshare "rtk";
+  "skillshare with rtkPackage null installs no rtk" = !(installs (mk [T.skillshare {tools.skillshare.rtkPackage = null;}]) "rtk");
   "disabled skillshare installs nothing and does not reconcile" =
     !(installs skillshareOff "skillshare") && !(skillshareOff.home.activation ? skillshare);
   "skillshare default profiles are claude and pi" =

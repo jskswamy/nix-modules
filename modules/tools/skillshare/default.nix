@@ -276,6 +276,18 @@ in {
       '';
     };
 
+    rtkPackage = mkOption {
+      type = types.nullOr types.package;
+      default = pkgs.rtk;
+      defaultText = lib.literalExpression "pkgs.rtk";
+      description = ''
+        Package installed for the `rtk hook claude` command-rewrite hook that
+        Skillshare binds to the Claude profiles. Without `rtk` on `PATH` every
+        Bash tool call runs a hook that fails. Set to null if another module
+        provides it.
+      '';
+    };
+
     enableAgentgateway = mkOption {
       type = types.bool;
       # The AgentGateway daemon runs only as a Darwin launchd agent.
@@ -300,7 +312,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage];
+    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage cfg.rtkPackage];
 
     assertions = [
       {
