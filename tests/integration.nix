@@ -154,8 +154,48 @@ let
   ];
   ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
-  ssBadMcp = mk [T.skillshare {tools.skillshare.mcpServers.extra.profiles = ["nope"];}];
-  failedAssertions = c: builtins.filter (a: !a.assertion) c.assertions;
+  # Failed assertion messages. Home Manager's own entry point throws on
+  # any, so this evaluates its modules directly to read them.
+  failedMessages = modules: let
+    hmLib = import "${hm}/modules/lib/stdlib-extended.nix" lib;
+    raw = hmLib.evalModules {
+      class = "homeManager";
+      specialArgs.modulesPath = "${hm}/modules";
+      modules =
+        [
+          {
+            home.username = "t";
+            home.homeDirectory = "/home/t";
+            home.stateVersion = "24.05";
+          }
+        ]
+        ++ modules
+        ++ import "${hm}/modules/modules.nix" {
+          inherit pkgs;
+          lib = hmLib;
+        };
+    };
+  in
+    map (a: a.message) (builtins.filter (a: !a.assertion) raw.config.assertions);
+  ssBadMcp = failedMessages [
+    T.skillshare
+    {
+      tools.skillshare.mcpServers.extra = {
+        profiles = ["nope"];
+        args = ["--url" "https://mcp.example.invalid/mcp"];
+      };
+    }
+  ];
+  ssNoTime = mk [T.skillshare {tools.skillshare.timeServerPackage = null;}];
+  ssOwnTime = mk [
+    T.skillshare
+    {
+      tools.skillshare = {
+        timeServerPackage = null;
+        mcpServers.time.args = ["--" "/opt/time/bin/mcp-server-time"];
+      };
+    }
+  ];
   # Claude-only bundles beyond jskswamy/skills and Beads.
   ssClaudeOnly = ["context7" "gopls-lsp" "mattpocock-skills"];
   ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
@@ -447,13 +487,16 @@ in {
   "skillshare routes default MCP to consumer profiles too" =
     ssTargets (ssExtraEntry "mcp" "time") == ["claude" "claude-extra" "pi"];
   "skillshare rejects MCP routed to an unknown profile" =
-    !(builtins.tryEval (builtins.deepSeq ssBadMcp.assertions true)).success
-    && failedAssertions skillshare == [];
+    builtins.elem "tools.skillshare.mcpServers lists unknown profiles: extra -> nope" ssBadMcp;
   "skillshare time runs from the stable profile path" =
     lib.takeEnd 2 (ssEntry "mcp" "time").args == ["--" "${skillshare.home.profileDirectory}/bin/mcp-server-time"];
   "skillshare installs the time server" = installs skillshare "mcp-server-time";
-  "skillshare time package can be overridden" =
-    !(installs (mk [T.skillshare {tools.skillshare.timeServerPackage = null;}]) "mcp-server-time");
+  "skillshare installs no time server when its package is null" = !(installs ssNoTime "mcp-server-time");
+  "skillshare registers no time MCP when its package is null" = !(builtins.elem "time" (ssNames "mcp" ssNoTime));
+  "skillshare registers a consumer time MCP when its package is null" =
+    lib.takeEnd 2 (lib.findFirst (e: e.name == "time") {args = [];} ssOwnTime.tools.skillshare.resources.mcp).args
+    == ["--" "/opt/time/bin/mcp-server-time"]
+    && !(installs ssOwnTime "mcp-server-time");
   "skillshare pins Chrome DevTools MCP" =
     lib.takeEnd 6 (ssEntry "mcp" "chrome-devtools").args == ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
   "skillshare points at the AgentGateway endpoint" =

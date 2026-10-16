@@ -251,10 +251,10 @@ in {
       description = ''
         MCP servers to add, keyed by name, each to the profiles it lists.
 
-        Defaults to `time`, `chrome-devtools` and, with
-        `enableAgentgateway`, `agentgateway`, each on every profile. Names
-        you define are added alongside them. Context7 comes with its plugin
-        bundle, not from here.
+        Defaults to `chrome-devtools`, `time` unless `timeServerPackage` is
+        null, and, with `enableAgentgateway`, `agentgateway`, each on every
+        profile. Names you define are added alongside them. Context7 comes
+        with its plugin bundle, not from here.
 
         An entry is added only while Skillshare does not list its name;
         activation never refreshes it afterwards. Changing `args` or
@@ -271,8 +271,8 @@ in {
       description = ''
         Package installed for the `time` MCP server. It is registered by its
         stable profile path, `home.profileDirectory/bin/mcp-server-time`, so
-        upgrades need no re-registration. Set to null to provide that binary
-        in the profile some other way.
+        upgrades need no re-registration. Set to null to drop the `time`
+        server; declare `mcpServers.time` yourself to register your own.
       '';
     };
 
@@ -322,8 +322,10 @@ in {
       };
 
       mcpServers = defaults ({
-          time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
           chrome-devtools.args = ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
+        }
+        // lib.optionalAttrs (cfg.timeServerPackage != null) {
+          time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
         }
         // lib.optionalAttrs cfg.enableAgentgateway {
           agentgateway.args = ["--url" "http://127.0.0.1:${toString (config.tools.agentgateway.port or 3050)}/mcp"];
