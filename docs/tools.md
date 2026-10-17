@@ -236,6 +236,26 @@ MCP server for querying nixpkgs and NixOS options, as a persistent HTTP daemon o
 - **Installs the package:** no by default — see above
 - **Writes:** _none_
 
+<a id="toolsk-fresh"></a>
+
+### `tools.fresh`
+
+Fresh terminal editor with Vi mode enabled at startup. Uses the terminal's
+ANSI palette, inheriting its theme and light/dark changes (including
+Gruvbox in Ghostty), rather than Fresh's fixed dark Gruvbox theme.
+It does not change `EDITOR`, `VISUAL`, or the `vi`/`vim` aliases.
+
+- **Installs the package:** yes, plus language servers for Go, Python
+  (Pyright), Rust, TypeScript/JavaScript, YAML, TOML, Markdown, Nix,
+  JSON/JSONC, HTML/CSS and Bash. Servers start automatically for these languages.
+- **Options:** `tools.fresh.package` (nullable), `tools.fresh.languageServers`,
+  `tools.fresh.settings` (merged JSON settings).
+- **Writes:** `~/.config/fresh/config.json` (read-only; change settings through
+  Nix or a project's `.fresh/config.json`, not Fresh's user settings UI).
+- **Requires:** the project's toolchain/environment for full analysis, such
+  as Go, Cargo/Rust sources or the project's Python environment. Remote
+  workspaces need language servers installed on the remote host too.
+
 <a id="toolsk-nvim"></a>
 
 ### `tools.nvim`

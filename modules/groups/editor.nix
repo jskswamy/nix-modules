@@ -1,4 +1,4 @@
-# Editors: neovim (LazyVim) and vim.
+# Editors: neovim (LazyVim), vim and Fresh.
 #
 # A group is only a bundle: it imports its tools and nothing else. Take the
 # group for all of them, or import the individual tools you want. Either
@@ -6,6 +6,7 @@
 {
   imports = [
     ../tools/nvim
+    ../tools/fresh
     ../tools/vim
   ];
 }

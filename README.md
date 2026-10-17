@@ -92,7 +92,7 @@ that is not in one of its tools.
 | ------------- | -------------------------------------------------------------------------------------------- |
 | `agent-tools` | `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`                                            |
 | `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                      |
-| `editor`      | `nvim`, `vim`                                                                                |
+| `editor`      | `nvim`, `vim`, `fresh`                                                                       |
 | `git-tools`   | `git`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk` |
 | `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                       |
 | `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                          |

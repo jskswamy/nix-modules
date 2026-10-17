@@ -78,6 +78,10 @@ let
   gitTools = mk [nm.homeManagerModules.git-tools];
   gitLfs = mk [T."git-lfs"];
   gitLfsTransfer = mk [T."git-lfs-transfer"];
+  fresh = mk [T.fresh];
+  freshConfig = builtins.fromJSON fresh.home.file.".config/fresh/config.json".text;
+  freshDisabled = mk [T.fresh {tools.fresh.enable = false;}];
+  editor = mk [nm.homeManagerModules.editor];
   nvim = mk [T.nvim];
   vim = mk [T.vim];
   tmux = mk [T.tmux];
@@ -267,6 +271,45 @@ in {
   "direnv ships mkenvrc" = direnv.home.file ? ".config/fish/functions/mkenvrc.fish";
   "disabled direnv ships no mkenvrc" = !((mk [T.direnv {tools.direnv.enable = false;}]).home.file ? ".config/fish/functions/mkenvrc.fish");
   "fish alone does not ship mkenvrc" = !(fish.home.file ? ".config/fish/functions/mkenvrc.fish");
+
+  "fresh installs the editor" = installs fresh "fresh";
+  "fresh inherits terminal colors" = freshConfig.theme == "terminal";
+  "fresh starts in vi mode" = freshConfig.plugins.vi_mode.enabled && freshConfig.plugins.vi_mode.settings.autoStart;
+  "fresh enables LSP" =
+    freshConfig.lsp_enabled
+    && builtins.all (language: freshConfig.lsp.${language}.enabled && freshConfig.lsp.${language}.auto_start) [
+      "go"
+      "python"
+      "rust"
+      "javascript"
+      "typescript"
+      "yaml"
+      "toml"
+      "markdown"
+      "nix"
+      "json"
+      "jsonc"
+      "bash"
+      "html"
+      "css"
+    ];
+  "fresh installs language servers" = builtins.all (name: installs fresh name) [
+    "gopls"
+    "pyright"
+    "rust-analyzer"
+    "typescript-language-server"
+    "yaml-language-server"
+    "taplo"
+    "marksman"
+    "nil"
+    "vscode-langservers-extracted"
+    "bash-language-server"
+  ];
+  "fresh uses pyright for Python" = freshConfig.lsp.python.command == "pyright-langserver" && freshConfig.lsp.python.args == ["--stdio"];
+  "fresh settings are overridable" = (builtins.fromJSON (mk [T.fresh {tools.fresh.settings.theme = "gruvbox";}]).home.file.".config/fresh/config.json".text).theme == "gruvbox";
+  "disabled fresh installs no editor or language servers" = map (p: p.name) freshDisabled.home.packages == map (p: p.name) (mk []).home.packages;
+  "disabled fresh writes no config" = !(freshDisabled.home.file ? ".config/fresh/config.json");
+  "editor group includes fresh and keeps nvim default" = installs editor "fresh" && editor.home.sessionVariables.EDITOR == "nvim";
 
   # editors: nvim wins when both editor modules are enabled.
   "nvim sets EDITOR" = nvim.home.sessionVariables.EDITOR == "nvim";
