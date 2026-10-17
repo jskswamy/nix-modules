@@ -39,7 +39,7 @@ ensure() {
 	shift 2
 	# Exit status is ignored: `mcp check` fails whenever a server has
 	# findings, yet still prints the full listing.
-	out=$("$@" --json 2>/dev/null)
+	out=$("$@" --json 2>/dev/null </dev/null)
 	if [[ -z $out ]] || ! existing=$(jq -r "$filter" <<<"$out"); then
 		warn "could not list $kind; skipped adding any"
 		return
@@ -68,7 +68,7 @@ ensure targets '(.targets // [])[].name' "$ss" target list
 # Missing excludes go in one call per target; each call costs a second or
 # more, and there are dozens of patterns.
 say "checking target excludes"
-if ! out=$("$ss" target list --json 2>/dev/null) || [[ -z $out ]] || ! jq . >/dev/null 2>&1 <<<"$out"; then
+if ! out=$("$ss" target list --json 2>/dev/null </dev/null) || [[ -z $out ]] || ! jq . >/dev/null 2>&1 <<<"$out"; then
 	warn "could not list targets; skipped adding excludes"
 else
 	while IFS= read -r line; do
@@ -97,7 +97,7 @@ if [[ $mode != --no-sync ]]; then
 		}
 	done < <(jq -r '.hooks // [] | .[].name' "$decl")
 	say "syncing resources to targets"
-	"$ss" sync --all || {
+	"$ss" sync --all </dev/null || {
 		warn "sync --all failed"
 		status=1
 	}
@@ -106,7 +106,7 @@ if [[ $mode != --no-sync ]]; then
 		command -v "$agent" >/dev/null || warn "plugin sync needs \`$agent\` on PATH; its plugins stay pending"
 	done < <(jq -r '.agents // [] | .[]' "$decl")
 	say "syncing plugins; each agent CLI installs them, this can take several minutes"
-	"$ss" sync plugins || {
+	"$ss" sync plugins </dev/null || {
 		warn "sync plugins failed"
 		status=1
 	}
