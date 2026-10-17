@@ -252,7 +252,8 @@ in {
         MCP servers to add, keyed by name, each to the profiles it lists.
 
         Defaults to `chrome-devtools`, `time` unless `timeServerPackage` is
-        null, and, with `enableAgentgateway`, `agentgateway`, each on every
+        null, `codebase-memory-mcp` unless `codebaseMemoryPackage` is null,
+        and, with `enableAgentgateway`, `agentgateway`, each on every
         profile. Names you define are added alongside them. Context7 comes
         with its plugin bundle, not from here.
 
@@ -288,6 +289,17 @@ in {
       '';
     };
 
+    codebaseMemoryPackage = mkOption {
+      type = types.nullOr types.package;
+      default = ownPkg pkgs "codebase-memory-mcp";
+      defaultText = lib.literalExpression ''ownPkg pkgs "codebase-memory-mcp"'';
+      description = ''
+        Package installed for the `codebase-memory-mcp` MCP server, which the
+        `codebase` plugin's skills and hooks lean on. It is registered by its
+        stable profile path on every profile. Set to null to drop the server.
+      '';
+    };
+
     enableAgentgateway = mkOption {
       type = types.bool;
       # The AgentGateway daemon runs only as a Darwin launchd agent.
@@ -312,7 +324,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage cfg.rtkPackage];
+    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage cfg.rtkPackage cfg.codebaseMemoryPackage];
 
     assertions = [
       {
@@ -338,6 +350,9 @@ in {
         }
         // lib.optionalAttrs (cfg.timeServerPackage != null) {
           time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
+        }
+        // lib.optionalAttrs (cfg.codebaseMemoryPackage != null) {
+          codebase-memory-mcp.args = ["--" "${config.home.profileDirectory}/bin/codebase-memory-mcp"];
         }
         // lib.optionalAttrs cfg.enableAgentgateway {
           agentgateway.args = ["--url" "http://127.0.0.1:${toString (config.tools.agentgateway.port or 3050)}/mcp"];

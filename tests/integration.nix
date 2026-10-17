@@ -304,15 +304,14 @@ in {
     lib.hasInfix ''"machine-key"'' bivouacCustomText
     && lib.hasInfix ''["nixModules.workspaceRoot"] = "workspaces"'' bivouacCustomText
     && lib.hasInfix ''["custom.option"] = "value"'' bivouacCustomText;
-  "bivouac imports skillshare, not codebase-memory" =
-    lib.hasInfix ''"tools.skillshare"'' bivouacText
-    && !(lib.hasInfix "tools.codebase-memory-mcp" bivouacText);
+  "bivouac imports skillshare, which brings codebase-memory" =
+    lib.hasInfix ''"tools.skillshare"'' bivouacText;
   "bivouac takes skillshare defaults: claude and pi, no extra MCP" =
     !(lib.hasInfix "tools.skillshare.profiles" bivouacText)
     && !(lib.hasInfix "tools.skillshare.mcpServers" bivouacText)
     && !(lib.hasInfix "portableProfiles" bivouacText)
     && builtins.attrNames ss.profiles == ["claude" "pi"]
-    && ssNames "mcp" ssNoGateway == ["chrome-devtools" "time"];
+    && ssNames "mcp" ssNoGateway == ["chrome-devtools" "codebase-memory-mcp" "time"];
   "bivouac enables skillshare without AgentGateway" =
     lib.hasInfix ''["tools.skillshare.enable"] = true'' bivouacText
     && lib.hasInfix ''["tools.skillshare.enableAgentgateway"] = false'' bivouacText;
@@ -377,6 +376,10 @@ in {
   "skillshare with package null installs nothing" = !(installs (mk [T.skillshare {tools.skillshare.package = null;}]) "skillshare");
   "skillshare installs rtk for its hook" = installs skillshare "rtk";
   "skillshare with rtkPackage null installs no rtk" = !(installs (mk [T.skillshare {tools.skillshare.rtkPackage = null;}]) "rtk");
+  "skillshare installs codebase-memory-mcp for its MCP server" = installs skillshare "codebase-memory-mcp";
+  "skillshare with codebaseMemoryPackage null drops the server" =
+    !(installs (mk [T.skillshare {tools.skillshare.codebaseMemoryPackage = null;}]) "codebase-memory-mcp")
+    && !(builtins.elem "codebase-memory-mcp" (ssNames "mcp" (mk [T.skillshare {tools.skillshare.codebaseMemoryPackage = null;}])));
   "disabled skillshare installs nothing and does not reconcile" =
     !(installs skillshareOff "skillshare") && !(skillshareOff.home.activation ? skillshare);
   "skillshare default profiles are claude and pi" =
@@ -478,8 +481,8 @@ in {
   "skillshare declares the agents plugin sync needs" = ssDecl.agents == ["claude" "pi"];
 
   # MCP routing.
-  "skillshare default MCP servers" = ssNames "mcp" skillshare == ["agentgateway" "chrome-devtools" "time"];
-  "skillshare routes portable MCP to every profile" = builtins.all (n: ssTargets (ssEntry "mcp" n) == ssAll) ["time" "chrome-devtools" "agentgateway"];
+  "skillshare default MCP servers" = ssNames "mcp" skillshare == ["agentgateway" "chrome-devtools" "codebase-memory-mcp" "time"];
+  "skillshare routes portable MCP to every profile" = builtins.all (n: ssTargets (ssEntry "mcp" n) == ssAll) ["time" "chrome-devtools" "agentgateway" "codebase-memory-mcp"];
   "skillshare routes a consumer MCP server to its listed profiles only" =
     ssExtraEntry "mcp" "extra"
     == {
