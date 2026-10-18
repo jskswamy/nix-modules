@@ -164,6 +164,7 @@ in {
           "tools.starship"
           "tools.direnv"
           "tools.nvim"
+          "tools.fresh"
           "tools.vim"
           "tools.tmux"
           "tools.tmuxp"
@@ -252,9 +253,8 @@ in {
           panes = [
             {
               label = "editor";
-              command = "nvim .";
+              command = "fresh .";
             }
-            {label = "term";}
           ];
         }
       ];

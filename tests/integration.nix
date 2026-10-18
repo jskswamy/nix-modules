@@ -338,6 +338,39 @@ in {
     == "bat"
     && bat.home.sessionVariables.MANPAGER == "bat -l man -p"
     && bat.home.sessionVariables.BAT_THEME == "ansi";
+  "bivouac editor tab is a single Fresh pane" =
+    bivouac.programs.bivouac.herdrTabs
+    == [
+      {
+        label = "agent";
+        panes = [
+          {
+            label = "agent";
+            command = null;
+          }
+        ];
+      }
+      {
+        label = "lazygit";
+        panes = [
+          {
+            label = "lazygit";
+            command = "lazygit";
+          }
+        ];
+      }
+      {
+        label = "editor";
+        panes = [
+          {
+            label = "editor";
+            command = "fresh .";
+          }
+        ];
+      }
+    ];
+  "bivouac installs Fresh remotely" = builtins.elem "tools.fresh" bivouac.programs.bivouac.nixModules.modules && lib.hasInfix "tools.fresh" bivouacText;
+  "bivouac renders Fresh command" = lib.hasInfix ''command = "fresh ."'' bivouacText && !(lib.hasInfix ''label = "term"'' bivouacText);
   "bivouac writes base config" = bivouac.home.file ? ".config/bivouac/base.pkl";
   "bivouac defaults workspace root" = lib.hasInfix ''["nixModules.workspaceRoot"] = "sessions"'' bivouacText;
   "bivouac does not force git identity" =
