@@ -9,7 +9,7 @@ return {
 					settings = {
 						["nil"] = {
 							formatting = {
-								command = { "alejandra" }, -- Use alejandra formatter from Mason
+								command = { "alejandra" }, -- Supplied by the Nix module
 							},
 						},
 					},
@@ -89,15 +89,11 @@ return {
 	-- Mason tool installer for language servers and formatters
 	{
 		"mason-org/mason.nvim",
-		config = function()
-			require("mason").setup({
-				PATH = "append", -- Append Mason's bin to PATH instead of prepending
-				-- Install packages in Mason's data directory (NixOS compatible)
-				install_root_dir = vim.fn.stdpath("data") .. "/mason",
-			})
-		end,
-		opts = {
-			ensure_installed = {
+		opts = function(_, opts)
+			opts.PATH = "append" -- Prefer Nix tools while keeping LazyVim's installer.
+			opts.install_root_dir = vim.fn.stdpath("data") .. "/mason"
+			-- Inherited extras repeat tools; Mason rejects concurrent duplicate installs.
+			opts.ensure_installed = vim.list.unique(vim.list_extend(opts.ensure_installed or {}, {
 				-- Language servers
 				"typescript-language-server",
 				"pyright",
@@ -119,7 +115,6 @@ return {
 				"shfmt", -- Shell script formatter
 				"stylua", -- Lua formatter
 				"prettier", -- Fallback for YAML/Markdown
-				"alejandra", -- Alternative Nix formatter (available in Mason)
 
 				-- Best linters for each language
 				"eslint_d", -- JS/TS linter (fast daemon version)
@@ -134,10 +129,9 @@ return {
 				-- Additional tools
 				"ast-grep", -- Structural search and replace (for grug-far)
 
-				-- Note: nil, statix, deadnix, nixpkgs-fmt are installed via system packages
-				-- since they're not available in Mason registry
-			},
-		},
+				-- Nix supplies nil, alejandra, statix and deadnix; no Cargo build needed.
+			}))
+		end,
 	},
 
 	-- Configure auto-formatting on save with best tools
@@ -237,8 +231,11 @@ return {
 		opts = {
 			formatters = {
 				biome = {
-					condition = function(ctx)
-						return vim.fs.find({ "biome.json", "biome.jsonc" }, { path = ctx.filename, upward = true })[1]
+					condition = function(_, ctx)
+						return vim.fs.find(
+							{ "biome.json", "biome.jsonc" },
+							{ path = vim.fs.dirname(ctx.filename), upward = true }
+						)[1]
 					end,
 				},
 			},

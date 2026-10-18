@@ -29,10 +29,41 @@ in {
         package manager instead.
       '';
     };
+
+    runtimePackages = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
+      default = with pkgs; [
+        stdenv.cc
+        tree-sitter
+        git
+        curl
+        gnutar
+        gzip
+        unzip
+        nodejs
+        (python3.withPackages (ps: [ps.pip]))
+        go
+        ripgrep
+        fd
+        nil
+        alejandra
+        statix
+        deadnix
+        pkl
+        jre_headless # Mason's pkl-lsp runs a Java archive.
+        terraform
+      ];
+      description = ''
+        Parser build tools, Mason runtimes, search utilities and configured
+        Nix/Pkl/Terraform commands. Mason installs the remaining language
+        servers, formatters and linters. Terraform requires allowing its
+        unfree license. Override with [] to supply these tools externally.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = lib.optional (cfg.package != null) cfg.package;
+    home.packages = lib.optional (cfg.package != null) cfg.package ++ cfg.runtimePackages;
     home.sessionVariables = {
       EDITOR = "nvim";
       VISUAL = "nvim";

@@ -83,6 +83,8 @@ let
   freshDisabled = mk [T.fresh {tools.fresh.enable = false;}];
   editor = mk [nm.homeManagerModules.editor];
   nvim = mk [T.nvim];
+  nvimDisabled = mk [T.nvim {tools.nvim.enable = false;}];
+  nvimPackageNames = map lib.getName nvim.home.packages;
   vim = mk [T.vim];
   tmux = mk [T.tmux];
   tmuxp = mk [T.tmuxp];
@@ -313,6 +315,41 @@ in {
 
   # editors: nvim wins when both editor modules are enabled.
   "nvim sets EDITOR" = nvim.home.sessionVariables.EDITOR == "nvim";
+  "nvim sets VISUAL" = nvim.home.sessionVariables.VISUAL == "nvim";
+  "nvim supplies a platform compiler" = builtins.elem (lib.getName pkgs.stdenv.cc) nvimPackageNames;
+  "nvim supplies parser and Mason runtimes" = builtins.all (name: builtins.elem name nvimPackageNames) [
+    "tree-sitter"
+    "git"
+    "curl"
+    "gnutar"
+    "gzip"
+    "unzip"
+    "nodejs"
+    "go"
+    "ripgrep"
+    "fd"
+  ];
+  "nvim supplies configured language commands" = builtins.all (name: builtins.elem name nvimPackageNames) [
+    "nil"
+    "alejandra"
+    "statix"
+    "deadnix"
+    "pkl"
+    "terraform"
+  ];
+  "nvim supplies Java for the Pkl language server" = builtins.elem (lib.getName pkgs.jre_headless) nvimPackageNames;
+  "nvim supplies Python with pip" = builtins.elem (lib.getName (pkgs.python3.withPackages (ps: [ps.pip]))) nvimPackageNames;
+  "nvim runtime packages are overridable" =
+    !(installs (mk [T.nvim {tools.nvim.runtimePackages = lib.mkForce [];}]) "tree-sitter");
+  "nvim with package null retains runtime support" = let
+    c = mk [T.nvim {tools.nvim.package = null;}];
+  in
+    !(installs c "neovim") && installs c "tree-sitter";
+  "nvim runtimes evaluate on Linux and Darwin" =
+    builtins.all (system:
+      builtins.deepSeq (map lib.getName (mkOn system [T.nvim]).tools.nvim.runtimePackages) true) ["x86_64-linux" "aarch64-darwin"];
+  "disabled nvim adds no packages" = map lib.getName nvimDisabled.home.packages == map lib.getName (mk []).home.packages;
+  "disabled nvim writes no config" = !(nvimDisabled.home.file ? ".config/nvim");
   "vim alone sets EDITOR to vim" = vim.home.sessionVariables.EDITOR == "vim";
   "nvim wins over vim" = nvimVim.home.sessionVariables.EDITOR == "nvim";
   "nvim sets the vim and vi aliases" = nvim.home.shellAliases.vim == "nvim" && nvim.home.shellAliases.vi == "nvim";

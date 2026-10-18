@@ -262,8 +262,30 @@ It does not change `EDITOR`, `VISUAL`, or the `vi`/`vim` aliases.
 
 Neovim (LazyVim). The whole config directory is symlinked, so edits need no rebuild.
 
-- **Installs the package:** yes
+- **Installs the package:** yes, plus `tools.nvim.runtimePackages`: the platform
+  C compiler, Tree-sitter CLI, Git/download/archive tools, Node/npm, Python with
+  pip, Go, ripgrep/fd, nil/alejandra/statix/deadnix/Pkl/Terraform, and the Java
+  runtime needed by Mason's Pkl language server.
 - **Writes:** `~/.config/nvim`
+
+Mason retains LazyVim's installer for the configured language servers,
+formatters and linters. Its binaries append to PATH so Nix commands take priority.
+Project dependencies and SDKs still belong in the project's development shell;
+optional Mason health warnings for unused ecosystems do not require installing
+Ruby, PHP, or Rust globally. Alejandra comes from Nix rather than Mason's
+Cargo-based installer.
+
+Terraform requires allowing its unfree license in nixpkgs. Consumers supplying
+tools externally can override `tools.nvim.runtimePackages` (use `lib.mkForce []`
+to replace the defaults). Setting `tools.nvim.package = null` skips only the
+editor binary; disabling the module skips both config and runtime packages.
+
+Regression tests: `tests/check.sh nvim-config`. On Linux, put the module's runtime
+packages on PATH and run `bash tests/nvim-smoke.sh cold`; use the printed directory
+with `bash tests/nvim-smoke.sh warm DIRECTORY`. These tests isolate config, data,
+state and cache, bootstrap pinned lazy.nvim and LazyVim revisions, verify all plugin pins,
+and exercise parser loading, Mason installs, Biome, Bash LSP, linting and Blink.
+They do not activate Home Manager or modify the live Neovim state.
 
 <a id="toolsk-pet"></a>
 
