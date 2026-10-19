@@ -50,7 +50,7 @@ Two of those are platform-dependent, and this page was generated on
 | [`lazygit`](#toolsk-lazygit) | yes | — | — | 2 |
 | [`local-mcp`](#toolsk-local-mcp) | no | — | `tools.local-mcp.port` | 0 |
 | [`mcp-nixos`](#toolsk-mcp-nixos) | no | — | — | 0 |
-| [`nvim`](#toolsk-nvim) | yes | — | — | 1 |
+| [`nvim`](#toolsk-nvim) | yes | — | — | 4 |
 | [`pet`](#toolsk-pet) | yes | — | — | 2 |
 | [`serena-mcp`](#toolsk-serena-mcp) | no | — | — | 0 |
 | [`ssh`](#toolsk-ssh) | yes | — | — | 1 |
@@ -266,7 +266,16 @@ Neovim (LazyVim). The whole config directory is symlinked, so edits need no rebu
   C compiler, Tree-sitter CLI, Git/download/archive tools, Node/npm, Python with
   pip, Go, ripgrep/fd, nil/alejandra/statix/deadnix/Pkl/Terraform, and the Java
   runtime needed by Mason's Pkl language server.
-- **Writes:** `~/.config/nvim`
+- **Writes:** `~/.config/nvim`, plus the LaTeX parser, revision marker and
+  highlighting queries under `$XDG_DATA_HOME/nvim/site` (default
+  `~/.local/share/nvim/site`).
+
+LaTeX parser generation exceeds small VMs' memory budget. The module uses
+nixpkgs' prebuilt grammar and fetches queries from the pinned Tree-sitter plugin.
+The smoke test checks that the parser revision matches the pinned registry and
+that LaTeX parsing and highlighting work. When updating the Tree-sitter pin,
+refresh the query-source hash and check grammar alignment. Existing LaTeX files may
+need backing up on the first Home Manager activation; no files are force-replaced.
 
 Mason retains LazyVim's installer for the configured language servers,
 formatters and linters. Its binaries append to PATH so Nix commands take priority.
@@ -280,12 +289,21 @@ tools externally can override `tools.nvim.runtimePackages` (use `lib.mkForce []`
 to replace the defaults). Setting `tools.nvim.package = null` skips only the
 editor binary; disabling the module skips both config and runtime packages.
 
-Regression tests: `tests/check.sh nvim-config`. On Linux, put the module's runtime
-packages on PATH and run `bash tests/nvim-smoke.sh cold`; use the printed directory
-with `bash tests/nvim-smoke.sh warm DIRECTORY`. These tests isolate config, data,
-state and cache, bootstrap pinned lazy.nvim and LazyVim revisions, verify all plugin pins,
-and exercise parser loading, Mason installs, Biome, Bash LSP, linting and Blink.
-They do not activate Home Manager or modify the live Neovim state.
+Regression tests: `tests/check.sh nvim-config`. On Linux, build the actual module's
+executables without activating Home Manager:
+
+```sh
+nix build --impure --file tests/nvim-runtime.nix runtime --out-link /tmp/nvim-runtime
+PATH="/tmp/nvim-runtime/bin:$PATH" bash tests/nvim-smoke.sh cold
+PATH="/tmp/nvim-runtime/bin:$PATH" bash tests/nvim-smoke.sh warm DIRECTORY
+```
+
+Use the cold run's printed directory for `DIRECTORY`. The tests isolate config,
+data, state and cache, mirror the module's managed data files, bootstrap pinned
+lazy.nvim and LazyVim revisions, verify active plugin pins and the unchanged lock,
+and exercise parser loading, LaTeX highlighting, Mason installs, Biome, Bash LSP,
+linting and Blink. Disabled plugins retained in the lock need not be installed.
+The tests do not activate Home Manager or modify the live Neovim state.
 
 <a id="toolsk-pet"></a>
 

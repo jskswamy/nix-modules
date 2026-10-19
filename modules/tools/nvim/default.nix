@@ -9,6 +9,13 @@
   inherit (import ../../../lib) mkSource mkToolEnable;
   src = mkSource config ./config "modules/tools/nvim/config";
   cfg = config.tools.nvim;
+  latexGrammar = pkgs.vimPlugins.nvim-treesitter.builtGrammars.latex;
+  treesitterSource = pkgs.fetchFromGitHub {
+    owner = "nvim-treesitter";
+    repo = "nvim-treesitter";
+    rev = (lib.importJSON ./config/lazy-lock.json)."nvim-treesitter".commit;
+    hash = "sha256-AMpRUNvTDUFx3EBc5POn3niPJlFRwG+Jgc1FR4CnXEk=";
+  };
 in {
   imports = [
     ../../_common
@@ -74,5 +81,12 @@ in {
     };
 
     home.file.".config/nvim".source = src.dir;
+
+    # Generating LaTeX's parser exhausts small VMs; retain its parser and query revisions.
+    xdg.dataFile = {
+      "nvim/site/parser/latex.so".source = "${latexGrammar}/parser";
+      "nvim/site/parser-info/latex.revision".text = latexGrammar.src.rev;
+      "nvim/site/queries/latex".source = "${treesitterSource}/runtime/queries/latex";
+    };
   };
 }

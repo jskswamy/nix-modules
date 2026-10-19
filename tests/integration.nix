@@ -316,6 +316,10 @@ in {
   # editors: nvim wins when both editor modules are enabled.
   "nvim sets EDITOR" = nvim.home.sessionVariables.EDITOR == "nvim";
   "nvim sets VISUAL" = nvim.home.sessionVariables.VISUAL == "nvim";
+  "nvim supplies a prebuilt LaTeX parser" = nvim.xdg.dataFile ? "nvim/site/parser/latex.so";
+  "nvim records the prebuilt LaTeX revision" = (nvim.xdg.dataFile."nvim/site/parser-info/latex.revision".text or "") == pkgs.vimPlugins.nvim-treesitter.builtGrammars.latex.src.rev;
+  "nvim supplies pinned LaTeX queries" = nvim.xdg.dataFile ? "nvim/site/queries/latex";
+  "disabled nvim writes no LaTeX parser" = !(nvimDisabled.xdg.dataFile ? "nvim/site/parser/latex.so");
   "nvim supplies a platform compiler" = builtins.elem (lib.getName pkgs.stdenv.cc) nvimPackageNames;
   "nvim supplies parser and Mason runtimes" = builtins.all (name: builtins.elem name nvimPackageNames) [
     "tree-sitter"

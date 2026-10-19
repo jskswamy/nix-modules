@@ -39,6 +39,12 @@ esac
 export XDG_CONFIG_HOME="$state/config" XDG_DATA_HOME="$state/data" XDG_STATE_HOME="$state/state" XDG_CACHE_HOME="$state/cache"
 export NVIM_SMOKE_REPO="$repo" NVIM_SMOKE_STATE="$state" NVIM_SMOKE_MODE="$mode"
 echo "Smoke-test state: $state"
+# Mirror the module's managed XDG files before LazyVim tries to install parsers.
+data=$(nix build --impure --no-link --print-out-paths --file "$repo/tests/nvim-runtime.nix" data)
+mkdir -p "$state/data/nvim/site/"{parser,parser-info,queries}
+for file in parser/latex.so parser-info/latex.revision queries/latex; do
+	ln -sfn "$data/$file" "$state/data/nvim/site/$file"
+done
 cd "$state/work"
 python3 -m pip --version
 python3 -m venv "$state/venv-$mode"
@@ -53,10 +59,14 @@ state, repo = map(pathlib.Path, sys.argv[1:])
 expected = json.loads((repo / 'modules/tools/nvim/config/lazy-lock.json').read_text())
 actual = json.loads((state / 'config/nvim/lazy-lock.json').read_text())
 assert actual == expected, 'Plugin lock changed during bootstrap'
-for name, pin in expected.items():
+# The lock also retains disabled plugins; only active plugins need checkouts.
+active = (state / 'active-plugins.txt').read_text().splitlines()
+assert active, 'No active plugins reported'
+for name in active:
+    assert name in expected, f'Active plugin missing from source lock: {name}'
     directory = state / 'data/nvim/lazy' / name
     revision = subprocess.check_output(['git', '-C', str(directory), 'rev-parse', 'HEAD'], text=True).strip()
-    assert revision == pin['commit'], f'{name}: {revision} != {pin["commit"]}'
-print(f'PASS {len(expected)} plugin revisions match the source lock')
+    assert revision == expected[name]['commit'], f'{name}: {revision} != {expected[name]["commit"]}'
+print(f'PASS {len(active)} active plugin revisions match the unchanged source lock')
 PY
 printf 'PASS %s smoke test; logs: %s\n' "$mode" "$state"

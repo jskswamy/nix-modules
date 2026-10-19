@@ -50,11 +50,37 @@ local function run()
 	print("PASS Mason declared tools installed")
 
 	local ts = require("nvim-treesitter")
-	ts.install({ "lua", "python", "typescript", "bash", "go", "yaml", "toml", "markdown", "nix" }):wait(120000)
-	for _, language in ipairs({ "lua", "python", "typescript", "bash", "go", "yaml", "toml", "markdown", "nix" }) do
+	local latex_revision = vim.fn.readfile(vim.fn.stdpath("data") .. "/site/parser-info/latex.revision")[1]
+	assert(
+		latex_revision == require("nvim-treesitter.parsers").latex.install_info.revision,
+		"Prebuilt LaTeX parser revision differs from the plugin pin"
+	)
+	ts.install({ "lua", "python", "typescript", "bash", "go", "yaml", "toml", "markdown", "nix", "latex" }):wait(120000)
+	for _, language in ipairs({
+		"lua",
+		"python",
+		"typescript",
+		"bash",
+		"go",
+		"yaml",
+		"toml",
+		"markdown",
+		"nix",
+		"latex",
+	}) do
 		assert(vim.treesitter.language.add(language), "Cannot load parser: " .. language)
 	end
-	print("PASS representative Tree-sitter parsers load")
+	local latex_source = "\\section{Fixture}\nText"
+	local latex = vim.treesitter.get_string_parser(latex_source, "latex"):parse()[1]
+	assert(not latex:root():has_error(), "LaTeX fixture failed to parse")
+	local highlights = assert(vim.treesitter.query.get("latex", "highlights"), "LaTeX highlighting queries unavailable")
+	local highlighted = false
+	for _ in highlights:iter_captures(latex:root(), latex_source) do
+		highlighted = true
+		break
+	end
+	assert(highlighted, "LaTeX fixture produced no highlight captures")
+	print("PASS representative Tree-sitter parsers and LaTeX highlighting")
 
 	local project = state .. "/fixture"
 	vim.fn.mkdir(project, "p")
@@ -103,8 +129,24 @@ local function run()
 		end, 100),
 		"Blink native matcher did not initialize"
 	)
-	assert(type(fuzzy.get_words({ "completion fixture" })) == "table", "Blink native word matching failed")
+	local words = fuzzy.get_words("completion fixture")
+	assert(
+		vim.tbl_contains(words, "completion") and vim.tbl_contains(words, "fixture"),
+		"Blink native word matching failed"
+	)
 	print("PASS Blink native fuzzy matcher initialized")
+	assert(
+		vim.wait(180000, function()
+			for _, package in ipairs(registry.get_all_packages()) do
+				if package:is_installing() then
+					return false
+				end
+			end
+			return true
+		end, 1000),
+		"LSP-triggered Mason installs did not finish"
+	)
+	vim.fn.writefile(vim.tbl_keys(require("lazy.core.config").plugins), state .. "/active-plugins.txt")
 	vim.fn.writefile(
 		vim.split(vim.fn.execute("messages"), "\n"),
 		state .. "/" .. os.getenv("NVIM_SMOKE_MODE") .. "-messages.txt"
