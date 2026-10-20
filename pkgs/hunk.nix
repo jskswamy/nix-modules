@@ -1,23 +1,23 @@
 # Provide hunk (review-first terminal diff viewer) using pre-built binaries
 _final: prev: let
-  hunkVersion = "0.23.0";
+  hunkVersion = "0.24.0";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-darwin-arm64.tar.gz";
-      hash = "sha256-dPT6XVDLtopZ5C0pla6Moxx3CO6nKzS1xQffe0Wq7NQ=";
+      hash = "sha256-ahTOG37VkEbIosU2KIQwge3eR2rVVev+vSNl9HcV1wY=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-darwin-x64.tar.gz";
-      hash = "sha256-LBVWH/EfhcvWyb+fmDMBnHZryiezHMbroFQZl5Alz+E=";
+      hash = "sha256-J4SjZoyH41AtEooXJQyuHvDP78DSQJYVsKTtSXaLvYE=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-linux-arm64.tar.gz";
-      hash = "sha256-Y4R6deq5Qw2L05ClXjI0C6xnmfm2CBJzl60F62uYSJI=";
+      hash = "sha256-cpeZ5J0CqC138SvMvmTALinZwgfJmuEpFcpiXr2UdzA=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/modem-dev/hunk/releases/download/v${hunkVersion}/hunkdiff-linux-x64.tar.gz";
-      hash = "sha256-qnA0DttNn9k2sfbStHGlJM9bz3DD9+uOOEy4ZyzntxI=";
+      hash = "sha256-Z3Ca5krL2WXho+0n5vMONxVwffVLuNNwjrx8VN8pJuw=";
     };
   };
 

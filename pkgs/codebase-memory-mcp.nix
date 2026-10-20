@@ -5,13 +5,13 @@
 # no-overlay-applied fallback working (see lib/default.nix) instead of
 # threading a foreign flake input through this repo's own overlay.
 #
-# ponytail: the v0.11.0 `-ui` release asset is byte-identical to the
+# ponytail: the v0.12.1 `-ui` release asset is byte-identical to the
 # non-UI one per platform (upstream release pipeline bug — --ui=true
 # likely does nothing in this build). Packaged anyway since
 # tools.codebase-memory-mcp.ui defaults to false; bump the pin once
 # upstream actually ships a distinct UI build.
 _final: prev: let
-  version = "0.11.0";
+  version = "0.12.1";
 
   mkVariant = pname: sources: let
     src = sources.${prev.stdenv.hostPlatform.system} or (throw "codebase-memory-mcp overlay: no binary pinned for ${prev.stdenv.hostPlatform.system}");
@@ -39,22 +39,22 @@ _final: prev: let
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-darwin-arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-084MgpeO01Htdp+BuMZqTGaCoge6Sk/K0wLSMThgWSE=";
+      hash = "sha256-+q0yIQvKWy9im/JtTpjhgrclX8w/fGMSRKan21aW87w=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-darwin-amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-kAmxuRdZyKjBt3ZsRbXkJpK5zXmFaZdj9HOPvpVkVOM=";
+      hash = "sha256-cad6KZJAQIyfz/JaCkH4h+H3pyMRr85JXvPgFbTaDJA=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-linux-amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-FrNu5iGfO10bDh1c2h8UbMdK8TRISWd2iWqHhmpY/j0=";
+      hash = "sha256-JBRaiZZh7xJCHB9LMzyC/OPfdXrqy6fokKOx9L/sAag=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-linux-arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-PstsadEMUNmZXVjAK1h1P0xd6ya3nBU1QuHFb/GsudY=";
+      hash = "sha256-m+gt6lKHax/UtR31c4AerWmuCa8X2lgar1Obua1MoWU=";
     };
   };
 
@@ -62,22 +62,22 @@ _final: prev: let
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-ui-darwin-arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-084MgpeO01Htdp+BuMZqTGaCoge6Sk/K0wLSMThgWSE=";
+      hash = "sha256-+q0yIQvKWy9im/JtTpjhgrclX8w/fGMSRKan21aW87w=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-ui-darwin-amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-kAmxuRdZyKjBt3ZsRbXkJpK5zXmFaZdj9HOPvpVkVOM=";
+      hash = "sha256-cad6KZJAQIyfz/JaCkH4h+H3pyMRr85JXvPgFbTaDJA=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-ui-linux-amd64.tar.gz";
       stripRoot = false;
-      hash = "sha256-FrNu5iGfO10bDh1c2h8UbMdK8TRISWd2iWqHhmpY/j0=";
+      hash = "sha256-JBRaiZZh7xJCHB9LMzyC/OPfdXrqy6fokKOx9L/sAag=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/DeusData/codebase-memory-mcp/releases/download/v${version}/codebase-memory-mcp-ui-linux-arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-PstsadEMUNmZXVjAK1h1P0xd6ya3nBU1QuHFb/GsudY=";
+      hash = "sha256-m+gt6lKHax/UtR31c4AerWmuCa8X2lgar1Obua1MoWU=";
     };
   };
 in {
