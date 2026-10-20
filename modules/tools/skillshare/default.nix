@@ -230,8 +230,8 @@ in {
         Agent profiles Skillshare targets, keyed by target name.
 
         Defaults to `claude` (~/.claude) and `pi` (~/.pi/agent), plus
-        `antigravity-cli` (~/.gemini/antigravity-cli) when that tool is
-        enabled. Names you
+        `antigravity-cli` (~/.gemini/antigravity-cli) and `codex` (~/.codex)
+        when those tools are enabled. Names you
         define are added alongside them. A name equal to its `agent` is that
         agent's built-in target (skills under `configDir/skills`); any other
         name is an account target, added with
@@ -351,6 +351,12 @@ in {
           antigravity-cli = {
             agent = "antigravity-cli";
             configDir = "${home}/.gemini/antigravity-cli";
+          };
+        }
+        // lib.optionalAttrs (config.tools.codex.enable or false) {
+          codex = {
+            agent = "codex";
+            configDir = "${home}/.codex";
           };
         });
 
