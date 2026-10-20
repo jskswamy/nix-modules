@@ -5,6 +5,8 @@
 # way, drop any one of them again with `tools.<name>.enable = false`.
 {
   imports = [
+    ../tools/antigravity-cli
+    ../tools/codex
     ../tools/herdr
     ../tools/ccstatusline
     ../tools/beads
