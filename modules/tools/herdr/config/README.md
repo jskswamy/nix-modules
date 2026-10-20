@@ -21,22 +21,14 @@ installs) to pick up changes without a full rebuild.
 
 ## Plugins
 
-| Key              | Plugin                                                             | Action                    |
-| ---------------- | ------------------------------------------------------------------ | ------------------------- |
-| `prefix+p`       | [herdr-plus](https://github.com/cloudmanic/herdr-plus)             | Open projects picker      |
-| `prefix+f`       | [herdr-file-viewer](https://github.com/smarzban/herdr-file-viewer) | Open file viewer in split |
-| `prefix+shift+h` | [herdr-hunk-diff](https://github.com/jhochenbaum/herdr-hunk-diff)  | Review changes            |
-| `prefix+shift+s` | herdr-hunk-diff                                                    | Send review to agent      |
-| `prefix+shift+c` | herdr-hunk-diff                                                    | Review the last commit    |
-| `prefix+shift+z` | [herdr-snooze](https://github.com/mrolafsson/herdr-snooze)         | Snooze or wake agent      |
-| `prefix+alt+z`   | herdr-snooze                                                       | Toggle snoozed view       |
+| Key              | Plugin                                                             | Action                 |
+| ---------------- | ------------------------------------------------------------------ | ---------------------- |
+| `prefix+p`       | [herdr-plus](https://github.com/cloudmanic/herdr-plus)             | Open projects picker   |
+| `prefix+b`       | [terminal-browser](https://github.com/zenbu-labs/terminal-browser) | Open browser in split  |
+| `prefix+g`       | [herdr-navigator](https://github.com/thanhdat77/herdr-navigator)   | Fuzzy jump             |
+| `prefix+shift+h` | [herdr-hunk-diff](https://github.com/jhochenbaum/herdr-hunk-diff)  | Review changes         |
+| `prefix+shift+s` | herdr-hunk-diff                                                    | Send review to agent   |
+| `prefix+shift+c` | herdr-hunk-diff                                                    | Review the last commit |
 
 The `herdr-hunk-diff` block in `config.toml` is managed by the plugin's own
 `setup-keys` command — edit it there, not by hand.
-
-## Installed plugins without bindings
-
-Listed in [`plugins.list`](./plugins.list) and synced by `herdr-lazy`
-([design doc](../../../../docs/superpowers/specs/2026-09-01-herdr-plugin-management-design.md)):
-
-- [pj-herdr](https://github.com/josephschmitt/pj-herdr) — no keybinding configured yet
