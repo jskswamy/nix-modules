@@ -229,7 +229,9 @@ in {
       description = ''
         Agent profiles Skillshare targets, keyed by target name.
 
-        Defaults to `claude` (~/.claude) and `pi` (~/.pi/agent). Names you
+        Defaults to `claude` (~/.claude) and `pi` (~/.pi/agent), plus
+        `antigravity-cli` (~/.gemini/antigravity-cli) when that tool is
+        enabled. Names you
         define are added alongside them. A name equal to its `agent` is that
         agent's built-in target (skills under `configDir/skills`); any other
         name is an account target, added with
@@ -334,16 +336,23 @@ in {
     ];
 
     tools.skillshare = {
-      profiles = defaults {
-        claude = {
-          agent = "claude";
-          configDir = "${home}/.claude";
-        };
-        pi = {
-          agent = "pi";
-          configDir = "${home}/.pi/agent";
-        };
-      };
+      profiles = defaults ({
+          claude = {
+            agent = "claude";
+            configDir = "${home}/.claude";
+          };
+          pi = {
+            agent = "pi";
+            configDir = "${home}/.pi/agent";
+          };
+        }
+        # Only when the CLI is installed; skillshare knows `agy` as this agent.
+        // lib.optionalAttrs (config.tools.antigravity-cli.enable or false) {
+          antigravity-cli = {
+            agent = "antigravity-cli";
+            configDir = "${home}/.gemini/antigravity-cli";
+          };
+        });
 
       mcpServers = defaults ({
           chrome-devtools.args = ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];

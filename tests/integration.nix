@@ -525,6 +525,9 @@ in {
         configDir = "/home/t/.pi/agent";
       };
     };
+  "skillshare targets antigravity-cli only when that tool is enabled" =
+    !(ss.profiles ? antigravity-cli)
+    && (mk [T.skillshare T.antigravity-cli]).tools.skillshare.profiles.antigravity-cli.agent == "antigravity-cli";
   "skillshare consumer profiles add to the defaults" =
     builtins.attrNames ssExtra.tools.skillshare.profiles == ["claude" "claude-extra" "pi"];
   "skillshare does not own config.yaml" =
