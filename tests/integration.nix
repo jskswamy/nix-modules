@@ -158,6 +158,8 @@ let
       };
     }
   ];
+  ssCli = mk [T.skillshare T.codex T.antigravity-cli];
+  ssCliTargets = name: ssTargets (lib.findFirst (e: e.name == name) null ssCli.tools.skillshare.resources.plugins);
   ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
   # Failed assertion messages. Home Manager's own entry point throws on
@@ -235,7 +237,7 @@ in {
   "lazygit with hunk gains both hunk commands" =
     lib.sort (a: b: a < b) (commands lazygitHunk)
     == ["AI commit with Claude" "Review branch tip with hunk" "Review commit with hunk"];
-  "skillshare package is pinned" = nm.packages.${builtins.currentSystem}.skillshare.version == "0.25.13";
+  "skillshare package is pinned" = nm.packages.${builtins.currentSystem}.skillshare.version == "0.26.0";
   "hunk alone does not enable git" = !hunkOnly.programs.git.enable;
   # Positive control: git's config is keyed by its absolute path, so a lookup by
   # the relative path would never match and any "writes no config" test would
@@ -552,6 +554,17 @@ in {
     ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
   ssRes.plugins;
   "skillshare binds Ponytail and Superpowers everywhere" = ssTargets (ssEntry "plugins" "ponytail") == ssAll && ssTargets (ssEntry "plugins" "superpowers") == ssAll;
+  "skillshare binds portable bundles to Codex and Antigravity CLI" =
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "pi"]) ["ponytail" "superpowers"];
+  "skillshare binds Beads to Codex and Antigravity CLI but not Pi" =
+    ssCliTargets "beads" == ["antigravity-cli" "claude" "codex"];
+  "skillshare binds Claude-compatible bundles to Antigravity CLI" =
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude"]) (["context7" "mattpocock-skills"] ++ jskswamyBundles)
+    && ssCliTargets "gopls-lsp" == ["claude"];
+  "skillshare excludes bundled standalone skills on Antigravity CLI" =
+    builtins.elem "beads" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
+    && builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
+    && !(ssCli.tools.skillshare.resources.excludes ? codex && builtins.elem "commit-action" ssCli.tools.skillshare.resources.excludes.codex);
   "skillshare keeps Beads and jskswamy bundles off Pi" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) (["beads"] ++ jskswamyBundles);
   "skillshare keeps Context7, gopls and Matt Pocock bundles on Claude only" =

@@ -8,8 +8,9 @@
 # `agents`, the agent CLIs plugin sync drives. Each list entry is
 # {name, args, dirs?}: `args` is the Skillshare CLI
 # call that adds it, run only when `name` is absent from that kind's JSON
-# listing, after creating `dirs`. Present entries are never touched, so
-# explicit `skillshare update` results survive. A failed add only warns;
+# listing, after creating `dirs`. Existing plugins gain missing bindings
+# from their saved source/ref; installed versions and bindings stay intact.
+# A failed add only warns;
 # nothing is ever removed. Sync failures make the exit status nonzero,
 # but only after every step has been attempted.
 set -uo pipefail
@@ -47,7 +48,26 @@ ensure() {
 	local todo=() n=0 total
 	while IFS= read -r entry; do
 		name=$(jq -r .name <<<"$entry")
-		grep -qxF -- "$name" <<<"$existing" || todo+=("$entry")
+		if grep -qxF -- "$name" <<<"$existing"; then
+			[[ $kind == plugins ]] || continue
+			# Add only new targets, keeping explicit updates and disabled bindings.
+			entry=$(jq -c --argjson cur "$out" '
+				. as $e | $cur.packages[.name] as $p
+				| [.args | to_entries[] | select(.value == "--target")
+					| $e.args[.key + 1] as $t
+					| select(($p.bindings // {} | has($t)) | not) | $t] as $missing
+				| select(($missing | length) > 0)
+				| select(($p.source // "") != "")
+				| .args = (["plugin", "add", $p.source, "--plugin", ($p.plugin // .name), "--name", .name]
+					+ (if ($p.sourceRef // "") == "" then [] else ["--source-ref", $p.sourceRef] end)
+					+ ($missing | map(["--target", .]) | add) + ["--json"])
+			' <<<"$entry") || {
+				warn "could not read plugin bindings for $name"
+				continue
+			}
+			[[ -n $entry ]] || continue
+		fi
+		todo+=("$entry")
 	done < <(jq -c --arg k "$kind" '.[$k] // [] | .[]' "$decl")
 	total=${#todo[@]}
 	((total)) && say "adding $total missing $kind"

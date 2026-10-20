@@ -1,22 +1,22 @@
 {
-  "about": "Facts from `skillshare plugin discover <source> --json` (0.25.12) in a scratch HOME with claude, an account target of claude, and pi. agents: configured agents among each candidate's targets. skills: the bundled skills a standalone install of the same repository also provides, at the discovered commit of the source the module declares. To refresh after a bundle gains or loses skills (the skills lists are the Claude exclude list), rerun discover for each source in that scratch HOME and copy the new commit, agents and skills here.",
+  "about": "Facts from `skillshare plugin discover <source> --json`. Agent compatibility refreshed with 0.25.13 against claude, pi, codex and antigravity-cli targets on the sources' default branches. commit and skills retain the original 0.25.12 bundled-skills snapshot: skills are the standalone copies excluded where the native bundle is installed. To refresh agents, discover each source with every supported target configured; to refresh skills, inspect the source bundle and update its commit and skills together.",
   "plugins": {
     "ponytail": {
       "commit": "84740e3d34",
-      "agents": ["claude", "pi"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli"]
     },
     "superpowers": {
       "commit": "bb92a77741",
-      "agents": ["claude", "pi"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli"]
     },
     "beads": {
       "commit": "b911ed28cd",
-      "agents": ["claude"],
+      "agents": ["claude", "codex", "antigravity-cli"],
       "skills": ["beads"]
     },
     "context7": {
       "commit": "ea10b21368",
-      "agents": ["claude"]
+      "agents": ["claude", "antigravity-cli"]
     },
     "gopls-lsp": {
       "commit": "ea10b21368",
@@ -24,7 +24,7 @@
     },
     "mattpocock-skills": {
       "commit": "49dd158d10",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "ask-matt",
         "code-review",
@@ -57,12 +57,12 @@
     },
     "bivouac": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": ["bivouac"]
     },
     "codebase": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "codebase-ask",
         "codebase-explore",
@@ -73,7 +73,7 @@
     },
     "commit-tools": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "commit-action",
         "commit-style",
@@ -83,7 +83,7 @@
     },
     "craft": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "craft-backlog",
         "craft-decompose",
@@ -99,12 +99,12 @@
     },
     "devenv": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": ["devenv"]
     },
     "jot": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "jot-capture",
         "jot-configure",
@@ -114,22 +114,22 @@
     },
     "refactor": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": ["refactor-scan"]
     },
     "sketch-note": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
     },
     "study": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": ["study-coach", "study-recall", "study-setup"]
     },
     "typst-notes": {
       "commit": "327368a51f",
-      "agents": ["claude"],
+      "agents": ["claude", "antigravity-cli"],
       "skills": [
         "infographics",
         "jot-to-publish",

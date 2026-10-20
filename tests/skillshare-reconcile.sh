@@ -34,7 +34,16 @@ case "$*" in
 		'{targets: map(. as $t | {name: ., exclude: [$f[0][] | select(startswith($t + ":")) | ltrimstr($t + ":")]})}'
 	;;
 "list --json") names skill | jq 'map({name: .})' ;;
-"plugin list --json") names plugin | jq 'map({key: ., value: {}}) | {packages: from_entries}' ;;
+"plugin list --json")
+	touch "$FAKE_STATE/binding"
+	names plugin | jq --rawfile bindings "$FAKE_STATE/binding" '
+		map(. as $name | {key: ., value: {
+			source: (env.FAKE_PLUGIN_SOURCE // ("org/" + $name)), plugin: $name,
+			sourceRef: (env.FAKE_SOURCE_REF // ""),
+			bindings: ($bindings | split("\n") | map(select(startswith($name + ":")) | ltrimstr($name + ":")
+				| {key: ., value: {disabled: (. == env.FAKE_DISABLED_TARGET)}}) | from_entries)
+		}}) | {packages: from_entries}'
+	;;
 "mcp check --no-dns --json") names mcp | jq '{servers: map({name: .})}' ;;
 "hooks list --json") names hook | jq 'map({key: ., value: {}}) | {source: {entries: from_entries}}' ;;
 "target add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/target" ;;
@@ -45,7 +54,22 @@ case "$*" in
 	while (($#)); do echo "$t:$2" >>"$FAKE_STATE/filter" && shift 2; done
 	;;
 "install "*) fail "$2" && exit 1; basename "$2" >>"$FAKE_STATE/skill" ;;
-"plugin add "*) fail "$3" && exit 1; basename "$3" >>"$FAKE_STATE/plugin" ;;
+"plugin add "*)
+	fail "$3" && exit 1
+	name=$(basename "$3") targets=()
+	shift 3
+	while (($#)); do
+		case $1 in
+		--plugin | --name) name=$2; shift 2 ;;
+		--target) targets+=("$2"); shift 2 ;;
+		--source-ref) shift 2 ;;
+		*) shift ;;
+		esac
+	done
+	for target in "${targets[@]}"; do fail "$name:$target" && exit 1; done
+	grep -qx "$name" "$FAKE_STATE/plugin" 2>/dev/null || echo "$name" >>"$FAKE_STATE/plugin"
+	for target in "${targets[@]}"; do echo "$name:$target" >>"$FAKE_STATE/binding"; done
+	;;
 "mcp add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/mcp" ;;
 "hooks add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/hook" ;;
 "sync --all" | "sync plugins") fail sync && exit 1; exit 0 ;;
@@ -140,5 +164,25 @@ for shape in keyed null nokey; do
 	check "$shape empty listing still adds every entry" '[[ $(adds) == 7 ]] && ! grep -q "could not list" "$tmp/err"'
 done
 unset FAKE_EMPTY
+
+# Adding a new profile must bind an already-managed plugin without touching
+# existing (even disabled) bindings or changing the user's source/ref.
+jq '.plugins[0].args += ["--target", "claude", "--target", "codex"]' "$decl" >"$tmp/expanded.json"
+mv "$tmp/expanded.json" "$decl"
+echo demo >"$FAKE_STATE/plugin"
+printf 'demo:claude\ndemo:pi\n' >"$FAKE_STATE/binding"
+export FAKE_PLUGIN_SOURCE=org/custom FAKE_SOURCE_REF=stable FAKE_DISABLED_TARGET=claude
+run --no-sync
+check "existing plugin gains only the missing binding from its saved source" 'grep -qx "plugin add org/custom --plugin demo --name demo --source-ref stable --target codex --json" "$FAKE_LOG" && grep -qx "demo:codex" "$FAKE_STATE/binding"'
+check "existing and undeclared plugin bindings are preserved" '[[ $(wc -l <"$FAKE_STATE/binding" | tr -d " ") == 3 ]] && grep -qx "demo:claude" "$FAKE_STATE/binding" && grep -qx "demo:pi" "$FAKE_STATE/binding"'
+run
+check "complete plugin bindings are not re-added" '! grep -q "^plugin add " "$FAKE_LOG" && synced'
+sed -i.bak '/^demo:codex$/d' "$FAKE_STATE/binding"
+echo "demo:codex" >"$FAKE_FAIL"
+run
+check "binding failure warns and still syncs without removing existing bindings" 'grep -q "warning.*demo" "$tmp/err" && synced && grep -qx "demo:claude" "$FAKE_STATE/binding" && ! grep -qx "demo:codex" "$FAKE_STATE/binding"'
+: >"$FAKE_FAIL"
+run
+check "failed plugin bindings are retried next time" 'grep -qx "demo:codex" "$FAKE_STATE/binding"'
 
 exit "$fails"
