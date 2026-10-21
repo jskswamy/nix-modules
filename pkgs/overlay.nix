@@ -7,8 +7,10 @@
 final: prev:
 import ./agentgateway.nix final prev
 // import ./aide.nix final prev
+// import ./antigravity-cli.nix final prev
 // import ./beads.nix final prev
 // import ./ccstatusline.nix final prev
+// import ./codex.nix final prev
 // import ./codebase-memory-mcp.nix final prev
 // import ./things-cloud-mcp.nix final prev
 // import ./tala.nix final prev
