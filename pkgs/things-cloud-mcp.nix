@@ -14,25 +14,23 @@
 # things-cloud-sdk/histories.go sync/write handling, suspected cause of
 # stale reads (frozen serverIndex) seen after restoring this server.
 #
-# 2026-08-26: bumped again (was da535f0) for our own
-# "fix: support Task7 kind and skip unknown items during rebuild"
-# (2d5ba56) — Things 3.23 started writing repeating tasks as a new
-# Task7 item kind, which aborted every state rebuild (every tool
-# call) the moment the account had one repeating task. Also filed
-# upstream: https://github.com/wbopan/things-cloud-mcp/pull/24.
+# 2026-10-21: bumped to fork main HEAD (b03d51d) — includes upstream
+# maintainer's fix/task7-and-recurring-projection (d0f1dc1) which adds Task7
+# support and occurrence projection for recurring to-dos, plus PR #33 (Task2/Tag2),
+# PR #34 (Mail to Things Command queue items), and our PR #20 (untitled notes).
 _: prev: {
   things-cloud-mcp = prev.buildGoModule rec {
     pname = "things-cloud-mcp";
-    version = "1.4.3-unstable-2026-08-26";
+    version = "1.4.4-unstable-2026-10-21";
 
     src = prev.fetchFromGitHub {
       owner = "jskswamy";
       repo = "things-cloud-mcp";
-      rev = "2d5ba562cded57955e0e61361207465b682715e5";
-      hash = "sha256-W5K9Nkzjc7k2EpUIO7rYivjWAPDDovXrUedW+5aNY+A=";
+      rev = "b03d51daf6fcabbe620231ccec66bfe29f1b0d2d";
+      hash = "sha256-KuDD97VISpniFFJPLZpICDDk7X6c3+CKGiSf/kc0nZM=";
     };
 
-    vendorHash = "sha256-UI5nEO4GpruVg2CoOUmUKFKL7fbTg/2ZIqSlf/6YL2k=";
+    vendorHash = "sha256-k2zliqA+7R4Vu/xzAo5kmhTFf/wf2QVw8ygUocZ1I4k=";
 
     # things-cloud-sdk/ is a separate Go module (its own go.mod), pulled in
     # via a local `replace` directive in go.mod — not a subpackage of the
