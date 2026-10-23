@@ -533,6 +533,9 @@ in {
   "skillshare targets codex only when that tool is enabled" =
     !(ss.profiles ? codex)
     && (mk [T.skillshare T.codex]).tools.skillshare.profiles.codex.agent == "codex";
+  "skillshare targets opencode only when that tool is enabled" =
+    !(ss.profiles ? opencode)
+    && (mk [T.skillshare T.opencode]).tools.skillshare.profiles.opencode.agent == "opencode";
   "skillshare consumer profiles add to the defaults" =
     builtins.attrNames ssExtra.tools.skillshare.profiles == ["claude" "claude-extra" "pi"];
   "skillshare does not own config.yaml" =
