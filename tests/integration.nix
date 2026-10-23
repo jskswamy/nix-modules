@@ -210,18 +210,18 @@ let
   agentTools = mk [nm.homeManagerModules.agent-tools];
 in {
   # Agent CLIs install only their selected package, without owning login state.
-  "agent CLI modules are exported" = T ? antigravity-cli && T ? codex;
-  "agent CLIs install their packages" = builtins.all (name: installs (mk [T.${name}]) name) ["antigravity-cli" "codex"];
+  "agent CLI modules are exported" = T ? antigravity-cli && T ? codex && T ? opencode;
+  "agent CLIs install their packages" = builtins.all (name: installs (mk [T.${name}]) name) ["antigravity-cli" "codex" "opencode"];
   "disabled agent CLIs install nothing" = builtins.all (name:
     map lib.getName (mk [T.${name} {tools.${name}.enable = false;}]).home.packages
-    == map lib.getName (mk []).home.packages) ["antigravity-cli" "codex"];
+    == map lib.getName (mk []).home.packages) ["antigravity-cli" "codex" "opencode"];
   "agent CLIs accept package null" = builtins.all (name:
     map lib.getName (mk [T.${name} {tools.${name}.package = null;}]).home.packages
-    == map lib.getName (mk []).home.packages) ["antigravity-cli" "codex"];
+    == map lib.getName (mk []).home.packages) ["antigravity-cli" "codex" "opencode"];
   "agent CLIs accept package overrides" = builtins.all (name:
     installs (mk [T.${name} {tools.${name}.package = pkgs.hello;}]) "hello"
-    && !(installs (mk [T.${name} {tools.${name}.package = pkgs.hello;}]) name)) ["antigravity-cli" "codex"];
-  "agent-tools includes both agent CLIs" = installs agentTools "antigravity-cli" && installs agentTools "codex";
+    && !(installs (mk [T.${name} {tools.${name}.package = pkgs.hello;}]) name)) ["antigravity-cli" "codex" "opencode"];
+  "agent-tools includes all agent CLIs" = installs agentTools "antigravity-cli" && installs agentTools "codex" && installs agentTools "opencode";
 
   # hunk: the guest pushes into git and lazygit; neither imports it.
   "git alone does not bring hunk" = !(installs git "hunk");

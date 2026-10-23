@@ -7,6 +7,7 @@
   imports = [
     ../tools/antigravity-cli
     ../tools/codex
+    ../tools/opencode
     ../tools/herdr
     ../tools/ccstatusline
     ../tools/beads
