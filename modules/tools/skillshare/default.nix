@@ -281,8 +281,8 @@ in {
 
     rtkPackage = mkOption {
       type = types.nullOr types.package;
-      default = pkgs.rtk;
-      defaultText = lib.literalExpression "pkgs.rtk";
+      default = (import ../../../pkgs/rtk.nix pkgs pkgs).rtk;
+      defaultText = lib.literalExpression "(import ../../../pkgs/rtk.nix pkgs pkgs).rtk";
       description = ''
         Package installed for the `rtk hook claude` command-rewrite hook that
         Skillshare binds to the Claude profiles. Without `rtk` on `PATH` every
