@@ -56,7 +56,7 @@ in {
         alejandra
         statix
         deadnix
-        pkl
+        ((import ../../../pkgs/pkl.nix pkgs pkgs).pkl)
         jre_headless # Mason's pkl-lsp runs a Java archive.
         terraform
       ];
