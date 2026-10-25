@@ -6,28 +6,28 @@
 # this formula only unpacks a prebuilt binary and never compiles anything.
 # Fetching the same binary directly via Nix skips that check entirely.
 _final: prev: let
-  moshiHookVersion = "0.4.31";
+  moshiHookVersion = "0.4.37";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://cdn.getmoshi.app/hook/v${moshiHookVersion}/moshi-hook_Darwin_arm64.tar.gz";
       stripRoot = false; # flat tarball, no wrapping directory
-      hash = "sha256-tvr1pZI9qZF8gHHyy5MFAVxzBAV2jXarcKJiyTwMgNw=";
+      hash = "sha256-I42/zfC8kDNcMImgpwR9HY7ynnL23E291rCcj9C4Sjs=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://cdn.getmoshi.app/hook/v${moshiHookVersion}/moshi-hook_Darwin_x86_64.tar.gz";
       stripRoot = false;
-      hash = "sha256-YiYWfE5Sjt3enkF+GVMra4mH/m7F7DEyAKELSGJr9Rw=";
+      hash = "sha256-eynLAvcBYweWfxzWz+lGV4vwbt9x6rkD1IGJ44aNLjk=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://cdn.getmoshi.app/hook/v${moshiHookVersion}/moshi-hook_Linux_arm64.tar.gz";
       stripRoot = false;
-      hash = "sha256-5RsHF/r1N+6r96idxpPhQOc++kiq9DwqK1Kc1vxqyPk=";
+      hash = "sha256-1oOzbz5QaiN2JZrM5GHzpv6W1GjVjTfULoFTkBvJeNA=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://cdn.getmoshi.app/hook/v${moshiHookVersion}/moshi-hook_Linux_x86_64.tar.gz";
       stripRoot = false;
-      hash = "sha256-P9jjZLFJLCDtrIj+9PdO4dvEsCM5xXkFcmMGREDidLA=";
+      hash = "sha256-1yYoTodU8v6O9xsD0OwlbduykHw8wwMpxJGxTmFG17Y=";
     };
   };
 
