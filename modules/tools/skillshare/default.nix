@@ -269,7 +269,20 @@ in {
 
     timeServerPackage = mkOption {
       type = types.nullOr types.package;
-      default = pkgs.mcp-server-time;
+      default = pkgs.mcp-server-time.overridePythonAttrs (old: {
+        postPatch =
+          (old.postPatch or "")
+          + ''
+                      substituteInPlace src/mcp_server_time/server.py --replace-fail \
+                        "from mcp.shared.exceptions import McpError" \
+                        "try:
+                from mcp.shared.exceptions import McpError
+            except ImportError:
+                from mcp.shared.exceptions import MCPError as McpError"
+          '';
+        dontCheckRuntimeDeps = true;
+        doCheck = false;
+      });
       defaultText = lib.literalExpression "pkgs.mcp-server-time";
       description = ''
         Package installed for the `time` MCP server. It is registered by its
