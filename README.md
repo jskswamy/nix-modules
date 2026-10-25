@@ -90,10 +90,10 @@ that is not in one of its tools.
 
 | Group         | Tools                                                                                               |
 | ------------- | --------------------------------------------------------------------------------------------------- |
-| `agent-tools` | `antigravity-cli`, `codex`, `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`, `aide`, `skillshare` |
+| `agent-tools` | `antigravity-cli`, `ast-grep`, `codex`, `duckdb`, `opencode`, `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`, `aide`, `skillshare` |
 | `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                             |
 | `editor`      | `nvim`, `vim`, `fresh`                                                                              |
-| `git-tools`   | `git`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `lazygit`, `gpg`, `tig`, `hunk`        |
+| `git-tools`   | `git`, `git-absorb`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `jujutsu`, `lazygit`, `mergiraf`, `gpg`, `tig`, `hunk` |
 | `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                              |
 | `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                                 |
 | `ssh`         | `ssh`                                                                                               |

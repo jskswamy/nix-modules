@@ -6,11 +6,14 @@
 {
   imports = [
     ../tools/git
+    ../tools/git-absorb
     ../tools/git-lfs
     ../tools/git-lfs-transfer
     ../tools/delta
     ../tools/difftastic
+    ../tools/jujutsu
     ../tools/lazygit
+    ../tools/mergiraf
     ../tools/gpg
     ../tools/tig
     ../tools/hunk

@@ -503,6 +503,26 @@ in {
   "git-lfs-transfer with package null installs nothing" = !(installs (mk [T."git-lfs-transfer" {tools."git-lfs-transfer".package = null;}]) "git-lfs-transfer");
   "git-tools includes lfs tools" = gitTools.programs.git.lfs.enable && installs gitTools "git-lfs-transfer";
 
+  # ast-grep, duckdb, git-absorb, jujutsu, mergiraf.
+  "ast-grep installs its package" = installs (mk [T."ast-grep"]) "ast-grep";
+  "duckdb installs its package" = installs (mk [T.duckdb]) "duckdb";
+  "agent-tools includes ast-grep and duckdb" = installs agentTools "ast-grep" && installs agentTools "duckdb";
+  "git-absorb installs its package and sets maxStack" =
+    installs (mk [T.git T."git-absorb"]) "git-absorb"
+    && ((mk [T.git T."git-absorb"]).programs.git.settings.absorb.maxStack or null) == 50;
+  "jujutsu installs its package" = installs (mk [T.jujutsu]) "jujutsu";
+  "git alone has no mergiraf driver or attributes" =
+    !(git.programs.git.settings.merge ? mergiraf) && git.programs.git.attributes == [];
+  "git with mergiraf sets merge driver and attributes" = let
+    c = mk [T.git T.mergiraf];
+  in
+    installs c "mergiraf"
+    && (c.programs.git.settings.merge.mergiraf.driver or null) == "mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L"
+    && builtins.elem "*.nix merge=mergiraf" c.programs.git.attributes
+    && builtins.elem "*.go merge=mergiraf" c.programs.git.attributes;
+  "git-tools includes git-absorb, jujutsu and mergiraf" =
+    installs gitTools "git-absorb" && installs gitTools "jujutsu" && installs gitTools "mergiraf";
+
   # skillshare: owns mutable state, so Home Manager installs the binary and
   # reconciles through the CLI but never writes its config.yaml.
   "skillshare installs its package" = installs skillshare "skillshare";

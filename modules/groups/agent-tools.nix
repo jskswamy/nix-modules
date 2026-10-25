@@ -6,7 +6,9 @@
 {
   imports = [
     ../tools/antigravity-cli
+    ../tools/ast-grep
     ../tools/codex
+    ../tools/duckdb
     ../tools/opencode
     ../tools/herdr
     ../tools/ccstatusline
