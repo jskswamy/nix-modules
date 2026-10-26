@@ -571,7 +571,7 @@ in {
 
   # Bundles, from the discovery fixture.
   "skillshare plugins are exactly the approved bundles" =
-    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "ponytail" "superpowers"] ++ ssClaudeOnly ++ jskswamyBundles);
+    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "egm" "ponytail" "superpowers"] ++ ssClaudeOnly ++ jskswamyBundles);
   "skillshare fixture covers every bundle" = builtins.all (n: ssCompat ? ${n}) (ssNames "plugins" skillshare);
   "skillshare binds each bundle to every compatible target" = builtins.all (e:
     ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
@@ -579,8 +579,8 @@ in {
   "skillshare binds Ponytail and Superpowers everywhere" = ssTargets (ssEntry "plugins" "ponytail") == ssAll && ssTargets (ssEntry "plugins" "superpowers") == ssAll;
   "skillshare binds portable bundles to Codex and Antigravity CLI" =
     builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "pi"]) ["ponytail" "superpowers"];
-  "skillshare binds Beads to Codex and Antigravity CLI but not Pi" =
-    ssCliTargets "beads" == ["antigravity-cli" "claude" "codex"];
+  "skillshare binds Beads and EGM to Codex and Antigravity CLI but not Pi" =
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex"]) ["beads" "egm"];
   "skillshare binds Claude-compatible bundles to Antigravity CLI" =
     builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude"]) (["context7" "mattpocock-skills"] ++ jskswamyBundles)
     && ssCliTargets "gopls-lsp" == ["claude"];
@@ -588,8 +588,8 @@ in {
     builtins.elem "beads" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && !(ssCli.tools.skillshare.resources.excludes ? codex && builtins.elem "commit-action" ssCli.tools.skillshare.resources.excludes.codex);
-  "skillshare keeps Beads and jskswamy bundles off Pi" =
-    builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) (["beads"] ++ jskswamyBundles);
+  "skillshare keeps Beads, EGM and jskswamy bundles off Pi" =
+    builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) (["beads" "egm"] ++ jskswamyBundles);
   "skillshare keeps Context7, gopls and Matt Pocock bundles on Claude only" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude && ssTargets (ssExtraEntry "plugins" n) == ["claude" "claude-extra"]) ssClaudeOnly;
   "skillshare installs Context7 and gopls from the official marketplace" =

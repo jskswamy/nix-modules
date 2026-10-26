@@ -14,6 +14,10 @@
       "agents": ["claude", "codex", "antigravity-cli"],
       "skills": ["beads"]
     },
+    "egm": {
+      "commit": "3d0b34821c",
+      "agents": ["claude", "codex", "antigravity-cli"]
+    },
     "context7": {
       "commit": "ea10b21368",
       "agents": ["claude", "antigravity-cli"]
@@ -56,12 +60,12 @@
       ]
     },
     "bivouac": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": ["bivouac"]
     },
     "codebase": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": [
         "codebase-ask",
@@ -72,7 +76,7 @@
       ]
     },
     "commit-tools": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": [
         "commit-action",
@@ -82,7 +86,7 @@
       ]
     },
     "craft": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": [
         "craft-backlog",
@@ -98,12 +102,12 @@
       ]
     },
     "devenv": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": ["devenv"]
     },
     "jot": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": [
         "jot-capture",
@@ -113,22 +117,22 @@
       ]
     },
     "refactor": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": ["refactor-scan"]
     },
     "sketch-note": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
     },
     "study": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": ["study-coach", "study-recall", "study-setup"]
     },
     "typst-notes": {
-      "commit": "327368a51f",
+      "commit": "893714a1b9",
       "agents": ["claude", "antigravity-cli"],
       "skills": [
         "infographics",

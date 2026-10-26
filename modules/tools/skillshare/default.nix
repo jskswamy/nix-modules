@@ -88,6 +88,7 @@
       ponytail = "DietrichGebert/ponytail";
       superpowers = "obra/superpowers";
       beads = "steveyegge/beads";
+      egm = "google/elephant-goldfish-model";
       context7 = "anthropics/claude-plugins-official";
       gopls-lsp = "anthropics/claude-plugins-official";
       mattpocock-skills = "mattpocock/skills";
