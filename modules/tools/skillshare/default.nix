@@ -126,6 +126,10 @@
       name = "beads";
       args = ["install" "steveyegge/beads/plugins/beads/skills/beads" "-y"];
     }
+    ++ lib.optional (bundleTargets "egm" != profileNames) {
+      name = "egm_review";
+      args = ["install" "google/elephant-goldfish-model/skills" "--kind" "skill" "--all" "-y"];
+    }
     # The repository holds more skills than its bundle; select exactly the
     # bundle's (`--skill` is noninteractive and refuses `-y`).
     ++ lib.optional (bundleTargets "mattpocock-skills" != profileNames) {

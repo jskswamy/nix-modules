@@ -158,7 +158,7 @@ let
       };
     }
   ];
-  ssCli = mk [T.skillshare T.codex T.antigravity-cli];
+  ssCli = mk [T.skillshare T.codex T.antigravity-cli T.opencode];
   ssCliTargets = name: ssTargets (lib.findFirst (e: e.name == name) null ssCli.tools.skillshare.resources.plugins);
   ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
@@ -577,8 +577,8 @@ in {
     ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
   ssRes.plugins;
   "skillshare binds Ponytail and Superpowers everywhere" = ssTargets (ssEntry "plugins" "ponytail") == ssAll && ssTargets (ssEntry "plugins" "superpowers") == ssAll;
-  "skillshare binds portable bundles to Codex and Antigravity CLI" =
-    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "pi"]) ["ponytail" "superpowers"];
+  "skillshare binds portable bundles to Codex, OpenCode and Antigravity CLI" =
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "opencode" "pi"]) ["ponytail" "superpowers"];
   "skillshare binds Beads and EGM to Codex and Antigravity CLI but not Pi" =
     builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex"]) ["beads" "egm"];
   "skillshare binds Claude-compatible bundles to Antigravity CLI" =
@@ -586,6 +586,7 @@ in {
     && ssCliTargets "gopls-lsp" == ["claude"];
   "skillshare excludes bundled standalone skills on Antigravity CLI" =
     builtins.elem "beads" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
+    && builtins.elem "egm_review" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && !(ssCli.tools.skillshare.resources.excludes ? codex && builtins.elem "commit-action" ssCli.tools.skillshare.resources.excludes.codex);
   "skillshare keeps Beads, EGM and jskswamy bundles off Pi" =
@@ -607,7 +608,7 @@ in {
     && !(builtins.any (a: lib.hasInfix "superpowers-dev" a || lib.hasInfix "superpowers-marketplace" a || a == "--source-ref") ssArgs);
   "skillshare installs standalone skills for uncovered targets" =
     ssNames "skills" skillshare
-    == ["beads" "release" "setup-matt-pocock-skills"]
+    == ["beads" "egm_review" "release" "setup-matt-pocock-skills"]
     && builtins.elem "jskswamy/skills/skills" (ssEntry "skills" "release").args
     && builtins.elem "skill" (ssEntry "skills" "release").args;
   "skillshare installs exactly the Matt Pocock bundle's skills standalone" =
@@ -618,7 +619,7 @@ in {
   "skillshare skips standalone Beads when every target has the plugin" =
     ssNames "skills" (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]) == ["release"];
   "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
-    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "mattpocock-skills"] ++ jskswamyBundles)))
+    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "egm" "mattpocock-skills"] ++ jskswamyBundles)))
   ssClaude;
   "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "release" (ssExcludes t))) ssClaude;
   "skillshare excludes nothing on Pi" = ssExcludes "pi" == [];

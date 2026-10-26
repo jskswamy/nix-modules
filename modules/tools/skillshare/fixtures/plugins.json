@@ -1,13 +1,13 @@
 {
-  "about": "Facts from `skillshare plugin discover <source> --json`. Agent compatibility refreshed with 0.25.13 against claude, pi, codex and antigravity-cli targets on the sources' default branches. commit and skills retain the original 0.25.12 bundled-skills snapshot: skills are the standalone copies excluded where the native bundle is installed. To refresh agents, discover each source with every supported target configured; to refresh skills, inspect the source bundle and update its commit and skills together.",
+  "about": "Facts from `skillshare plugin discover <source> --json`. Agent compatibility refreshed with 0.27.0 against claude, pi, codex, opencode and antigravity-cli targets on the sources' default branches. commit and skills retain the bundled-skills snapshot: skills are the standalone copies excluded where the native bundle is installed. To refresh agents, discover each source with every supported target configured; to refresh skills, inspect the source bundle and update its commit and skills together.",
   "plugins": {
     "ponytail": {
       "commit": "84740e3d34",
-      "agents": ["claude", "pi", "codex", "antigravity-cli"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"]
     },
     "superpowers": {
       "commit": "bb92a77741",
-      "agents": ["claude", "pi", "codex", "antigravity-cli"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"]
     },
     "beads": {
       "commit": "b911ed28cd",
@@ -16,7 +16,16 @@
     },
     "egm": {
       "commit": "3d0b34821c",
-      "agents": ["claude", "codex", "antigravity-cli"]
+      "agents": ["claude", "codex", "antigravity-cli"],
+      "skills": [
+        "egm_bootstrap",
+        "egm_brainstorm",
+        "egm_draft",
+        "egm_drift_report",
+        "egm_resolve",
+        "egm_review",
+        "egm_review_loop"
+      ]
     },
     "context7": {
       "commit": "ea10b21368",
