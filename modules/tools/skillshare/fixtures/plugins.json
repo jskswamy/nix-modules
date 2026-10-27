@@ -69,13 +69,13 @@
       ]
     },
     "bivouac": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": ["bivouac"]
     },
     "codebase": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
         "codebase-ask",
         "codebase-explore",
@@ -85,8 +85,8 @@
       ]
     },
     "commit-tools": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
         "commit-action",
         "commit-style",
@@ -95,8 +95,8 @@
       ]
     },
     "craft": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
         "craft-backlog",
         "craft-decompose",
@@ -111,13 +111,13 @@
       ]
     },
     "devenv": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": ["devenv"]
     },
     "jot": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
         "jot-capture",
         "jot-configure",
@@ -126,23 +126,23 @@
       ]
     },
     "refactor": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": ["refactor-scan"]
     },
     "sketch-note": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
     },
     "study": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": ["study-coach", "study-recall", "study-setup"]
     },
     "typst-notes": {
-      "commit": "893714a1b9",
-      "agents": ["claude", "antigravity-cli"],
+      "commit": "4e61ce9859",
+      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
         "infographics",
         "jot-to-publish",
