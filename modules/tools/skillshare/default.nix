@@ -67,6 +67,9 @@
     targets = lib.mapAttrsToList target cfg.profiles;
     # Plugin sync drives each agent's own CLI.
     agents = lib.unique (lib.mapAttrsToList (_: p: p.agent) cfg.profiles);
+    # OpenCode V2 will not load the file URL Skillshare writes. Reconcile
+    # adds the plugin directory beside it in each of these configs.
+    opencodeConfigDirs = lib.mapAttrsToList (_: p: p.configDir) (lib.filterAttrs (_: p: p.agent == "opencode") cfg.profiles);
     inherit (cfg.resources) excludes skills plugins mcp hooks;
   };
 
@@ -135,6 +138,17 @@
     ++ lib.optional (bundleTargets "mattpocock-skills" != profileNames) {
       name = "setup-matt-pocock-skills";
       args = ["install" "mattpocock/skills" "--skill" (lib.concatStringsSep "," compat.mattpocock-skills.skills)];
+    }
+    # Ponytail and Superpowers publish no OpenCode package. Their skills
+    # reach OpenCode as standalone copies; targets that have the native
+    # bundle exclude them, so they are not installed twice.
+    ++ lib.optional (bundleTargets "ponytail" != profileNames) {
+      name = "ponytail";
+      args = ["install" "DietrichGebert/ponytail/skills" "--skill" (lib.concatStringsSep "," compat.ponytail.skills)];
+    }
+    ++ lib.optional (bundleTargets "superpowers" != profileNames) {
+      name = "using-superpowers";
+      args = ["install" "obra/superpowers/skills" "--skill" (lib.concatStringsSep "," compat.superpowers.skills)];
     };
 
   mcpAdd = name: targets: rest: {
@@ -408,6 +422,7 @@ in {
         verboseEcho "Skipping skillshare reconcile in dry run"
       else
         XDG_CONFIG_HOME=${lib.escapeShellArg config.xdg.configHome} \
+        PYTHON=${pkgs.python3}/bin/python3 \
         PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
           ${pkgs.bash}/bin/bash ${./reconcile.sh} ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)} \
           ${lib.optionalString (!cfg.syncOnActivation) "--no-sync"} ||

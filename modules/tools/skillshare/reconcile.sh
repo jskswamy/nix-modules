@@ -131,4 +131,18 @@ if [[ $mode != --no-sync ]]; then
 		status=1
 	}
 fi
+
+# Skillshare registers OpenCode plugins as a file URL of index.js. OpenCode V2
+# skips that and loads only a directory, so the plugin's skills never appear.
+# Repair after sync, and also when sync is skipped: a previous registration
+# still needs the directory. Skillshare's file URL stays; it is the identity
+# the next sync matches.
+mapfile -t opencode_dirs < <(jq -r '.opencodeConfigDirs // [] | .[]' "$decl")
+if ((${#opencode_dirs[@]})); then
+	say "registering OpenCode plugin directories"
+	"${PYTHON:-python3}" "$(dirname "$0")/opencode-plugins.py" "${opencode_dirs[@]}" || {
+		warn "could not register OpenCode plugin directories"
+		status=1
+	}
+fi
 exit "$status"

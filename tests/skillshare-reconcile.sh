@@ -185,4 +185,21 @@ check "binding failure warns and still syncs without removing existing bindings"
 run
 check "failed plugin bindings are retried next time" 'grep -qx "demo:codex" "$FAKE_STATE/binding"'
 
+# OpenCode V2 loads a plugin directory, not the index.js file URL Skillshare writes.
+plugin_root="$tmp/state/skillshare/plugins/skillshare-demo/content/dist/plugins/codebase"
+mkdir -p "$plugin_root"
+printf 'export default {}\n' >"$plugin_root/index.js"
+oc_home="$tmp/oc"
+mkdir -p "$oc_home"
+file_url="file://$plugin_root/index.js"
+dir_url="file://$plugin_root"
+python3 -c 'import json,sys; json.dump({"provider":{"keep":True},"plugins":[sys.argv[1]]}, open(sys.argv[2],"w"))' "$file_url" "$oc_home/opencode.json"
+python3 modules/tools/skillshare/opencode-plugins.py "$oc_home"
+check "OpenCode plugin file URL gains its directory" 'python3 -c "import json,sys; data=json.load(open(sys.argv[1])); assert data[\"provider\"]=={\"keep\":True}; assert data[\"plugins\"]==[sys.argv[2], sys.argv[3]]" "$oc_home/opencode.json" "$file_url" "$dir_url"'
+python3 modules/tools/skillshare/opencode-plugins.py "$oc_home"
+check "OpenCode plugin directory registration is idempotent" 'python3 -c "import json,sys; assert json.load(open(sys.argv[1]))[\"plugins\"]==[sys.argv[2], sys.argv[3]]" "$oc_home/opencode.json" "$file_url" "$dir_url"'
+python3 -c 'import json,sys; json.dump({"plugins":[sys.argv[1]]}, open(sys.argv[2],"w"))' "$dir_url" "$oc_home/opencode.json"
+python3 modules/tools/skillshare/opencode-plugins.py "$oc_home"
+check "orphaned OpenCode plugin directory is dropped" 'python3 -c "import json,sys; assert json.load(open(sys.argv[1]))[\"plugins\"]==[]" "$oc_home/opencode.json"'
+
 exit "$fails"

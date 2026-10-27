@@ -579,7 +579,16 @@ in {
   "skillshare binds Ponytail, Superpowers and jskswamy bundles everywhere" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssAll) (["ponytail" "superpowers"] ++ jskswamyBundles);
   "skillshare binds portable bundles to Codex, OpenCode and Antigravity CLI" =
-    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "opencode" "pi"]) (["ponytail" "superpowers"] ++ jskswamyBundles);
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "opencode" "pi"]) jskswamyBundles;
+  "skillshare does not bind Ponytail or Superpowers to OpenCode" =
+    builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex" "pi"]) ["ponytail" "superpowers"];
+  "skillshare installs Ponytail and Superpowers skills where the plugin cannot" =
+    builtins.elem "ponytail" (ssNames "skills" ssCli)
+    && builtins.elem "using-superpowers" (ssNames "skills" ssCli)
+    && !(builtins.elem "ponytail" (ssCli.tools.skillshare.resources.excludes.opencode or []))
+    && builtins.elem "ponytail" (ssCli.tools.skillshare.resources.excludes.claude or [])
+    && builtins.elem "using-superpowers" (ssCli.tools.skillshare.resources.excludes.pi or [])
+    && ssCli.tools.skillshare.declarations.opencodeConfigDirs == ["/home/t/.config/opencode"];
   "skillshare binds Beads and EGM to Codex and Antigravity CLI but not Pi" =
     builtins.all (n: ssCliTargets n == ["antigravity-cli" "claude" "codex"]) ["beads" "egm"];
   "skillshare binds Claude-compatible bundles to Antigravity CLI" =
@@ -621,11 +630,11 @@ in {
   "skillshare skips standalone Beads when every target has the plugin" =
     ssNames "skills" (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]) == ["release"];
   "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
-    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "egm" "mattpocock-skills"] ++ jskswamyBundles)))
+    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "egm" "mattpocock-skills" "ponytail" "superpowers"] ++ jskswamyBundles)))
   ssClaude;
   "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "release" (ssExcludes t))) ssClaude;
-  "skillshare excludes bundled jskswamy skills on Pi" =
-    ssExcludes "pi" == lib.sort (a: b: a < b) (lib.concatMap ssBundled jskswamyBundles);
+  "skillshare excludes bundled plugin skills on Pi" =
+    ssExcludes "pi" == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["ponytail" "superpowers"] ++ jskswamyBundles));
   "skillshare omits OpenSpec and RTK skills" =
     !(builtins.any (a: lib.hasInfix "openspec" (lib.toLower a) || lib.hasInfix "rtk-ai" a) ssArgs)
     && !(builtins.any (e: lib.hasInfix "rtk" e.name) (ssRes.skills ++ ssRes.plugins));

@@ -1,13 +1,38 @@
 {
-  "about": "Facts from `skillshare plugin discover <source> --json`. Agent compatibility refreshed with 0.27.0 against claude, pi, codex, opencode and antigravity-cli targets on the sources' default branches. commit and skills retain the bundled-skills snapshot: skills are the standalone copies excluded where the native bundle is installed. To refresh agents, discover each source with every supported target configured; to refresh skills, inspect the source bundle and update its commit and skills together.",
+  "about": "Facts from `skillshare plugin discover <source> --json`, checked against what 0.27.0 actually binds. Agent compatibility refreshed against claude, pi, codex, opencode and antigravity-cli on the sources' default branches. Ponytail and Superpowers discover no OpenCode package, so opencode is omitted and their skills are installed standalone for targets the bundle does not reach. commit and skills retain the bundled-skills snapshot: skills are the standalone copies excluded where the native bundle is installed. To refresh agents, discover each source with every supported target configured; to refresh skills, inspect the source bundle and update its commit and skills together.",
   "plugins": {
     "ponytail": {
       "commit": "84740e3d34",
-      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli"],
+      "skills": [
+        "ponytail",
+        "ponytail-audit",
+        "ponytail-debt",
+        "ponytail-gain",
+        "ponytail-help",
+        "ponytail-review"
+      ]
     },
     "superpowers": {
       "commit": "bb92a77741",
-      "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"]
+      "agents": ["claude", "pi", "codex", "antigravity-cli"],
+      "skills": [
+        "brainstorming",
+        "diagnosing-superpowers",
+        "dispatching-parallel-agents",
+        "executing-plans",
+        "finishing-a-development-branch",
+        "receiving-code-review",
+        "requesting-code-review",
+        "subagent-driven-development",
+        "systematic-debugging",
+        "test-driven-development",
+        "using-git-worktrees",
+        "using-superpowers",
+        "verification-before-completion",
+        "writing-plans",
+        "writing-skills"
+      ]
     },
     "beads": {
       "commit": "b911ed28cd",
