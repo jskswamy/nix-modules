@@ -48,7 +48,11 @@
           shellcheck.enable = true;
           shfmt.enable = true;
           stylua.enable = true;
-          yamllint.enable = true;
+          yamllint = {
+            enable = true;
+            # Beads rewrites this symlinked config in its own YAML style.
+            excludes = ["^modules/tools/beads/config/config\\.yaml$"];
+          };
           markdownlint = {
             enable = true;
             # Generated documentation uses inline anchors and table formatting
@@ -67,7 +71,7 @@
             enable = true;
             # Generated documentation is excluded for the same reason as
             # markdownlint above.
-            excludes = ["^docs/tools\\.md$"];
+            excludes = ["^docs/tools\\.md$" "^modules/tools/beads/config/config\\.yaml$"];
             types_or = ["json" "yaml" "markdown"];
           };
         };
