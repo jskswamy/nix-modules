@@ -24,6 +24,7 @@ import ./agentgateway.nix final prev
 // import ./rtk.nix final prev
 // import ./pkl.nix final prev
 // import ./skillshare.nix final prev
+// import ../overlays/opencode.nix final prev
 // {
   pi-coding-agent = final.callPackage ./pi-coding-agent.nix {};
   vim-full =

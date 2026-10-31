@@ -9,6 +9,7 @@ let
   byName = name: builtins.head (builtins.filter (e: e.name == name) introspect);
   hunk = byName "hunk";
   beads = byName "beads";
+  opencode = byName "opencode";
   moshiHook = byName "moshi-hook";
 in {
   "hunk owner" = hunk.owner == "modem-dev";
@@ -16,6 +17,8 @@ in {
   "hunk version present" = hunk.version != null;
   "beads owner" = beads.owner == "gastownhall";
   "beads repo" = beads.repo == "beads";
+  "opencode owner" = opencode.owner == "anomalyco";
+  "opencode repo" = opencode.repo == "opencode";
   "moshi-hook owner is null" = moshiHook.owner == null;
   "moshi-hook repo is null" = moshiHook.repo == null;
 }

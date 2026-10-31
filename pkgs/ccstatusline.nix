@@ -4,11 +4,11 @@
 _: prev: {
   ccstatusline = prev.stdenv.mkDerivation rec {
     pname = "ccstatusline";
-    version = "2.2.30";
+    version = "2.2.33";
 
     src = prev.fetchurl {
       url = "https://registry.npmjs.org/ccstatusline/-/ccstatusline-${version}.tgz";
-      hash = "sha256-NWR5zB/3Nbdmvrom7ploLN7xQ8YDsPTx/X5qVugn12k=";
+      hash = "sha256-qcexePc6oawe5cSVQ/s3ZeBNrHdP0ldlTADmCpKtwXQ=";
     };
 
     nativeBuildInputs = [prev.makeWrapper];

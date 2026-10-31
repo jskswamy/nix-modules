@@ -2,26 +2,26 @@
 # official pre-built binaries instead of nixpkgs, which lags upstream's
 # release cadence.
 _final: prev: let
-  version = "1.4.4";
-  buildId = "5083301166317568";
+  version = "1.4.12";
+  buildId = "4768735748292608";
   wholeVersion = "${version}-${buildId}";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${wholeVersion}/darwin-arm/cli_mac_arm64.tar.gz";
-      hash = "sha256-cMy9+Zl5LDvZfdLCPCY+a3KiqO9Oba3BEw524pr8SII=";
+      hash = "sha256-TJibXM8OOcmaHObfgkEKu2KNTYPg0xg1J3At90TZxYk=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${wholeVersion}/darwin-x64/cli_mac_x64.tar.gz";
-      hash = "sha256-KVPwNJBjQCoJiTRNypofdzzz0REFmKlWEgLRa9gf5Uo=";
+      hash = "sha256-Yk0BNp31hB9kVVdB3QnTq0ptF0aZpN7YlqUYDIHywt4=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${wholeVersion}/linux-x64/cli_linux_x64.tar.gz";
-      hash = "sha256-d9mSV40sDAOKH7Vs9qm+C9R6+2puJxWrjZrK9P23vts=";
+      hash = "sha256-M2jRkj/IafIeyPzoMlKoyWyJKDqsk5OViskfv3o5SeQ=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${wholeVersion}/linux-arm/cli_linux_arm64.tar.gz";
-      hash = "sha256-zlwy+ImMHsFVsr9yvnnj8QL/JK/2p93ifcLD9szTIdo=";
+      hash = "sha256-MN1h6+HwqIKQV+ot4p2tCMcQ3Zcs5MApSfUeYyE1qGs=";
     };
   };
 
