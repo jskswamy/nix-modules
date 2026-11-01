@@ -78,9 +78,8 @@
   #
   # Which agents can take each complete bundle comes from Skillshare's own
   # plugin discovery, recorded in fixtures/plugins.json. A bundle is bound
-  # to every compatible target. Its skills also reach other targets through
-  # the repository's standalone install, which compatible targets exclude,
-  # so no target holds both copies of a skill.
+  # to every compatible target. Standalone skills cover compatibility gaps
+  # only; targets with the native bundle exclude those fallback copies.
   compat = (lib.importJSON ./fixtures/plugins.json).plugins;
   jskswamyBundles = ["bivouac" "codebase" "commit-tools" "craft" "devenv" "jot" "refactor" "sketch-note" "study" "typst-notes"];
   # Skillshare package name -> source. Stable Superpowers is the default
@@ -114,16 +113,18 @@
 
   excludes = lib.filterAttrs (_: v: v != []) (lib.genAttrs profileNames (t:
     lib.concatMap (name: compat.${name}.skills or [])
-    (builtins.filter (name: builtins.elem t (bundleTargets name)) (builtins.attrNames bundles))));
+    (builtins.filter (name:
+      !(builtins.elem name jskswamyBundles)
+      && bundleTargets name != profileNames
+      && builtins.elem t (bundleTargets name))
+    (builtins.attrNames bundles))));
 
   skills =
-    # bivouac and release sit in no approved bundle, so every target
-    # needs this install. It installs the whole repository at once, so
-    # `release` only stands in for it: once listed, the install is done.
+    # Every target gets the jskswamy bundles natively; only release is standalone.
     [
       {
         name = "release";
-        args = ["install" "jskswamy/skills/skills" "--kind" "skill" "--all" "-y"];
+        args = ["install" "jskswamy/skills/skills/release" "-y"];
       }
     ]
     ++ lib.optional (bundleTargets "beads" != profileNames) {

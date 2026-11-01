@@ -620,8 +620,8 @@ in {
   "skillshare excludes bundled standalone skills on Antigravity CLI" =
     builtins.elem "beads" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && builtins.elem "egm_review" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
-    && builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
-    && builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.codex or [])
+    && !(builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or []))
+    && !(builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.codex or []))
     && !(ssCli.tools.skillshare.resources.excludes ? codex && builtins.elem "ask-matt" ssCli.tools.skillshare.resources.excludes.codex);
   "skillshare keeps Beads and EGM off Pi" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) ["beads" "egm"];
@@ -643,8 +643,7 @@ in {
   "skillshare installs standalone skills for uncovered targets" =
     ssNames "skills" skillshare
     == ["beads" "egm_review" "release" "setup-matt-pocock-skills"]
-    && builtins.elem "jskswamy/skills/skills" (ssEntry "skills" "release").args
-    && builtins.elem "skill" (ssEntry "skills" "release").args;
+    && (ssEntry "skills" "release").args == ["install" "jskswamy/skills/skills/release" "-y"];
   "skillshare installs exactly the Matt Pocock bundle's skills standalone" =
     lib.take 2 ssMatt.args
     == ["install" "mattpocock/skills"]
@@ -652,12 +651,17 @@ in {
     && builtins.elem "setup-matt-pocock-skills" (ssBundled "mattpocock-skills");
   "skillshare skips standalone Beads when every target has the plugin" =
     ssNames "skills" (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]) == ["release"];
-  "skillshare excludes bundled skills on Claude targets" = builtins.all (t:
-    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["beads" "egm" "mattpocock-skills" "ponytail" "superpowers"] ++ jskswamyBundles)))
+  "skillshare excludes only installed fallback skills on Claude targets" = builtins.all (t:
+    ssExcludes t == lib.sort (a: b: a < b) (lib.concatMap ssBundled ["beads" "egm" "mattpocock-skills"]))
   ssClaude;
   "skillshare leaves uncovered skills visible to Claude" = builtins.all (t: !(builtins.elem "release" (ssExcludes t))) ssClaude;
-  "skillshare excludes bundled plugin skills on Pi" =
-    ssExcludes "pi" == lib.sort (a: b: a < b) (lib.concatMap ssBundled (["ponytail" "superpowers"] ++ jskswamyBundles));
+  "skillshare needs no excludes on Pi without redundant standalone installs" = ssExcludes "pi" == [];
+  "skillshare needs no excludes when every target has every plugin" =
+    (mk [T.skillshare {tools.skillshare.profiles = lib.mkForce {inherit (ss.profiles) claude;};}]).tools.skillshare.resources.excludes == {};
+  "skillshare never excludes plugin-only jskswamy skills" = builtins.all (t:
+    !(builtins.any (s: builtins.elem s (ssCli.tools.skillshare.resources.excludes.${t} or []))
+      (lib.concatMap ssBundled jskswamyBundles)))
+  (builtins.attrNames ssCli.tools.skillshare.profiles);
   "skillshare omits OpenSpec and RTK skills" =
     !(builtins.any (a: lib.hasInfix "openspec" (lib.toLower a) || lib.hasInfix "rtk-ai" a) ssArgs)
     && !(builtins.any (e: lib.hasInfix "rtk" e.name) (ssRes.skills ++ ssRes.plugins));
