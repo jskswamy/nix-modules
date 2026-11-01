@@ -48,8 +48,8 @@ in {
     home.file = {
       ".config/ghostty/config".source = src.file "config";
 
-      # Included by config/ghostty/config via `config-file = ?theme.conf`, so
-      # the rest of that file stays a plain instant-edit symlink.
+      # Included by config/ghostty/config via `config-file = ?~/.config/ghostty/theme.conf`,
+      # so the rest of that file stays a plain instant-edit symlink.
       ".config/ghostty/theme.conf".text = "theme = light:${variantTitle} Light,dark:${variantTitle} Dark\n";
 
       ".local/bin/ghostty-terminfo" = {

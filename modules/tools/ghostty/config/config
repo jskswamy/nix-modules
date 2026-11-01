@@ -1,7 +1,7 @@
 # display configuration
 # auto-switches based on macOS appearance (System Settings → Appearance → Auto)
 # run `ghostty +list-themes` to preview themes interactively
-config-file = ?theme.conf
+config-file = ?~/.config/ghostty/theme.conf
 # other theme pairs to try:
 #theme = light:Modus Operandi Tinted,dark:Modus Vivendi
 #theme = light:Catppuccin Latte,dark:Catppuccin Mocha
@@ -18,7 +18,7 @@ font-size = 13
 
 # Font rendering optimizations for sharper text
 # (freetype-load-flags dropped — no-op on macOS, Ghostty uses CoreText there)
-font-synthetic-style = true
+font-synthetic-style = bold,italic,bold-italic
 grapheme-width-method = "unicode"
 font-thicken = true
 
@@ -26,14 +26,14 @@ font-thicken = true
 adjust-font-baseline = 0
 
 # Additional font rendering tweaks for Alacritty-like sharpness
-font-shaping-break = true
+font-shaping-break = cursor
 adjust-cell-height = 3%
 adjust-cell-width = 5%
 
 bold-color = bright
 
 # Enhanced rendering for pixel-perfect display
-alpha-blending = "linear"
+alpha-blending = "linear-corrected"
 minimum-contrast = 3
 
 # Color space optimization for better color accuracy
@@ -44,11 +44,11 @@ confirm-close-surface = false
 copy-on-select = clipboard
 unfocused-split-opacity = 0.7
 background-opacity = 1.0
-background-blur-radius = 0
+background-blur = false
 cursor-style-blink = false
 cursor-style = block
 maximize = true
-scrollback-limit = 50000
+scrollback-limit-lines = 50000
 
 # shell related tweaks - Enhanced for terminfo handling
 shell-integration = "fish"
@@ -107,7 +107,7 @@ keybind = ctrl+b>j=goto_split:down
 keybind = ctrl+b>k=goto_split:up
 keybind = ctrl+b>l=goto_split:right
 keybind = ctrl+b>semicolon=goto_split:previous
-keybind = ctrl+b>apostrophe=goto_split:next
+keybind = ctrl+b>'=goto_split:next
 
 # split resize (key table — enter once, repeat h/j/k/l, Esc to exit)
 keybind = ctrl+b>r=activate_key_table:resize
@@ -118,7 +118,7 @@ keybind = resize/l=resize_split:right,50
 keybind = resize/escape=deactivate_key_table
 
 # split size
-keybind = ctrl+b>zero=equalize_splits
+keybind = ctrl+b>0=equalize_splits
 keybind = ctrl+b>z=toggle_split_zoom
 
 # close split/tab
@@ -129,24 +129,24 @@ keybind = ctrl+b>c=new_tab
 keybind = ctrl+b>comma=prompt_surface_title
 keybind = ctrl+b>n=next_tab
 keybind = ctrl+b>p=previous_tab
-keybind = ctrl+b>one=goto_tab:1
-keybind = ctrl+b>two=goto_tab:2
-keybind = ctrl+b>three=goto_tab:3
-keybind = ctrl+b>four=goto_tab:4
-keybind = ctrl+b>five=goto_tab:5
-keybind = ctrl+b>six=goto_tab:6
-keybind = ctrl+b>seven=goto_tab:7
-keybind = ctrl+b>eight=goto_tab:8
-keybind = ctrl+b>nine=goto_tab:9
+keybind = ctrl+b>1=goto_tab:1
+keybind = ctrl+b>2=goto_tab:2
+keybind = ctrl+b>3=goto_tab:3
+keybind = ctrl+b>4=goto_tab:4
+keybind = ctrl+b>5=goto_tab:5
+keybind = ctrl+b>6=goto_tab:6
+keybind = ctrl+b>7=goto_tab:7
+keybind = ctrl+b>8=goto_tab:8
+keybind = ctrl+b>9=goto_tab:9
 
 # quick terminal
-keybind = ctrl+b>grave_accent=toggle_quick_terminal
+keybind = ctrl+b>backquote=toggle_quick_terminal
 
 # working directory
 window-inherit-working-directory = true
 
 # window styling
-window-decoration = true
+window-decoration = auto
 window-padding-x = 24,24
 window-padding-y = 24,24
 keybind = alt+backspace=text:\x1b\x7f
