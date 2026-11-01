@@ -424,7 +424,7 @@ in {
         XDG_CONFIG_HOME=${lib.escapeShellArg config.xdg.configHome} \
         PYTHON=${pkgs.python3}/bin/python3 \
         PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
-          ${pkgs.bash}/bin/bash ${./reconcile.sh} ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)} \
+          ${pkgs.bash}/bin/bash ${./.}/reconcile.sh ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)} \
           ${lib.optionalString (!cfg.syncOnActivation) "--no-sync"} ||
           warnEcho "skillshare reconcile reported failures; see the warnings above"
       fi

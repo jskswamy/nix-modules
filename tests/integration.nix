@@ -563,6 +563,12 @@ in {
   "skillshare reconciles after writeBoundary" =
     builtins.elem "writeBoundary" skillshare.home.activation.skillshare.after
     && lib.hasInfix "reconcile.sh" skillshare.home.activation.skillshare.data;
+  "skillshare activation ships the OpenCode helper beside reconcile" = let
+    script = lib.findFirst (lib.hasSuffix "reconcile.sh") "" (lib.splitString " " skillshare.home.activation.skillshare.data);
+  in
+    builtins.dirOf script
+    != builtins.storeDir
+    && builtins.pathExists "${builtins.dirOf script}/opencode-plugins.py";
   "skillshare enables AgentGateway on Darwin" = (mkOn "aarch64-darwin" [T.skillshare]).tools.skillshare.enableAgentgateway;
   "skillshare omits AgentGateway on Linux" = !(mkOn "x86_64-linux" [T.skillshare]).tools.skillshare.enableAgentgateway;
   "skillshare reconciles after packages are installed" = builtins.elem "installPackages" skillshare.home.activation.skillshare.after;
