@@ -88,6 +88,18 @@ Routes Claude Code to the HTTP-native MCP servers, and registers itself as a Cla
 - **Option:** `tools.agentgateway.port`
 - **Writes:** `~/.config/agentgateway/config.yaml`
 
+Home Manager activation creates a session key before starting the launch agent.
+The launch wrapper only reads and supplies `SESSION_KEY` from
+`${XDG_STATE_HOME:-~/.local/state}/agentgateway/session.key`. The key is
+generated once per machine, with a private directory (0700) and file (0600),
+then reused across restarts and rebuilds. It is never stored in the tracked
+YAML or Nix store. Invalid or unreadable state stops startup rather than
+silently rotating the key or starting without session encryption.
+
+Moving from the previous inline key generates a fresh key on the first
+activation with this module, invalidating existing sessions once. Things Cloud
+authentication still comes from the existing agenix environment file.
+
 <a id="toolsk-alacritty"></a>
 
 ### `tools.alacritty`

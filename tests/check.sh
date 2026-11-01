@@ -4,6 +4,7 @@
 # tests/check.sh nvim-config        assert Mason and Biome config contracts
 # tests/check.sh fish-bare          assert fish config is quiet without tools
 # tests/check.sh skillshare         assert the skillshare reconcile contract
+# tests/check.sh agentgateway       assert machine-local session key behavior
 # tests/check.sh snapshot OUT.json  write the full-tool-set snapshot
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -28,11 +29,14 @@ fish-bare)
 skillshare)
 	tests/skillshare-reconcile.sh
 	;;
+agentgateway)
+	python3 tests/agentgateway-session.py
+	;;
 snapshot)
 	nix eval --impure --json -f tests/snapshot.nix | jq -S . >"${2:?usage: check.sh snapshot OUT.json}"
 	;;
 *)
-	echo "usage: $0 integration | nix-upgrade | nvim-config | fish-bare | skillshare | snapshot OUT.json" >&2
+	echo "usage: $0 integration | nix-upgrade | nvim-config | fish-bare | skillshare | agentgateway | snapshot OUT.json" >&2
 	exit 2
 	;;
 esac

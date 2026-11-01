@@ -11,6 +11,8 @@
   src = mkSource config ./config "modules/tools/agentgateway/config";
   cfg = config.tools.agentgateway;
   url = "http://127.0.0.1:${toString cfg.port}/mcp";
+  stateDir = "${config.xdg.stateHome}/agentgateway";
+  keyFile = "${stateDir}/session.key";
 in {
   imports = [
     ../../_common
@@ -62,12 +64,42 @@ in {
       # Claude Code does not read ~/.claude/.mcp.json; it keeps user-scoped
       # MCP config in ~/.claude.json via the CLI. `claude mcp add` is
       # idempotent, reporting "MCP server already exists" on repeat runs.
-      activation = lib.mkIf cfg.registerMcp {
-        configureClaudeCodeAgentgateway = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      activation = {
+        agentgatewaySessionKey = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (lib.hm.dag.entryBetween ["setupLaunchAgents"] ["writeBoundary"] ''
+          if [[ ! -v DRY_RUN ]]; then
+            (
+              set -e
+              umask 077
+              state_dir=${lib.escapeShellArg stateDir}
+              key_file=${lib.escapeShellArg keyFile}
+              if [[ -L "$state_dir" || -L "$key_file" ]]; then
+                echo "agentgateway: refusing symlinked session state" >&2
+                exit 1
+              fi
+              ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
+              ${pkgs.coreutils}/bin/chmod 700 "$state_dir"
+              if [[ ! -e "$key_file" ]]; then
+                temporary="$(${pkgs.coreutils}/bin/mktemp "$state_dir/.session-key.XXXXXX")"
+                trap '${pkgs.coreutils}/bin/rm -f "$temporary"' EXIT
+                ${pkgs.openssl}/bin/openssl rand -hex 32 > "$temporary"
+                # Publish a complete key without replacing a concurrent activation's key.
+                ${pkgs.coreutils}/bin/ln -T "$temporary" "$key_file" 2>/dev/null || [[ -f "$key_file" && ! -L "$key_file" ]]
+              fi
+              if [[ ! -f "$key_file" || -L "$key_file" ]] ||
+                [[ "$(${pkgs.coreutils}/bin/wc -c < "$key_file")" -gt 65 ]] ||
+                ! ${pkgs.gnugrep}/bin/grep -Eq '^[0-9a-fA-F]{64}$' "$key_file"; then
+                echo "agentgateway: invalid machine-local session key; refusing to rotate it" >&2
+                exit 1
+              fi
+              ${pkgs.coreutils}/bin/chmod 600 "$key_file"
+            )
+          fi
+        '');
+        configureClaudeCodeAgentgateway = lib.mkIf cfg.registerMcp (lib.hm.dag.entryAfter ["writeBoundary"] ''
           if command -v claude &> /dev/null; then
             $DRY_RUN_CMD claude mcp add --transport http agentgateway "${url}" --scope user 2>/dev/null || true
           fi
-        '';
+        '');
       };
     };
 
@@ -78,6 +110,11 @@ in {
           "${pkgs.bash}/bin/bash"
           "-c"
           ''
+            session_key_file=${lib.escapeShellArg keyFile}
+            [[ -f "$session_key_file" && ! -L "$session_key_file" ]] || exit 1
+            SESSION_KEY="$(${pkgs.coreutils}/bin/cat "$session_key_file")" || exit 1
+            [[ "$SESSION_KEY" =~ ^[0-9a-fA-F]{64}$ ]] || exit 1
+            export SESSION_KEY
             things_cloud_env="${config.home.homeDirectory}/.config/agenix/things-cloud-mcp.env"
             if [ -r "$things_cloud_env" ]; then
               . "$things_cloud_env"

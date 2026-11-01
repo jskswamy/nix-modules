@@ -6,6 +6,7 @@
 # ${THINGS_CLOUD_AUTH} is expanded from the process environment at load time
 # (agentgateway runs the whole file through shellexpand before parsing) —
 # set by the launchd wrapper script in default.nix.
+# SESSION_KEY is loaded separately from machine-local state by that wrapper.
 #
 # Handles only the HTTP-native things-cloud server, run as a persistent
 # daemon (see default.nix); agentgateway just proxies.

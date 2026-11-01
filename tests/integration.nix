@@ -454,6 +454,10 @@ in {
     && !(lib.hasInfix "1mcp" agConfig);
   "agentgateway registers Claude MCP by default" = agDefault.home.activation ? configureClaudeCodeAgentgateway;
   "agentgateway registration can be disabled" = !(agNoReg.home.activation ? configureClaudeCodeAgentgateway);
+  "agentgateway creates session state only for its Darwin daemon" =
+    (mkOn "aarch64-darwin" [T.agentgateway]).home.activation ? agentgatewaySessionKey
+    && !((mkOn "x86_64-linux" [T.agentgateway]).home.activation ? agentgatewaySessionKey)
+    && !((mk [T.agentgateway {tools.agentgateway.enable = false;}]).home.activation ? agentgatewaySessionKey);
   "disabled bivouac writes no base config" = !((mk [T.bivouac]).home.file ? ".config/bivouac/base.pkl");
   "fd installs its package" = installs fd "fd";
   "fd with package null installs nothing" = !(installs (mk [T.fd {tools.fd.package = null;}]) "fd");
