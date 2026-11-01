@@ -3,7 +3,7 @@
 # Skillshare writes resolved versions, digests and bindings back into its
 # config.yaml, so that file stays mutable and is never linked from the
 # store. Activation only adds what is missing through the CLI (see
-# reconcile.sh) and syncs; updates stay an explicit `skillshare update`.
+# reconcile.sh) and syncs; upstream updates are opt-in.
 {
   config,
   lib,
@@ -64,6 +64,7 @@
     };
 
   declarations = {
+    inherit (cfg) updateOnActivation;
     targets = lib.mapAttrsToList target cfg.profiles;
     # Plugin sync drives each agent's own CLI.
     agents = lib.unique (lib.mapAttrsToList (_: p: p.agent) cfg.profiles);
@@ -233,6 +234,18 @@ in {
       type = types.bool;
       default = true;
       description = "Run `sync --all` and `sync plugins` after reconciling on activation.";
+    };
+
+    updateOnActivation = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Update all managed plugins and standalone skills before syncing on
+        activation, preserving normal audit and local-edit protections.
+        Independent of syncOnActivation; plugin updates can modify native
+        installations. Requires network access and can slow activation.
+        Failures warn without aborting activation. Dry runs never update.
+      '';
     };
 
     profiles = mkOption {

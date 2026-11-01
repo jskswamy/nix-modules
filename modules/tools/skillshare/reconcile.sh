@@ -9,9 +9,9 @@
 # {name, args, dirs?}: `args` is the Skillshare CLI
 # call that adds it, run only when `name` is absent from that kind's JSON
 # listing, after creating `dirs`. Existing plugins gain missing bindings
-# from their saved source/ref; installed versions and bindings stay intact.
+# from their saved source/ref; upstream updates require `updateOnActivation`.
 # A failed add only warns;
-# nothing is ever removed. Sync failures make the exit status nonzero,
+# nothing is explicitly removed. Update/sync failures make the exit status nonzero,
 # but only after every step has been attempted.
 set -uo pipefail
 
@@ -105,6 +105,19 @@ ensure skills '(. // [])[].name' "$ss" list
 ensure plugins '(.packages // {}) | keys[]' "$ss" plugin list
 ensure mcp '(.servers // [])[].name' "$ss" mcp check --no-dns
 ensure hooks '(.source.entries // {}) | keys[]' "$ss" hooks list
+
+if jq -e '.updateOnActivation == true' "$decl" >/dev/null; then
+	say "updating managed plugins"
+	"$ss" plugin update --all --global --json </dev/null || {
+		warn "plugin update failed"
+		status=1
+	}
+	say "updating standalone skills"
+	"$ss" update --all --global --json </dev/null || {
+		warn "skill update failed"
+		status=1
+	}
+fi
 
 if [[ $mode != --no-sync ]]; then
 	# A declared hook owns its Agent entries: an identical hook another tool

@@ -563,6 +563,19 @@ in {
   "skillshare reconciles after writeBoundary" =
     builtins.elem "writeBoundary" skillshare.home.activation.skillshare.after
     && lib.hasInfix "reconcile.sh" skillshare.home.activation.skillshare.data;
+  "skillshare activation updates default off" = !(ss.updateOnActivation or true) && !(ssDecl.updateOnActivation or true);
+  "skillshare passes opted-in updates even without sync" = let
+    c = mk [
+      T.skillshare
+      {
+        tools.skillshare = {
+          updateOnActivation = true;
+          syncOnActivation = false;
+        };
+      }
+    ];
+  in
+    c.tools.skillshare.declarations.updateOnActivation;
   "skillshare activation ships the OpenCode helper beside reconcile" = let
     script = lib.findFirst (lib.hasSuffix "reconcile.sh") "" (lib.splitString " " skillshare.home.activation.skillshare.data);
   in

@@ -30,6 +30,21 @@ Two of those are platform-dependent, and this page was generated on
 
 ## Summary
 
+### Skillshare activation updates
+
+`tools.skillshare.updateOnActivation` defaults to `false`. Set it to `true`
+to update all managed plugin bundles and standalone skills before activation
+syncs resources. Updates retain normal audit and local-edit protections;
+failures warn and activation continues. Dry runs never update.
+
+The option is independent of `tools.skillshare.syncOnActivation`: disabling
+sync does not disable opted-in updates, and plugin updates may modify native
+client installations themselves. Updates require network access, can take
+several minutes, and include managed resources not declared by this module.
+Source refs remain unchanged, so pinned sources stay pinned. Before editing
+shared plugin configuration with Skillshare 0.28.2, upgrade all machines that
+write it and follow the upstream plugin-state migration guidance.
+
 | Tool | Installs | Brings with it | Extra options | Files |
 | --- | --- | --- | --- | --- |
 | [`agentgateway`](#toolsk-agentgateway) | no | — | `tools.agentgateway.port` | 1 |

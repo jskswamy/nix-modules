@@ -72,6 +72,8 @@ case "$*" in
 	;;
 "mcp add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/mcp" ;;
 "hooks add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/hook" ;;
+"plugin update --all --global --json") fail pluginupdate && exit 1; exit 0 ;;
+"update --all --global --json") fail skillupdate && exit 1; exit 0 ;;
 "sync --all" | "sync plugins") fail sync && exit 1; exit 0 ;;
 "hooks sync "*" --replace") fail hooksync && exit 1; exit 0 ;;
 *) echo "fake skillshare: unexpected: $*" >&2; exit 99 ;;
@@ -118,6 +120,7 @@ check "first run adds every missing entry" '[[ $(adds) == 7 ]]'
 check "first run creates target directories" '[[ -d $HOME/.claude/skills && -d $HOME/.claude-extra ]]'
 check "first run syncs resources then plugins" 'synced && [[ $(grep -n "sync" "$FAKE_LOG" | tail -1) == *"sync plugins" ]]'
 check "first run succeeds" '[[ $rc == 0 ]]'
+check "missing update policy does not update resources" '! grep -q -e "^plugin update " -e "^update " "$FAKE_LOG"'
 check "first run adds every exclude of a target in one call" 'grep -qx "target claude --add-exclude foo --add-exclude bar" "$FAKE_LOG"'
 check "first run adds excludes after targets" '[[ $(grep -n "" "$FAKE_LOG" | grep -m1 -e "--add-exclude" | cut -d: -f1) -gt $(grep -n "^target add" "$FAKE_LOG" | tail -1 | cut -d: -f1) ]]'
 check "declared hooks take over their agent entries before sync" '[[ $(grep -n -e "^hooks sync rtk --replace$" -e "^sync --all$" "$FAKE_LOG" | cut -d: -f2- | tr "\n" ,) == "hooks sync rtk --replace,sync --all," ]]'
@@ -204,5 +207,23 @@ check "OpenCode plugin directory registration is idempotent" 'python3 -c "import
 python3 -c 'import json,sys; json.dump({"plugins":[sys.argv[1]]}, open(sys.argv[2],"w"))' "$dir_url" "$oc_home/opencode.json"
 python3 modules/tools/skillshare/opencode-plugins.py "$oc_home"
 check "orphaned OpenCode plugin directory is dropped" 'python3 -c "import json,sys; assert json.load(open(sys.argv[1]))[\"plugins\"]==[]" "$oc_home/opencode.json"'
+
+jq '.updateOnActivation = false' "$decl" >"$tmp/policy.json"
+mv "$tmp/policy.json" "$decl"
+run
+check "disabled update policy leaves updates explicit" '! grep -q -e "^plugin update " -e "^update " "$FAKE_LOG" && synced && [[ $rc == 0 ]]'
+jq '.updateOnActivation = true' "$decl" >"$tmp/policy.json"
+mv "$tmp/policy.json" "$decl"
+run
+check "opted-in updates run before synchronization with normal safeguards" '[[ $(grep -E "^(plugin update |update |sync )" "$FAKE_LOG" | tr "\n" ,) == "plugin update --all --global --json,update --all --global --json,sync --all,sync plugins," ]] && [[ $rc == 0 ]]'
+run --no-sync
+check "update policy is independent of sync policy" 'grep -qx "plugin update --all --global --json" "$FAKE_LOG" && grep -qx "update --all --global --json" "$FAKE_LOG" && ! grep -q "^sync " "$FAKE_LOG" && [[ $rc == 0 ]]'
+for failure in pluginupdate skillupdate; do
+	echo "$failure" >"$FAKE_FAIL"
+	python3 -c 'import json,sys; json.dump({"plugins":[sys.argv[1]]}, open(sys.argv[2],"w"))' "$file_url" "$oc_home/opencode.json"
+	run
+	check "$failure warns and still attempts both updates and synchronization" '[[ $rc != 0 ]] && grep -q "warning: .*update" "$tmp/err" && grep -qx "plugin update --all --global --json" "$FAKE_LOG" && grep -qx "update --all --global --json" "$FAKE_LOG" && synced'
+	check "$failure still repairs OpenCode registrations" 'python3 -c "import json,sys; assert json.load(open(sys.argv[1]))[\"plugins\"]==[sys.argv[2], sys.argv[3]]" "$oc_home/opencode.json" "$file_url" "$dir_url"'
+done
 
 exit "$fails"
