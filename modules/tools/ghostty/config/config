@@ -54,8 +54,11 @@ scrollback-limit-lines = 50000
 shell-integration = "fish"
 shell-integration-features = "cursor,title,sudo"
 
-# macos specific tweaks
-macos-titlebar-style = "hidden"
+# macos specific tweaks. transparent, not hidden: hidden also strips the
+# traffic-light buttons, and a maximized window's frame is barely visible,
+# so a decorated window still looks empty-handed. transparent gives a real
+# titlebar with traffic lights to grab whenever decorations are on.
+macos-titlebar-style = "transparent"
 macos-option-as-alt = true
 macos-auto-secure-input = true
 macos-titlebar-proxy-icon = visible
@@ -95,7 +98,6 @@ macos-titlebar-proxy-icon = visible
 #
 # OTHER
 #   Ctrl+b `     Toggle quick terminal (dropdown)
-#   Ctrl+b d     Toggle window decorations (drag with the titlebar while on)
 # =============================================================================
 
 # splits
@@ -148,15 +150,17 @@ window-inherit-working-directory = true
 
 # window styling — decorationless for maximum terminal space. none removes
 # the frame, borders and rounded corners entirely; on macOS it also disables
-# native tabs (enforced by the system), so tab keybinds only work after
-# Ctrl+b d toggles decorations back on. Splits and the tmux-style prefix are
-# unaffected. A small balanced padding keeps text off the window edges and
-# centers the cell grid so the leftover columns don't rag one side.
+# native tabs (enforced by the system). Splits and the tmux-style prefix are
+# unaffected. There is no runtime toggle: macOS 1.4 does not implement the
+# toggle_window_decorations action (GTK only), so getting decorations back
+# means changing window-decoration and opening a new window (super+shift+,
+# reloads); the transparent titlebar style then gives a real titlebar with
+# traffic lights to drag. A small balanced padding keeps text off the window
+# edges and centers the cell grid so the leftover columns don't rag one side.
 window-decoration = none
 window-padding-x = 10,10
 window-padding-y = 10,10
 window-padding-balance = true
-keybind = ctrl+b>d=toggle_window_decorations
 keybind = alt+backspace=text:\x1b\x7f
 
 # disable cmd+k clear (use ctrl+l instead)
