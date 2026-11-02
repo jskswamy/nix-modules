@@ -95,6 +95,7 @@ macos-titlebar-proxy-icon = visible
 #
 # OTHER
 #   Ctrl+b `     Toggle quick terminal (dropdown)
+#   Ctrl+b d     Toggle window decorations (drag with the titlebar while on)
 # =============================================================================
 
 # splits
@@ -145,10 +146,17 @@ keybind = ctrl+b>backquote=toggle_quick_terminal
 # working directory
 window-inherit-working-directory = true
 
-# window styling
-window-decoration = auto
-window-padding-x = 24,24
-window-padding-y = 24,24
+# window styling — decorationless for maximum terminal space. none removes
+# the frame, borders and rounded corners entirely; on macOS it also disables
+# native tabs (enforced by the system), so tab keybinds only work after
+# Ctrl+b d toggles decorations back on. Splits and the tmux-style prefix are
+# unaffected. A small balanced padding keeps text off the window edges and
+# centers the cell grid so the leftover columns don't rag one side.
+window-decoration = none
+window-padding-x = 6,6
+window-padding-y = 6,6
+window-padding-balance = true
+keybind = ctrl+b>d=toggle_window_decorations
 keybind = alt+backspace=text:\x1b\x7f
 
 # disable cmd+k clear (use ctrl+l instead)
