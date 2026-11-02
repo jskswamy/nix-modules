@@ -206,6 +206,14 @@ let
   ];
   # Claude-only bundles beyond jskswamy/skills and Beads.
   ssClaudeOnly = ["context7" "gopls-lsp" "mattpocock-skills"];
+  # Pi-only bundles from the pi.dev gallery, and their repositories.
+  ssPiOnly = ["pi-advisor-flow" "pi-btw" "pi-subagents" "vigolium-piolium"];
+  ssPiRepo = {
+    "pi-advisor-flow" = "philipbrembeck/pi-advisor";
+    "pi-btw" = "dbachelder/pi-btw";
+    "pi-subagents" = "nicobailon/pi-subagents";
+    "vigolium-piolium" = "vigolium/piolium";
+  };
   ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
   agentTools = mk [nm.homeManagerModules.agent-tools];
 in {
@@ -594,7 +602,7 @@ in {
 
   # Bundles, from the discovery fixture.
   "skillshare plugins are exactly the approved bundles" =
-    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "egm" "ponytail" "superpowers"] ++ ssClaudeOnly ++ jskswamyBundles);
+    ssNames "plugins" skillshare == lib.sort (a: b: a < b) (["beads" "egm" "ponytail" "superpowers"] ++ ssClaudeOnly ++ ssPiOnly ++ jskswamyBundles);
   "skillshare fixture covers every bundle" = builtins.all (n: ssCompat ? ${n}) (ssNames "plugins" skillshare);
   "skillshare binds each bundle to every compatible target" = builtins.all (e:
     ssTargets e == builtins.filter (t: builtins.elem ss.profiles.${t}.agent ssCompat.${e.name}.agents) ssAll)
@@ -631,6 +639,10 @@ in {
     builtins.all (n: (ssEntry "plugins" n).args == ["plugin" "add" "anthropics/claude-plugins-official" "--plugin" n "--target" "claude" "--json"]) ["context7" "gopls-lsp"];
   "skillshare installs Matt Pocock skills from their repository" =
     (ssEntry "plugins" "mattpocock-skills").args == ["plugin" "add" "mattpocock/skills" "--plugin" "mattpocock-skills" "--target" "claude" "--json"];
+  "skillshare binds Pi gallery bundles to Pi only" =
+    builtins.all (n: ssCliTargets n == ["pi"] && ssTargets (ssEntry "plugins" n) == ["pi"]) ssPiOnly;
+  "skillshare installs Pi gallery bundles from their repositories" =
+    builtins.all (n: (ssEntry "plugins" n).args == ["plugin" "add" ssPiRepo.${n} "--plugin" n "--target" "pi" "--json"]) ssPiOnly;
   "skillshare binds plugins to declared profiles only" =
     builtins.all (c: builtins.all (e: builtins.all (t: c.tools.skillshare.profiles ? ${t}) (ssTargets e)) c.tools.skillshare.resources.plugins) [skillshare ssExtra];
   "skillshare leaves Context7 MCP to its plugin" = !(builtins.elem "context7" (ssNames "mcp" skillshare));

@@ -95,6 +95,14 @@
       context7 = "anthropics/claude-plugins-official";
       gopls-lsp = "anthropics/claude-plugins-official";
       mattpocock-skills = "mattpocock/skills";
+      # Pi-only extensions from the pi.dev gallery: multi-agent delegation,
+      # executor/advisor flow, side conversations and security audits. Other
+      # agents cannot load Pi packages, so the compat matrix binds these to
+      # every Pi profile, Bivouac instances included.
+      pi-subagents = "nicobailon/pi-subagents";
+      pi-advisor-flow = "philipbrembeck/pi-advisor";
+      pi-btw = "dbachelder/pi-btw";
+      vigolium-piolium = "vigolium/piolium";
     }
     // lib.genAttrs jskswamyBundles (_: "jskswamy/skills");
 

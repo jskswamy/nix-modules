@@ -93,6 +93,22 @@
         "writing-for-agents"
       ]
     },
+    "pi-subagents": {
+      "commit": "e9a31b3ea7",
+      "agents": ["pi"]
+    },
+    "pi-advisor-flow": {
+      "commit": "223d8bc12a",
+      "agents": ["pi"]
+    },
+    "pi-btw": {
+      "commit": "2bf85893c3",
+      "agents": ["pi"]
+    },
+    "vigolium-piolium": {
+      "commit": "9ffdcace48",
+      "agents": ["pi"]
+    },
     "bivouac": {
       "commit": "4e61ce9859",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
