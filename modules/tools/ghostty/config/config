@@ -153,8 +153,8 @@ window-inherit-working-directory = true
 # unaffected. A small balanced padding keeps text off the window edges and
 # centers the cell grid so the leftover columns don't rag one side.
 window-decoration = none
-window-padding-x = 6,6
-window-padding-y = 6,6
+window-padding-x = 10,10
+window-padding-y = 10,10
 window-padding-balance = true
 keybind = ctrl+b>d=toggle_window_decorations
 keybind = alt+backspace=text:\x1b\x7f
