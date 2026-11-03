@@ -38,10 +38,12 @@ in {
     extraKeys = lib.mkOption {
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
       default = {
-        # Match Ghostty's alt+backspace (esc + delete-word); upstream's
-        # default is ctrl-w. alt-left/right already come from the vendored
-        # defaults, pinned alongside this module at each app upgrade.
-        terminal."alt-backspace" = "\u001b\u007f";
+        # terminal-section values are actions; raw bytes use "send:<text>"
+        # (the vendored defaults encode alt-backspace as send:ESC+ctrl-w).
+        # Nix string literals have no \u escape, so the bytes come from
+        # fromJSON: this is Ghostty's ESC+DEL (delete-word). alt-left/
+        # right already ship in the vendored defaults.
+        terminal."alt-backspace" = "send:${builtins.fromJSON ''"\u001b\u007f"''}";
       };
       example = {
         global."ctrl-shift-t" = "terminal";
