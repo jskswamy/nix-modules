@@ -14,7 +14,7 @@ what gets installed, or to `null` to keep the config and install nothing.
 
 **Installs the package** (23): `alacritty`, `beads`, `ccstatusline`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `fabric`, `fish`, `git`, `gpg`, `herdr`, `hunk`, `lazygit`, `nvim`, `pet`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`, `zsh`.
 
-**Config only by default** (5): `agentgateway`, `ghostty`, `local-mcp`, `mcp-nixos`, `serena-mcp`.
+**Config only by default** (6): `agentgateway`, `ghostty`, `herdr-app`, `local-mcp`, `mcp-nixos`, `serena-mcp`.
 
 Two of those are platform-dependent, and this page was generated on
 `x86_64-linux`:
@@ -61,6 +61,7 @@ write it and follow the upstream plugin-state migration guidance.
 | [`git`](#toolsk-git) | yes | — | — | 3 |
 | [`gpg`](#toolsk-gpg) | yes | — | — | 2 |
 | [`herdr`](#toolsk-herdr) | yes | — | `tools.herdr.projectsDir` | 4 |
+| [`herdr-app`](#toolsk-herdr-app) | no | — | `tools.herdr-app.extraKeys` | 1 |
 | [`hunk`](#toolsk-hunk) | yes | — | — | 1 |
 | [`lazygit`](#toolsk-lazygit) | yes | — | — | 2 |
 | [`local-mcp`](#toolsk-local-mcp) | no | — | `tools.local-mcp.port` | 0 |
@@ -224,6 +225,24 @@ Terminal workspace manager for AI coding agents: keybindings, the herdr-lazy plu
 - **Installs the package:** yes
 - **Option:** `tools.herdr.projectsDir`
 - **Writes:** `~/.config/herdr/config.toml`<br>`~/.config/herdr/plugins/config/cloudmanic.herdr-plus/worktrees`<br>`~/.config/herdr/plugins/config/herdr-lazy/plugins.list`<br>`~/.config/herdr/plugins/config/herdr-navigator/config.toml`
+
+<a id="toolsk-herdr-app"></a>
+
+### `tools.herdr-app`
+
+Desktop multiplexer client config: font and keyboard mappings for the Herdr desktop app. Deliberately config-only — upstream ships no Homebrew cask and no Nix package; the usual source is herdr's install script (`Herdr.app` in /Applications, `herdr-app` symlinked into `~/.local/bin`). Managed via the `terminal` group.
+
+**Key scheme is generated, not stored.** The herdr TUI's `~/.config/herdr/config.toml` `[keys]` is the single source of truth. At activation, `herdr --default-config` supplies the installed binary's baked-in defaults, config.toml applies user overrides, and a generator translates the effective `ctrl+a` prefix scheme into herdr-app's `keys.json` (which takes herdr's two-keystroke sequences — same mechanism as Zed's chains). Bindings with no desktop equivalent (resize_mode, `[keys.command]` plugin blocks, `focus_agent`'s indexed jump) skip loudly on stderr. `~/.config/herdr-app/keys.json` is therefore not a managing symlink: it is regenerated whole on every switch, and the app hot-reloads it. Desktop-only overrides that the TUI cannot express (e.g. alt-backspace as esc+word-delete) go in `tools.herdr-app.extraKeys`.
+
+The app does **not** read `~/.config/herdr/config.toml` itself (checked the source; no migration code) — this generator is the copy-over. Note the prefix steals `ctrl+a` from shells (readline home), exactly as the TUI does inside Ghostty.
+
+The app covers its own bookkeeping: `~/.config/herdr-app/{AGENTS.md,view.json,shared.json,...}` are written by the app on every start, and defaults are installed only when a file is missing, so managed files are read but never overwritten.
+
+The app's terminal panes embed libghostty (upstream vendors the ghostty repo), so terminal rendering is Ghostty's own; but herdr-app exposes no ghostty tuning knobs (font-thicken, cell adjustments, codepoint maps) — only `font`, `font_size`, `font_ligatures` and `option_as_alt`. Refresh `defaults-keys.macos.json` from upstream's `defaults/keys.macos.json` at each herdr-app upgrade; it only carries the chrome keys. The CLI itself (`herdr`) is packaged by `tools.herdr` from upstream release binaries.
+
+- **Installs the package:** no by default
+- **Option:** `tools.herdr-app.extraKeys` (desktop-only key sections, merged last)
+- **Writes:** `~/.config/herdr-app/settings.json` + regenerated `~/.config/herdr-app/keys.json` (activation)
 
 <a id="toolsk-hunk"></a>
 

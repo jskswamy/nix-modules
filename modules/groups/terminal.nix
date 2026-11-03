@@ -7,6 +7,7 @@
   imports = [
     ../tools/alacritty
     ../tools/ghostty
+    ../tools/herdr-app
     ../tools/tmux
     ../tools/tmuxp
   ];
