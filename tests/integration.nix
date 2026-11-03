@@ -452,7 +452,7 @@ in {
     && !(lib.hasInfix "tools.skillshare.mcpServers" bivouacText)
     && !(lib.hasInfix "portableProfiles" bivouacText)
     && builtins.attrNames ss.profiles == ["claude" "pi"]
-    && ssNames "mcp" ssNoGateway == ["chrome-devtools" "codebase-memory-mcp" "time"];
+    && ssNames "mcp" ssNoGateway == ["chrome-devtools" "codebase-memory-mcp" "superlogical" "time"];
   "bivouac enables skillshare without AgentGateway" =
     lib.hasInfix ''["tools.skillshare.enable"] = true'' bivouacText
     && lib.hasInfix ''["tools.skillshare.enableAgentgateway"] = false'' bivouacText;
@@ -706,8 +706,8 @@ in {
   "skillshare declares the agents plugin sync needs" = ssDecl.agents == ["claude" "pi"];
 
   # MCP routing.
-  "skillshare default MCP servers" = ssNames "mcp" skillshare == ["agentgateway" "chrome-devtools" "codebase-memory-mcp" "time"];
-  "skillshare routes portable MCP to every profile" = builtins.all (n: ssTargets (ssEntry "mcp" n) == ssAll) ["time" "chrome-devtools" "agentgateway" "codebase-memory-mcp"];
+  "skillshare default MCP servers" = ssNames "mcp" skillshare == ["agentgateway" "chrome-devtools" "codebase-memory-mcp" "superlogical" "time"];
+  "skillshare routes portable MCP to every profile" = builtins.all (n: ssTargets (ssEntry "mcp" n) == ssAll) ["time" "chrome-devtools" "agentgateway" "codebase-memory-mcp" "superlogical"];
   "skillshare routes a consumer MCP server to its listed profiles only" =
     ssExtraEntry "mcp" "extra"
     == {
@@ -729,6 +729,8 @@ in {
     && !(installs ssOwnTime "mcp-server-time");
   "skillshare pins Chrome DevTools MCP" =
     lib.takeEnd 6 (ssEntry "mcp" "chrome-devtools").args == ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
+  "skillshare points at the Superlogical community MCP endpoint" =
+    lib.takeEnd 2 (ssEntry "mcp" "superlogical").args == ["--url" "https://www.superlogical.com/rex/community-mcp"];
   "skillshare points at the AgentGateway endpoint" =
     lib.takeEnd 2 (ssEntry "mcp" "agentgateway").args == ["--url" "http://127.0.0.1:3050/mcp"];
   "skillshare omits AgentGateway when disabled" = !(builtins.elem "agentgateway" (ssNames "mcp" ssNoGateway));

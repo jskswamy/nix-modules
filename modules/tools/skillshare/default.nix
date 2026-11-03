@@ -294,11 +294,11 @@ in {
       description = ''
         MCP servers to add, keyed by name, each to the profiles it lists.
 
-        Defaults to `chrome-devtools`, `time` unless `timeServerPackage` is
-        null, `codebase-memory-mcp` unless `codebaseMemoryPackage` is null,
-        and, with `enableAgentgateway`, `agentgateway`, each on every
-        profile. Names you define are added alongside them. Context7 comes
-        with its plugin bundle, not from here.
+        Defaults to `chrome-devtools`, `superlogical`, `time` unless
+        `timeServerPackage` is null, `codebase-memory-mcp` unless
+        `codebaseMemoryPackage` is null, and, with `enableAgentgateway`,
+        `agentgateway`, each on every profile. Names you define are added
+        alongside them. Context7 comes with its plugin bundle, not from here.
 
         An entry is added only while Skillshare does not list its name;
         activation never refreshes it afterwards. Changing `args` or
@@ -412,6 +412,7 @@ in {
 
       mcpServers = defaults ({
           chrome-devtools.args = ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
+          superlogical.args = ["--url" "https://www.superlogical.com/rex/community-mcp"];
         }
         // lib.optionalAttrs (cfg.timeServerPackage != null) {
           time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
