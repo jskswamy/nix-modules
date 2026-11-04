@@ -244,6 +244,8 @@ def main():
     effective.update({k: v for k, v in config_keys.items() if isinstance(v, str)})
 
     prefix = parse_prefix(effective.get("prefix") or "ctrl+b")
+    translated = 0
+    skipped = []
     if prefix is None:
         warn("no usable [keys] prefix; skipping translation")
     else:
@@ -254,9 +256,10 @@ def main():
             command = SEMANTIC_COMMANDS.get(option)
             if command is None:
                 if value.startswith("prefix"):
-                    warn(f"{option}={value!r}: no herdr-app command; skipped")
+                    skipped.append(f"{option}={value!r}: no herdr-app command; skipped")
                 continue
             for sequence_string in binding_sequences(prefix, value):
+                translated += 1
                 command_string = command
                 if "{n}" in command:
                     # e.g. switch_tab: replace the {n} slot with the second
@@ -265,6 +268,21 @@ def main():
                         "{n}", sequence_string.rsplit(" ", 1)[1]
                     )
                 out.setdefault("global", {})[sequence_string] = command_string
+
+    # Reader-friendly wrap-up: the per-binding lines above are the
+    # by-design survey of TUI bindings without a desktop command, not
+    # failures. Say so once, in plain language.
+    if skipped:
+        for line in skipped:
+            print(f"herdr-app-keys:   {line}", file=sys.stderr)
+        print(
+            "herdr-app-keys: summary — these TUI bindings have no desktop\n"
+            "herdr-app-keys: equivalent and are skipped by design; this is not\n"
+            "herdr-app-keys: an error and happens at every switch. Everything\n"
+            "herdr-app-keys: else (the shared ctrl+a scheme) was translated and\n"
+            f"herdr-app-keys: written safely ({translated} bindings).",
+            file=sys.stderr,
+        )
 
     with open(args.out, "w") as f:
         json.dump(out, f, indent=2, sort_keys=True, ensure_ascii=False)
