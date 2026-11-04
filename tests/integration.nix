@@ -217,6 +217,8 @@ let
   ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
   agentTools = mk [nm.homeManagerModules.agent-tools];
   terminal = mk [nm.homeManagerModules.terminal];
+  nexo = mk [T.nexo];
+  nexoDisabled = mk [T.nexo {tools.nexo.enable = false;}];
   rexDarwin = mkOn "aarch64-darwin" [T.rex];
   rexLinux = mkOn "x86_64-linux" [T.rex];
   rexDisabled = mk [T.rex {tools.rex.enable = false;}];
@@ -752,6 +754,11 @@ in {
 
   # rex: keybindings, Darwin GUI defaults, and Skillshare wiring.
   "rex is exported and included in terminal group" = T ? rex && terminal.tools.rex.enable;
+  "nexo is exported and included in terminal group" = T ? nexo && terminal.tools.nexo.enable;
+  "nexo installs package and writes config.toml" =
+    installs nexo "nexo" && nexo.home.file ? ".config/nexo/config.toml";
+  "disabled nexo writes no config" =
+    !(installs nexoDisabled "nexo") && !(nexoDisabled.home.file ? ".config/nexo/config.toml");
   "rex writes init.lua and reloads config on activation" =
     rexDarwin.home.file ? ".config/rex/init.lua"
     && rexDarwin.home.activation ? rexReload

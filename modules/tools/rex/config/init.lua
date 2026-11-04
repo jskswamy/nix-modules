@@ -228,6 +228,151 @@ rex.bind("ctrl+a>shift+9", "session.previous") -- ctrl+a > (
 rex.bind("ctrl+a>u", "session.open_on_web")
 rex.bind("ctrl+a>shift+s", "client.host.switch") -- ctrl+a > S
 
+-- Nexo Project, Agent & Previous-Session Switcher
+local function find_executable(name)
+	local home = os.getenv("HOME") or ""
+	local user = os.getenv("USER") or ""
+	local candidates = {
+		"/etc/profiles/per-user/" .. user .. "/bin/" .. name,
+		home .. "/.nix-profile/bin/" .. name,
+		home .. "/.local/bin/" .. name,
+		"/opt/homebrew/bin/" .. name,
+		"/run/current-system/sw/bin/" .. name,
+	}
+	for _, path in ipairs(candidates) do
+		local f = io.open(path, "rb")
+		if f then
+			f:close()
+			return path
+		end
+	end
+	return name
+end
+
+local function nexo_argv(ctx, subcmd, tab)
+	local home = os.getenv("HOME") or ""
+	local user = os.getenv("USER") or ""
+	local nexo_bin = find_executable("nexo")
+	local path_env = table.concat({
+		home .. "/.local/bin",
+		"/etc/profiles/per-user/" .. user .. "/bin",
+		home .. "/.nix-profile/bin",
+		"/run/current-system/sw/bin",
+		"/opt/homebrew/bin",
+		"/usr/bin",
+		"/bin",
+	}, ":")
+
+	local view = rex.session.view({})
+	local client_id = (ctx and ctx.client_id) or ""
+	local session_id = (ctx and ctx.session_id) or (view and view.session_id) or ""
+	local block_id = (ctx and ctx.block_id) or ""
+	if block_id == "" and view and view.windows then
+		for _, w in ipairs(view.windows) do
+			if w.window_id == view.active_window_id then
+				block_id = w.focused_block_id or ""
+				break
+			end
+		end
+	end
+
+	local argv = { "/usr/bin/env" }
+	if client_id ~= "" then
+		argv[#argv + 1] = "REX_CLIENT=" .. tostring(client_id)
+	end
+	if session_id ~= "" then
+		argv[#argv + 1] = "REX_SESSION=" .. tostring(session_id)
+	end
+	if block_id ~= "" and subcmd ~= "tui" then
+		argv[#argv + 1] = "REX_BLOCK=" .. tostring(block_id)
+	end
+	argv[#argv + 1] = "PATH=" .. path_env
+	argv[#argv + 1] = nexo_bin
+	argv[#argv + 1] = "--backend=rex"
+	argv[#argv + 1] = subcmd
+	if tab then
+		argv[#argv + 1] = tab
+	end
+	return argv
+end
+
+local function launch_nexo(ctx, tab)
+	local view = rex.session.view({})
+	if view and view.windows then
+		for _, w in ipairs(view.windows) do
+			if w.window_id == view.active_window_id then
+				for _, layer in ipairs(w.layers or {}) do
+					if layer.kind == "floating" and layer.blocks then
+						for _, b in ipairs(layer.blocks) do
+							if b.label == "nexo" then
+								rex.session.close_layer({ layer_id = layer.layer_id })
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return rex.session.new_layer({
+		bounds = { 0.1, 0.1, 0.8, 0.8 },
+		focus = true,
+		layout = rex.layout.block({
+			flavor = "com.superlogical.terminal.shell",
+			label = "nexo",
+			options = {
+				command = nexo_argv(ctx, "tui", tab),
+				shell = "none",
+			},
+		}),
+	})
+end
+
+rex.action({
+	name = "nexo_projects",
+	title = "Nexo: Open Projects Picker",
+	category = "Session",
+	run = function(ctx)
+		return launch_nexo(ctx, "projects")
+	end,
+})
+
+rex.action({
+	name = "nexo_agents",
+	title = "Nexo: Open Agents Picker",
+	category = "Session",
+	run = function(ctx)
+		return launch_nexo(ctx, "agents")
+	end,
+})
+
+rex.action({
+	name = "nexo_previous",
+	title = "Nexo: Switch to Previous Session",
+	category = "Session",
+	run = function(ctx)
+		local r, err = rex.exec(nexo_argv(ctx, "previous", nil), { timeout = 5 })
+		if not r then
+			error(err, 0)
+		end
+		if not r.ok then
+			error(r.stderr, 0)
+		end
+	end,
+})
+
+-- Prefix bindings (ctrl+a)
+rex.bind("ctrl+a>shift+p", "nexo_projects") -- ctrl+a > P
+rex.bind("ctrl+a>shift+a", "nexo_agents") -- ctrl+a > A
+rex.bind("ctrl+a>b", "nexo_previous")
+rex.bind("ctrl+a>backspace", "nexo_previous")
+
+-- Native macOS GUI bindings
+rex.bind("shift+cmd+k", "nexo_projects")
+rex.bind("shift+cmd+a", "nexo_agents")
+rex.bind("shift+cmd+l", "nexo_previous")
+
 -- Sidebar & App UI
 rex.bind("ctrl+a>shift+;", "client.palette.toggle") -- ctrl+a > :
 rex.bind("ctrl+a>shift+/", "client.sidebar.filter.focus") -- ctrl+a > ?

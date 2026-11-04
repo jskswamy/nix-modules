@@ -1,0 +1,7 @@
+# nexo configuration (~/.config/nexo/config.toml)
+# Managed by nix-modules (tools.nexo).
+
+paths = [
+  "~/source/github.com/*",
+]
+git-from-home = true
