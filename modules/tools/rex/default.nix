@@ -16,6 +16,7 @@
 in {
   imports = [
     ../../_common
+    ../nexo
   ];
 
   options.tools.rex = {

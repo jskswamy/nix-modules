@@ -11,6 +11,7 @@ in {
   imports = [
     ../../_common
     ../../theme
+    ../nexo
   ];
 
   options.tools.herdr = {
