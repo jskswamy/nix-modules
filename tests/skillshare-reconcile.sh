@@ -229,10 +229,11 @@ done
 : >"$FAKE_FAIL"
 jq '.skills += [{"name": "rex", "args": ["install", "/store/skill/rex", "-y"]}]' "$decl" >"$tmp/rex.json"
 mv "$tmp/rex.json" "$decl"
-mkdir -p "$HOME/.claude/skills/rex" "$HOME/.claude-extra/skills/rex"
+mkdir -p "$HOME/.claude/skills/rex" "$HOME/.agents/skills/rex" "$HOME/.claude-extra/skills/rex"
 printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$HOME/.claude/skills/rex/SKILL.md"
+printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$HOME/.agents/skills/rex/SKILL.md"
 printf -- '---\nname: rex\n---\nuser custom skill\n' >"$HOME/.claude-extra/skills/rex/SKILL.md"
 run
-check "reconcile removes imperative rex-stub skill dir before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
+check "reconcile removes imperative rex-stub skill dirs (including ~/.agents/skills) before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && ! -e $HOME/.agents/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
 
 exit "$fails"

@@ -7,21 +7,10 @@
   inherit (import ../../../lib) mkSource mkToolEnable;
   src = mkSource config ./config "modules/tools/rex/config";
   cfg = config.tools.rex;
-  inherit (config.theme) variant;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
-
-  variantTitle =
-    lib.toUpper (builtins.substring 0 1 variant)
-    + builtins.substring 1 1000 variant;
-
-  rexBin =
-    if cfg.package != null
-    then lib.getExe cfg.package
-    else "${config.home.homeDirectory}/.local/bin/rex";
 in {
   imports = [
     ../../_common
-    ../../theme
   ];
 
   options.tools.rex = {
@@ -48,8 +37,6 @@ in {
       file =
         {
           ".config/rex/init.lua".source = src.file "init.lua";
-          ".config/rex/themes/${variantTitle} Light".source = ./themes + "/${variantTitle} Light";
-          ".config/rex/themes/${variantTitle} Dark".source = ./themes + "/${variantTitle} Dark";
         }
         // lib.optionalAttrs (isDarwin && cfg.package == null) {
           ".local/bin/rex" = {
@@ -57,18 +44,6 @@ in {
             executable = true;
           };
         };
-
-      activation.rexThemes = lib.mkIf isDarwin (lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
-        if [[ ! -v DRY_RUN ]] && [[ -x ${lib.escapeShellArg rexBin} ]]; then
-          for theme in \
-            "${config.home.homeDirectory}/.config/rex/themes/${variantTitle} Light" \
-            "${config.home.homeDirectory}/.config/rex/themes/${variantTitle} Dark"; do
-            if [[ -f "$theme" ]]; then
-              ${lib.escapeShellArg rexBin} do client.theme.import "path=$theme" >/dev/null 2>&1 || true
-            fi
-          done
-        fi
-      '');
     };
 
     # Declarative macOS GUI & terminal settings (com.superlogical.rex),
@@ -91,6 +66,8 @@ in {
       "Workspace.terminalCursorBlinkUsesCustomInterval" = true;
       "Workspace.terminalCursorBlinkIntervalMilliseconds" = 0;
       "Workspace.balancesSplitsOnCreation" = true;
+      "Workspace.experiments.groupsActivityByPriority" = true;
+      "Workspace.activityGrouping" = "priority";
     });
   };
 }

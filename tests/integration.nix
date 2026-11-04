@@ -742,12 +742,11 @@ in {
   "skillshare omits AgentGateway when disabled" = !(builtins.elem "agentgateway" (ssNames "mcp" ssNoGateway));
   "skillshare omits AgentGateway on Linux by default" = !(builtins.elem "agentgateway" (ssNames "mcp" (mkOn "x86_64-linux" [T.skillshare])));
 
-  # rex: keybindings, Gruvbox themes, Darwin GUI defaults, and Skillshare wiring.
+  # rex: keybindings, Darwin GUI defaults, and Skillshare wiring.
   "rex is exported and included in terminal group" = T ? rex && terminal.tools.rex.enable;
-  "rex writes init.lua and Gruvbox themes" =
+  "rex writes init.lua" =
     rexDarwin.home.file ? ".config/rex/init.lua"
-    && rexDarwin.home.file ? ".config/rex/themes/Gruvbox Light"
-    && rexDarwin.home.file ? ".config/rex/themes/Gruvbox Dark";
+    && !(rexDarwin.home.activation ? rexThemes);
   "rex installs wrapper CLI on Darwin when package is null" =
     rexDarwin.home.file ? ".local/bin/rex"
     && !(rexLinux.home.file ? ".local/bin/rex");
@@ -768,7 +767,9 @@ in {
     && d."Workspace.terminalCursorStyleForced" == true
     && d."Workspace.terminalCursorBlinkUsesCustomInterval" == true
     && d."Workspace.terminalCursorBlinkIntervalMilliseconds" == 0
-    && d."Workspace.balancesSplitsOnCreation" == true;
+    && d."Workspace.balancesSplitsOnCreation" == true
+    && d."Workspace.experiments.groupsActivityByPriority" == true
+    && d."Workspace.activityGrouping" == "priority";
   "disabled rex writes no config" =
     !(rexDisabled.home.file ? ".config/rex/init.lua")
     && !(rexDisabled.home.file ? ".local/bin/rex");

@@ -136,7 +136,10 @@ if [[ $mode != --no-sync ]]; then
 			if [[ -d $dir/rex && ! -L $dir/rex ]] && grep -q '^  rex-stub:' "$dir/rex/SKILL.md" 2>/dev/null; then
 				rm -rf "$dir/rex"
 			fi
-		done < <(jq -r '.targets // [] | .[].dirs // [] | .[] | if endswith("/skills") then . else . + "/skills" end' "$decl")
+		done < <({
+			printf '%s\n' "$HOME/.agents/skills"
+			jq -r '.targets // [] | .[].dirs // [] | .[] | if endswith("/skills") then . else . + "/skills" end' "$decl"
+		})
 	fi
 	say "syncing resources to targets"
 	"$ss" sync --all </dev/null || {
