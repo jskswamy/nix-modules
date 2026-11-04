@@ -13,7 +13,7 @@ config-file = ?~/.config/ghostty/theme.conf
 
 # font configuration - Enhanced for Alacritty-like rendering
 font-family = "FiraCode Nerd Font Mono"
-font-size = 13
+font-size = 12
 #font-variation = wght=450
 
 # Font rendering optimizations for sharper text
