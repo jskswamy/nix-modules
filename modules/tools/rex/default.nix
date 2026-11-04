@@ -8,6 +8,11 @@
   src = mkSource config ./config "modules/tools/rex/config";
   cfg = config.tools.rex;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
+
+  rexBin =
+    if cfg.package != null
+    then lib.getExe cfg.package
+    else "${config.home.homeDirectory}/.local/bin/rex";
 in {
   imports = [
     ../../_common
@@ -44,6 +49,12 @@ in {
             executable = true;
           };
         };
+
+      activation.rexReload = lib.hm.dag.entryAfter ["writeBoundary" "linkGeneration"] ''
+        if [[ ! -v DRY_RUN ]] && [[ -x ${lib.escapeShellArg rexBin} ]]; then
+          ${lib.escapeShellArg rexBin} --autostart=false config reload >/dev/null 2>&1 || true
+        fi
+      '';
     };
 
     # Declarative macOS GUI & terminal settings (com.superlogical.rex),
@@ -52,7 +63,7 @@ in {
     targets.darwin.defaults."com.superlogical.rex" = lib.mkIf isDarwin (lib.mapAttrs (_: lib.mkDefault) {
       "rex.client.remoteControl" = true;
       "Workspace.terminalFontName" = "FiraCode Nerd Font Mono";
-      "Workspace.terminalFontPointSize" = 13.0;
+      "Workspace.terminalFontPointSize" = 12.0;
       "Workspace.terminalAllowsLigatures" = true;
       "Workspace.terminalSynthesizesMissingStyles" = false;
       "Workspace.terminalUsesBoldFace" = false;

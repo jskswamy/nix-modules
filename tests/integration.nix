@@ -744,8 +744,9 @@ in {
 
   # rex: keybindings, Darwin GUI defaults, and Skillshare wiring.
   "rex is exported and included in terminal group" = T ? rex && terminal.tools.rex.enable;
-  "rex writes init.lua" =
+  "rex writes init.lua and reloads config on activation" =
     rexDarwin.home.file ? ".config/rex/init.lua"
+    && rexDarwin.home.activation ? rexReload
     && !(rexDarwin.home.activation ? rexThemes);
   "rex installs wrapper CLI on Darwin when package is null" =
     rexDarwin.home.file ? ".local/bin/rex"
@@ -756,7 +757,7 @@ in {
     d."rex.client.remoteControl"
     == true
     && d."Workspace.terminalFontName" == "FiraCode Nerd Font Mono"
-    && d."Workspace.terminalFontPointSize" == 13.0
+    && d."Workspace.terminalFontPointSize" == 12.0
     && d."Workspace.terminalCharacterSpacing" == "-5%"
     && d."Workspace.terminalCellHeightPercent" == 15.0
     && d."Workspace.terminalOptionKeyBehavior" == "actsAsAlt"
