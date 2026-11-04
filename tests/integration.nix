@@ -206,12 +206,12 @@ let
   ];
   # Claude-only bundles beyond jskswamy/skills and Beads.
   ssClaudeOnly = ["context7" "gopls-lsp" "mattpocock-skills"];
-  # Pi-only bundles from the pi.dev gallery, and their repositories.
+  # Pi-only bundles from the pi.dev gallery, and their sources.
   ssPiOnly = ["pi-advisor-flow" "pi-btw" "pi-subagents" "vigolium-piolium"];
   ssPiRepo = {
     "pi-advisor-flow" = "philipbrembeck/pi-advisor";
     "pi-btw" = "dbachelder/pi-btw";
-    "pi-subagents" = "nicobailon/pi-subagents";
+    "pi-subagents" = "npm:pi-subagents";
     "vigolium-piolium" = "vigolium/piolium";
   };
   ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
@@ -647,8 +647,16 @@ in {
     (ssEntry "plugins" "mattpocock-skills").args == ["plugin" "add" "mattpocock/skills" "--plugin" "mattpocock-skills" "--target" "claude" "--json"];
   "skillshare binds Pi gallery bundles to Pi only" =
     builtins.all (n: ssCliTargets n == ["pi"] && ssTargets (ssEntry "plugins" n) == ["pi"]) ssPiOnly;
-  "skillshare installs Pi gallery bundles from their repositories" =
-    builtins.all (n: (ssEntry "plugins" n).args == ["plugin" "add" ssPiRepo.${n} "--plugin" n "--target" "pi" "--json"]) ssPiOnly;
+  "skillshare installs Pi gallery bundles from their repositories" = builtins.all (n:
+    (ssEntry "plugins" n).args
+    == ["plugin" "add" ssPiRepo.${n}]
+    ++ (
+      if lib.hasPrefix "npm:" ssPiRepo.${n}
+      then []
+      else ["--plugin" n]
+    )
+    ++ ["--target" "pi" "--json"])
+  ssPiOnly;
   "skillshare binds plugins to declared profiles only" =
     builtins.all (c: builtins.all (e: builtins.all (t: c.tools.skillshare.profiles ? ${t}) (ssTargets e)) c.tools.skillshare.resources.plugins) [skillshare ssExtra];
   "skillshare leaves Context7 MCP to its plugin" = !(builtins.elem "context7" (ssNames "mcp" skillshare));

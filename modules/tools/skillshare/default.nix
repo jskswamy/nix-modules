@@ -99,7 +99,10 @@
       # executor/advisor flow, side conversations and security audits. Other
       # agents cannot load Pi packages, so the compat matrix binds these to
       # every Pi profile, Bivouac instances included.
-      pi-subagents = "nicobailon/pi-subagents";
+      # pi-subagents imports npm packages at runtime (yaml, jiti, ...). A git
+      # source is copied without `npm install`, so it is added from npm and
+      # Pi installs its dependencies.
+      pi-subagents = "npm:pi-subagents";
       pi-advisor-flow = "philipbrembeck/pi-advisor";
       pi-btw = "dbachelder/pi-btw";
       vigolium-piolium = "vigolium/piolium";
@@ -134,7 +137,12 @@
   plugins =
     lib.mapAttrsToList (name: source: {
       inherit name;
-      args = ["plugin" "add" source "--plugin" name] ++ targetArgs (bundleTargets name) ++ ["--json"];
+      # An npm source names its package and takes no --plugin.
+      args =
+        ["plugin" "add" source]
+        ++ lib.optionals (!lib.hasPrefix "npm:" source) ["--plugin" name]
+        ++ targetArgs (bundleTargets name)
+        ++ ["--json"];
     })
     bundles;
 
