@@ -634,8 +634,8 @@ in {
   "skillshare excludes bundled standalone skills on Antigravity CLI" =
     builtins.elem "beads" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
     && builtins.elem "egm_review" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or [])
-    && !(builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or []))
-    && !(builtins.elem "commit-action" (ssCli.tools.skillshare.resources.excludes.codex or []))
+    && !(builtins.elem "commit" (ssCli.tools.skillshare.resources.excludes.antigravity-cli or []))
+    && !(builtins.elem "commit" (ssCli.tools.skillshare.resources.excludes.codex or []))
     && !(ssCli.tools.skillshare.resources.excludes ? codex && builtins.elem "ask-matt" ssCli.tools.skillshare.resources.excludes.codex);
   "skillshare keeps Beads and EGM off Pi" =
     builtins.all (n: ssTargets (ssEntry "plugins" n) == ssClaude) ["beads" "egm"];

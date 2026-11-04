@@ -110,86 +110,73 @@
       "agents": ["pi"]
     },
     "bivouac": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": ["bivouac"]
+      "skills": ["session"]
     },
     "codebase": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
-        "codebase-ask",
-        "codebase-explore",
-        "codebase-graph",
-        "codebase-impact",
-        "codebase-index"
+        "ask",
+        "capabilities",
+        "explore",
+        "graph",
+        "impact",
+        "index",
+        "seams"
       ]
     },
     "commit-tools": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": [
-        "commit-action",
-        "commit-style",
-        "review-commits",
-        "validate-commits"
-      ]
+      "skills": ["commit", "commit-style", "review-commits", "validate-commits"]
     },
     "craft": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
       "skills": [
-        "craft-backlog",
-        "craft-decompose",
-        "craft-deps",
-        "craft-epic",
-        "craft-task",
-        "craft-understand",
-        "execute-tasks",
-        "park-idea",
-        "review-parked",
-        "task-commit"
+        "backlog",
+        "decompose",
+        "deps",
+        "epic",
+        "execute",
+        "park",
+        "parked",
+        "task",
+        "task-commit",
+        "understand"
       ]
     },
     "devenv": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": ["devenv"]
+      "skills": ["manage"]
     },
     "jot": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": [
-        "jot-capture",
-        "jot-configure",
-        "jot-setup",
-        "sketch-from-capture"
-      ]
+      "skills": ["capture", "configure", "setup", "sketch-from-capture"]
     },
     "refactor": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": ["refactor-scan"]
+      "skills": ["scan"]
     },
     "sketch-note": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": ["capture-for-sketch", "excalidraw-format", "sketch-note"]
+      "skills": ["capture-for-sketch", "excalidraw-format", "sketch"]
     },
     "study": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": ["study-coach", "study-recall", "study-setup"]
+      "skills": ["coach", "recall", "setup"]
     },
     "typst-notes": {
-      "commit": "4e61ce9859",
+      "commit": "5b24adf5f7",
       "agents": ["claude", "pi", "codex", "antigravity-cli", "opencode"],
-      "skills": [
-        "infographics",
-        "jot-to-publish",
-        "typst-format",
-        "typst-publish"
-      ]
+      "skills": ["infographics", "jot-to-publish", "publish", "typst-format"]
     }
   }
 }
