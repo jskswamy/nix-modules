@@ -227,13 +227,20 @@ for failure in pluginupdate skillupdate; do
 done
 
 : >"$FAKE_FAIL"
-jq '.skills += [{"name": "rex", "args": ["install", "/store/skill/rex", "-y"]}]' "$decl" >"$tmp/rex.json"
+ro_store="$tmp/ro-store/rex"
+mkdir -p "$ro_store" "$XDG_CONFIG_HOME/skillshare/skills/rex"
+printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$ro_store/SKILL.md"
+chmod 0444 "$ro_store/SKILL.md"
+chmod 0555 "$ro_store" "$XDG_CONFIG_HOME/skillshare/skills/rex"
+jq --arg src "$ro_store" '.skills += [{"name": "rex", "args": ["install", $src, "-y"]}]' "$decl" >"$tmp/rex.json"
 mv "$tmp/rex.json" "$decl"
 mkdir -p "$HOME/.claude/skills/rex" "$HOME/.agents/skills/rex" "$HOME/.claude-extra/skills/rex"
 printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$HOME/.claude/skills/rex/SKILL.md"
 printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$HOME/.agents/skills/rex/SKILL.md"
 printf -- '---\nname: rex\n---\nuser custom skill\n' >"$HOME/.claude-extra/skills/rex/SKILL.md"
 run
+chmod 0755 "$ro_store"
+check "reconcile stages read-only store skill dir as writable and repairs 0555 destination" '[[ -w $XDG_CONFIG_HOME/skillshare/skills/rex && -w $XDG_CONFIG_HOME/skillshare/.nix-sources/rex/SKILL.md ]] && grep -qx "install $XDG_CONFIG_HOME/skillshare/.nix-sources/rex -y" "$FAKE_LOG"'
 check "reconcile removes imperative rex-stub skill dirs (including ~/.agents/skills) before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && ! -e $HOME/.agents/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
 
 exit "$fails"

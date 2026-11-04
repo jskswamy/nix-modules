@@ -79,6 +79,17 @@ ensure() {
 		mapfile -t dirs < <(jq -r '.dirs // [] | .[]' <<<"$entry")
 		mapfile -t args < <(jq -r '.args[]' <<<"$entry")
 		((${#dirs[@]})) && mkdir -p "${dirs[@]}"
+		if [[ $kind == skills ]]; then
+			[[ -d ${cfg%/config.yaml}/skills/$name ]] && chmod -R u+w "${cfg%/config.yaml}/skills/$name"
+			for i in "${!args[@]}"; do
+				if [[ -d ${args[i]} && ! -w ${args[i]} ]]; then
+					local stage="${cfg%/config.yaml}/.nix-sources/$name"
+					rm -rf "$stage" && mkdir -p "$(dirname "$stage")"
+					cp -R "${args[i]}" "$stage" && chmod -R u+w "$stage"
+					args[i]=$stage
+				fi
+			done
+		fi
 		"$ss" "${args[@]}" </dev/null || warn "could not add $kind $name; existing state kept"
 	done
 }
