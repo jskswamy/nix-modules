@@ -216,6 +216,12 @@ let
   };
   ssMatt = ssEntry "skills" "setup-matt-pocock-skills";
   agentTools = mk [nm.homeManagerModules.agent-tools];
+  terminal = mk [nm.homeManagerModules.terminal];
+  rexDarwin = mkOn "aarch64-darwin" [T.rex];
+  rexLinux = mkOn "x86_64-linux" [T.rex];
+  rexDisabled = mk [T.rex {tools.rex.enable = false;}];
+  ssRex = mk [T.skillshare T.rex T.codex];
+  ssRexHook = builtins.fromJSON (builtins.readFile (lib.last (lib.findFirst (e: e.name == "rex") null ssRex.tools.skillshare.resources.hooks).args));
 in {
   # Agent CLIs install only their selected package, without owning login state.
   "agent CLI modules are exported" = T ? antigravity-cli && T ? codex && T ? opencode;
@@ -735,4 +741,41 @@ in {
     lib.takeEnd 2 (ssEntry "mcp" "agentgateway").args == ["--url" "http://127.0.0.1:3050/mcp"];
   "skillshare omits AgentGateway when disabled" = !(builtins.elem "agentgateway" (ssNames "mcp" ssNoGateway));
   "skillshare omits AgentGateway on Linux by default" = !(builtins.elem "agentgateway" (ssNames "mcp" (mkOn "x86_64-linux" [T.skillshare])));
+
+  # rex: keybindings, Gruvbox themes, Darwin GUI defaults, and Skillshare wiring.
+  "rex is exported and included in terminal group" = T ? rex && terminal.tools.rex.enable;
+  "rex writes init.lua and Gruvbox themes" =
+    rexDarwin.home.file ? ".config/rex/init.lua"
+    && rexDarwin.home.file ? ".config/rex/themes/Gruvbox Light"
+    && rexDarwin.home.file ? ".config/rex/themes/Gruvbox Dark";
+  "rex installs wrapper CLI on Darwin when package is null" =
+    rexDarwin.home.file ? ".local/bin/rex"
+    && !(rexLinux.home.file ? ".local/bin/rex");
+  "rex configures com.superlogical.rex defaults on Darwin" = let
+    d = rexDarwin.targets.darwin.defaults."com.superlogical.rex";
+  in
+    d."rex.client.remoteControl"
+    == true
+    && d."Workspace.terminalFontName" == "FiraCode Nerd Font Mono"
+    && d."Workspace.terminalFontPointSize" == 13.0
+    && d."Workspace.terminalCharacterSpacing" == "-5%"
+    && d."Workspace.terminalCellHeightPercent" == 15.0
+    && d."Workspace.terminalOptionKeyBehavior" == "actsAsAlt"
+    && !(d ? "Workspace.terminalPaddingX")
+    && !(d ? "Workspace.terminalPaddingY")
+    && d."Workspace.terminalCopyOnSelect" == true
+    && d."Workspace.terminalCursorStyle" == "block"
+    && d."Workspace.terminalCursorStyleForced" == true
+    && d."Workspace.terminalCursorBlinkUsesCustomInterval" == true
+    && d."Workspace.terminalCursorBlinkIntervalMilliseconds" == 0
+    && d."Workspace.balancesSplitsOnCreation" == true;
+  "disabled rex writes no config" =
+    !(rexDisabled.home.file ? ".config/rex/init.lua")
+    && !(rexDisabled.home.file ? ".local/bin/rex");
+  "skillshare with rex installs rex skill and SessionStart hooks for claude and codex" =
+    builtins.elem "rex" (ssNames "skills" ssRex)
+    && ssNames "hooks" ssRex == ["rex" "rtk"]
+    && lib.sort (a: b: a < b) (builtins.attrNames ssRexHook.bindings) == ["claude" "codex"]
+    && (builtins.head (builtins.head ssRexHook.bindings.claude.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent claude 2>/dev/null || true'"
+    && (builtins.head (builtins.head ssRexHook.bindings.codex.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent codex 2>/dev/null || true'";
 }

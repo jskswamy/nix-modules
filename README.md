@@ -88,16 +88,16 @@ brought in.
 Each group is only a bundle of tool modules — there is nothing in a group
 that is not in one of its tools.
 
-| Group         | Tools                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------- |
+| Group         | Tools                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `agent-tools` | `antigravity-cli`, `ast-grep`, `codex`, `duckdb`, `opencode`, `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`, `aide`, `skillshare` |
-| `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                             |
-| `editor`      | `nvim`, `vim`, `fresh`                                                                              |
-| `git-tools`   | `git`, `git-absorb`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `jujutsu`, `lazygit`, `mergiraf`, `gpg`, `tig`, `hunk` |
-| `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                              |
-| `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                                 |
-| `ssh`         | `ssh`                                                                                               |
-| `terminal`    | `alacritty`, `ghostty`, `tmux`, `tmuxp`                                                             |
+| `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                                                               |
+| `editor`      | `nvim`, `vim`, `fresh`                                                                                                                |
+| `git-tools`   | `git`, `git-absorb`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `jujutsu`, `lazygit`, `mergiraf`, `gpg`, `tig`, `hunk`     |
+| `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                                                                |
+| `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                                                                   |
+| `ssh`         | `ssh`                                                                                                                                 |
+| `terminal`    | `alacritty`, `ghostty`, `herdr-app`, `rex`, `tmux`, `tmuxp`                                                                           |
 
 How to consume and override these from your own configuration —
 including a cookbook — is in **[docs/consuming.md](docs/consuming.md)**.
@@ -120,9 +120,9 @@ Tools include `agentgateway`, `aide`, `alacritty`, `antigravity-cli`,
 `any-nix-shell`, `bat`, `beads`, `ccstatusline`, `codebase-memory-mcp`,
 `codex`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `eza`, `fabric`,
 `fd`, `fish`, `fzf`, `ghostty`, `git`, `git-lfs`, `git-lfs-transfer`, `gpg`,
-`herdr`, `hunk`, `jump`, `lazygit`, `local-mcp`, `mcp-nixos`, `nvim`, `pet`,
-`ripgrep`, `serena-mcp`, `ssh`, `starship`, `tig`, `tmux`, `tmuxp`, `vim`,
-`zoxide`, `zsh`.
+`herdr`, `herdr-app`, `hunk`, `jump`, `lazygit`, `local-mcp`, `mcp-nixos`,
+`nvim`, `pet`, `rex`, `ripgrep`, `serena-mcp`, `ssh`, `starship`, `tig`,
+`tmux`, `tmuxp`, `vim`, `zoxide`, `zsh`.
 
 `overlays.default` provides reusable packages including `beads`, `claude-code`,
 `codebase-memory-mcp`, `entire`, `feather-font`, `gastown`, `herdr`, `hunk`,

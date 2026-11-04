@@ -68,6 +68,7 @@ write it and follow the upstream plugin-state migration guidance.
 | [`mcp-nixos`](#toolsk-mcp-nixos) | no | — | — | 0 |
 | [`nvim`](#toolsk-nvim) | yes | — | — | 4 |
 | [`pet`](#toolsk-pet) | yes | — | — | 2 |
+| [`rex`](#toolsk-rex) | no | — | — | 4 |
 | [`serena-mcp`](#toolsk-serena-mcp) | no | — | — | 0 |
 | [`ssh`](#toolsk-ssh) | yes | — | — | 1 |
 | [`starship`](#toolsk-starship) | yes | — | — | 2 |
@@ -359,6 +360,19 @@ Command-line snippet manager, with the snippet file.
 
 - **Installs the package:** yes
 - **Writes:** `~/.config/pet/config.toml`<br>`~/.config/pet/snippet.toml`
+
+<a id="toolsk-rex"></a>
+
+### `tools.rex`
+
+Rex terminal and multiplexer configuration: `ctrl+a` prefix keybindings
+(`init.lua`), Gruvbox Light/Dark theme files, macOS GUI and terminal defaults
+(`com.superlogical.rex`), a `~/.local/bin/rex` CLI wrapper for the embedded
+app-bundle binary on Darwin, and Skillshare wiring for the `rex` agent skill
+and `SessionStart` hook (`claude` and `codex`).
+
+- **Installs the package:** no by default
+- **Writes:** `~/.config/rex/init.lua`<br>`~/.config/rex/themes/Gruvbox Light`<br>`~/.config/rex/themes/Gruvbox Dark`<br>`~/.local/bin/rex` (Darwin)
 
 <a id="toolsk-serena-mcp"></a>
 

@@ -8,6 +8,7 @@
     ../tools/alacritty
     ../tools/ghostty
     ../tools/herdr-app
+    ../tools/rex
     ../tools/tmux
     ../tools/tmuxp
   ];

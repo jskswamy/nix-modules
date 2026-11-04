@@ -129,6 +129,15 @@ if [[ $mode != --no-sync ]]; then
 			status=1
 		}
 	done < <(jq -r '.hooks // [] | .[].name' "$decl")
+	# Remove stub skill directories written imperatively by `rex skill setup`
+	# so `sync --all` can replace them with Skillshare symlinks.
+	if jq -e '(.skills // []) | any(.name == "rex")' "$decl" >/dev/null; then
+		while IFS= read -r dir; do
+			if [[ -d $dir/rex && ! -L $dir/rex ]] && grep -q '^  rex-stub:' "$dir/rex/SKILL.md" 2>/dev/null; then
+				rm -rf "$dir/rex"
+			fi
+		done < <(jq -r '.targets // [] | .[].dirs // [] | .[] | if endswith("/skills") then . else . + "/skills" end' "$decl")
+	fi
 	say "syncing resources to targets"
 	"$ss" sync --all </dev/null || {
 		warn "sync --all failed"

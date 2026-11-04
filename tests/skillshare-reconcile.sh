@@ -226,4 +226,13 @@ for failure in pluginupdate skillupdate; do
 	check "$failure still repairs OpenCode registrations" 'python3 -c "import json,sys; assert json.load(open(sys.argv[1]))[\"plugins\"]==[sys.argv[2], sys.argv[3]]" "$oc_home/opencode.json" "$file_url" "$dir_url"'
 done
 
+: >"$FAKE_FAIL"
+jq '.skills += [{"name": "rex", "args": ["install", "/store/skill/rex", "-y"]}]' "$decl" >"$tmp/rex.json"
+mv "$tmp/rex.json" "$decl"
+mkdir -p "$HOME/.claude/skills/rex" "$HOME/.claude-extra/skills/rex"
+printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\n' >"$HOME/.claude/skills/rex/SKILL.md"
+printf -- '---\nname: rex\n---\nuser custom skill\n' >"$HOME/.claude-extra/skills/rex/SKILL.md"
+run
+check "reconcile removes imperative rex-stub skill dir before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
+
 exit "$fails"

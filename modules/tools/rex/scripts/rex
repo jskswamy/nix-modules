@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Wrapper locating the embedded Rex CLI inside Rex.app or Rex Beta.app on macOS.
+set -euo pipefail
+
+for app in \
+	"/Applications/Rex.app" \
+	"/Applications/Rex Beta.app" \
+	"$HOME/Applications/Rex.app" \
+	"$HOME/Applications/Rex Beta.app"; do
+	bin="$app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"
+	if [[ -x $bin ]]; then
+		exec "$bin" "$@"
+	fi
+done
+
+echo "rex: could not find Rex.app or Rex Beta.app in /Applications" >&2
+exit 127

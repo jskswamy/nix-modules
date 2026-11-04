@@ -111,6 +111,25 @@
   bundleTargets = name: ofAgent compat.${name}.agents;
   targetArgs = lib.concatMap (t: ["--target" t]);
   claudeTargets = ofAgent ["claude"];
+  rexTargets = ofAgent ["claude" "codex"];
+  rexEnabled = config.tools.rex.enable or false;
+  # Exact byte-for-byte stub expected by `rex skill status` (must not be
+  # reformatted by markdownlint/prettier).
+  rexSkill = pkgs.writeTextDir "rex/SKILL.md" ''
+    ---
+    name: rex
+    description: Use the rex CLI to manage Rex sessions, open tabs, arrange panes, run commands, inspect terminal output, and control connected Rex apps.
+    metadata:
+      rex-stub: "2"
+    ---
+    <!-- Installed by "rex skill setup". Remove it with "rex skill remove". -->
+
+    Run `rex __internal skill` and follow the guide it prints. The guide comes from
+    the installed Rex CLI, so it describes the commands available in that version.
+
+    If the command fails, the installed Rex version predates the guide. Start with
+    `rex whoami --json`, then use `rex --help` and `rex COMMAND --help`.
+  '';
 
   plugins =
     lib.mapAttrsToList (name: source: {
@@ -159,6 +178,10 @@
     ++ lib.optional (bundleTargets "superpowers" != profileNames) {
       name = "using-superpowers";
       args = ["install" "obra/superpowers/skills" "--skill" (lib.concatStringsSep "," compat.superpowers.skills)];
+    }
+    ++ lib.optional rexEnabled {
+      name = "rex";
+      args = ["install" "${rexSkill}/rex" "-y"];
     };
 
   mcpAdd = name: targets: rest: {
@@ -209,10 +232,30 @@
       ];
     });
   });
-  hooks = lib.optional (claudeTargets != []) {
-    name = "rtk";
-    args = ["hooks" "add" "rtk" "--file" rtkHook];
-  };
+  rexHook = builtins.toFile "skillshare-rex-hook.json" (builtins.toJSON {
+    bindings = lib.genAttrs rexTargets (t: {
+      events.SessionStart = [
+        {
+          hooks = [
+            {
+              type = "command";
+              command = "/bin/sh -c 'rex __internal session-start --agent ${cfg.profiles.${t}.agent} 2>/dev/null || true'";
+              timeout = 5;
+            }
+          ];
+        }
+      ];
+    });
+  });
+  hooks =
+    lib.optional (claudeTargets != []) {
+      name = "rtk";
+      args = ["hooks" "add" "rtk" "--file" rtkHook];
+    }
+    ++ lib.optional (rexEnabled && rexTargets != []) {
+      name = "rex";
+      args = ["hooks" "add" "rex" "--file" rexHook];
+    };
 
   skillshare =
     if cfg.package != null
