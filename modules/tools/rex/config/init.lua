@@ -776,11 +776,10 @@ focus_after_minimize = function(ctx)
 	end
 end
 
-local function launch_maximize_picker(ctx)
-	close_maximize_picker(ctx)
+local function tool_path_env()
 	local home = os.getenv("HOME") or ""
 	local user = os.getenv("USER") or ""
-	local path_env = table.concat({
+	return table.concat({
 		home .. "/.local/bin",
 		"/etc/profiles/per-user/" .. user .. "/bin",
 		home .. "/.nix-profile/bin",
@@ -789,6 +788,11 @@ local function launch_maximize_picker(ctx)
 		"/usr/bin",
 		"/bin",
 	}, ":")
+end
+
+local function launch_maximize_picker(ctx)
+	close_maximize_picker(ctx)
+	local path_env = tool_path_env()
 	local view = rex.session.view({})
 	local session_id = (ctx and ctx.session_id) or (view and view.session_id) or ""
 	local script = [[
@@ -888,6 +892,89 @@ fi
 		}),
 	})
 end
+
+-- Doc Reader (ctrl+a > e)
+-- Scans the focused pane's scrollback for paths to docs the agent mentioned
+-- (newest first), picks one with fzf, and opens it: markdown in glow, the
+-- rest with the system opener. shortcut: matches extension-suffixed paths
+-- only, a path with spaces is missed; upgrade by quoting rules if it bites.
+local doc_reader_script = [=[
+resolve() {
+  case $1 in
+    [~]/*) echo "$HOME/${1#??}" ;;
+    /*) echo "$1" ;;
+    ./*) echo "$SRC_CWD/${1#??}" ;;
+    *) echo "$SRC_CWD/$1" ;;
+  esac
+}
+files=$(
+  rex capture -b "$SRC_BLOCK" --unwrap \
+  | grep -oE '[A-Za-z0-9_./~+@-]+\.(md|html|png|jpe?g|svg|pdf|txt)' \
+  | awk '{ l[NR] = $0 } END { for (i = NR; i > 0; i--) if (!s[l[i]]++) print l[i] }' \
+  | while IFS= read -r p; do
+      f=$(resolve "$p")
+      [ -f "$f" ] && echo "$f"
+    done | awk '!s[$0]++'
+)
+if [ -z "$files" ]; then
+  echo "No docs found in this pane's output."; read -r _
+elif [ "$(printf '%s\n' "$files" | wc -l)" -eq 1 ]; then
+  pick=$files
+else
+  pick=$(printf '%s\n' "$files" | fzf --reverse --height=100% --border=none --prompt='Open doc > ' \
+    --preview='bat --color=always --style=plain {}' --preview-window='right:60%:wrap')
+fi
+if [ -n "$pick" ]; then
+  case $pick in
+    *.md) glow -p "$pick" ;;
+    *.txt) bat --paging=always "$pick" ;;
+    *) open "$pick" ;;
+  esac
+fi
+rex -s "$REX_SESSION" do -e '
+  local v = rex.session.view({})
+  for _, w in ipairs((v and v.windows) or {}) do
+    for _, l in ipairs(w.layers or {}) do
+      if l.kind == "floating" and l.blocks and l.blocks[1] and l.blocks[1].label == "doc-reader" then
+        pcall(rex.session.close_layer, { layer_id = l.layer_id })
+      end
+    end
+  end
+' >/dev/null 2>&1
+]=]
+
+rex.action({
+	name = "doc_reader",
+	title = "Open Doc From Output",
+	category = "Float Overlay",
+	run = function(ctx)
+		local _, _, src_block = resolve_focused_context(ctx)
+		rex.session.new_layer({
+			session_id = ctx.session_id,
+			bounds = { 0.04, 0.04, 0.92, 0.92 },
+			focus = true,
+			layout = rex.layout.block({
+				flavor = "com.superlogical.terminal.shell",
+				label = "doc-reader",
+				options = {
+					command = {
+						"/usr/bin/env",
+						"PATH=" .. tool_path_env(),
+						"REX_SESSION=" .. tostring(ctx.session_id),
+						"SRC_BLOCK=" .. tostring(src_block or ""),
+						"SRC_CWD=" .. (focused_cwd(ctx) or os.getenv("HOME") or ""),
+						"/bin/sh",
+						"-c",
+						doc_reader_script,
+					},
+					shell = "none",
+				},
+			}),
+		})
+	end,
+})
+
+rex.bind("ctrl+a>e", "doc_reader")
 
 rex.action({
 	name = "float_minimize_or_restore",
