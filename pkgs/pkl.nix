@@ -1,24 +1,21 @@
 # Provide pkl from upstream GitHub release binaries instead of nixpkgs,
 # avoiding the 1.2 GB JVM closure and Java deprecation warnings.
 _: prev: let
-  pklVersion = "0.32.2";
+  pklVersion = "0.33.0";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/apple/pkl/releases/download/${pklVersion}/pkl-macos-aarch64";
-      hash = "sha256-RmlS8LMMk9+jY5Ols2lRWZF85CkePJNqGKCiQM++mOk=";
+      hash = "sha256-45wVffDwCjXTS0YnCnaHhO3K9Qmq+/dDhJsntMg++Ds=";
     };
-    x86_64-darwin = prev.fetchurl {
-      url = "https://github.com/apple/pkl/releases/download/${pklVersion}/pkl-macos-amd64";
-      hash = "sha256-PEyRSnUhDT8yknQLSo1Ef5+DLoG2ByC+xXIh6IRxfu4=";
-    };
+    # No x86_64-darwin: upstream stopped publishing pkl-macos-amd64 in 0.33.0.
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/apple/pkl/releases/download/${pklVersion}/pkl-linux-aarch64";
-      hash = "sha256-5gdE4X1N3AJXo1JgmYtfmDh7XWpehoMXzM++vo2WKuM=";
+      hash = "sha256-7c6jYUAuyrDzqT+GsaiWxB0AqSQfSWL3AnglSwj70m0=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/apple/pkl/releases/download/${pklVersion}/pkl-linux-amd64";
-      hash = "sha256-h0x1SEx5rdd/sjRupKsuiHXuo1+3B4lL9UV6LfXQPe8=";
+      hash = "sha256-uabd6ms4K31NtM9453qjhY4Min4Ck50rophXS10fzGk=";
     };
   };
 
@@ -45,7 +42,7 @@ in {
       homepage = "https://pkl-lang.org";
       license = licenses.asl20;
       mainProgram = "pkl";
-      platforms = ["aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux"];
+      platforms = ["aarch64-darwin" "x86_64-linux" "aarch64-linux"];
     };
   };
 }
