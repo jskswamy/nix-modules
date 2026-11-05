@@ -894,36 +894,81 @@ fi
 end
 
 -- Doc Reader (ctrl+a > e)
--- Scans the focused pane's scrollback for paths to docs the agent mentioned
--- (newest first), picks one with fzf, and opens it: markdown in glow, the
--- rest with the system opener. shortcut: matches extension-suffixed paths
--- only, a path with spaces is missed; upgrade by quoting rules if it bites.
+-- Scans the focused pane's scrollback for paths (newest first), resolving
+-- relative paths and bare filenames from the pane cwd up to its git repo root
+-- and parent org directory (or ~/source/<host>/<org>), streaming hits into fzf
+-- with a full-width list and bottom preview. Markdown opens in glow, text in
+-- bat, and everything else with the system opener.
+-- shortcut: extension-suffixed paths only, so a path with spaces is missed.
 local doc_reader_script = [=[
-resolve() {
-  case $1 in
-    [~]/*) echo "$HOME/${1#??}" ;;
-    /*) echo "$1" ;;
-    ./*) echo "$SRC_CWD/${1#??}" ;;
-    *) echo "$SRC_CWD/$1" ;;
-  esac
+cwd=${SRC_CWD:-$HOME}
+repo=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || repo=$cwd
+case $repo in
+  "$HOME"/source/*/*/*)
+    rest=${repo#"$HOME/source/"}
+    host=${rest%%/*}
+    rest=${rest#*/}
+    org="$HOME/source/$host/${rest%%/*}"
+    ;;
+  *)
+    org=$(dirname "$repo")
+    if [ "$org" = "$HOME" ] || [ "$org" = / ]; then
+      org=$repo
+    fi
+    ;;
+esac
+fd_exact() {
+  command -v fd >/dev/null 2>&1 || return 1
+  found=
+  while IFS= read -r hit; do
+    [ -n "$hit" ] || continue
+    tail=${hit%/"$1"}
+    if [ "$tail/$1" = "$hit" ] && [ -f "$hit" ]; then
+      printf '%s\n' "$hit"
+      found=1
+    fi
+  done <<EOF
+$(fd -H -I -E .git -E node_modules -E vendor -t f -p -F -s -a -- "/$1" "$2" 2>/dev/null)
+EOF
+  [ -n "$found" ]
 }
-files=$(
-  rex capture -b "$SRC_BLOCK" --unwrap \
+resolve() {
+  p=$1
+  case $p in
+    [~]/*) p="$HOME/${p#??}" ;;
+  esac
+  case $p in
+    /*)
+      [ -f "$p" ] && printf '%s\n' "$p"
+      return
+      ;;
+    ./*) p=${p#??} ;;
+  esac
+  dir=$cwd
+  while [ -n "$dir" ] && [ "$dir" != / ]; do
+    if [ -f "$dir/$p" ]; then
+      printf '%s\n' "$dir/$p"
+      return
+    fi
+    [ "$dir" = "$org" ] || [ "$dir" = "$HOME" ] && break
+    next=$(dirname "$dir")
+    [ "$next" = "$dir" ] && break
+    dir=$next
+  done
+  fd_exact "$p" "$repo" && return
+  [ "$org" != "$repo" ] && fd_exact "$p" "$org"
+}
+pick=$(
+  rex -s "$REX_SESSION" capture -b "$SRC_BLOCK" --unwrap \
   | grep -oE '[A-Za-z0-9_./~+@-]+\.(md|html|png|jpe?g|svg|pdf|txt)' \
   | awk '{ l[NR] = $0 } END { for (i = NR; i > 0; i--) if (!s[l[i]]++) print l[i] }' \
   | while IFS= read -r p; do
-      f=$(resolve "$p")
-      [ -f "$f" ] && echo "$f"
-    done | awk '!s[$0]++'
+      resolve "$p"
+    done \
+  | awk '!s[$0]++ { print; fflush() }' \
+  | fzf --reverse --height=100% --border=none --prompt='Open doc > ' \
+      --preview='bat --color=always --style=plain {}' --preview-window='down:65%:wrap'
 )
-if [ -z "$files" ]; then
-  echo "No docs found in this pane's output."; read -r _
-elif [ "$(printf '%s\n' "$files" | wc -l)" -eq 1 ]; then
-  pick=$files
-else
-  pick=$(printf '%s\n' "$files" | fzf --reverse --height=100% --border=none --prompt='Open doc > ' \
-    --preview='bat --color=always --style=plain {}' --preview-window='right:60%:wrap')
-fi
 if [ -n "$pick" ]; then
   case $pick in
     *.md) glow -p "$pick" ;;
