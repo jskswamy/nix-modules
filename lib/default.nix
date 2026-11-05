@@ -41,10 +41,10 @@
       description = "Whether to apply the ${name} configuration.";
     };
 
-  # A package this repo defines. Uses the consumer's own `pkgs` when they
-  # applied `overlays.default` (the common case, and free), and otherwise
-  # applies the overlay locally so that importing a tool module is enough
-  # on its own.
-  ownPkg = pkgs: name:
-    pkgs.${name} or (pkgs.extend (import ../pkgs/overlay.nix)).${name};
+  # A package this repo defines. Always taken from this repo's overlay,
+  # never from the consumer's `pkgs.${name}`: a name like `aide` also
+  # exists in nixpkgs (the unrelated AIDE intrusion detector), and
+  # preferring `pkgs.${name}` silently installs that one wherever the
+  # consumer has not applied `overlays.default`.
+  ownPkg = pkgs: name: (pkgs.extend (import ../pkgs/overlay.nix)).${name};
 }
