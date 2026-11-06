@@ -202,8 +202,21 @@ locked_rev() {
 	nix flake metadata "$root" --json 2>/dev/null | jq -r --arg n "$name" '.locks.nodes[$n].locked.rev' || echo ""
 }
 
+# Verify with the repo's own `build` app when it has one: `nix flake check`
+# evaluates every system's outputs, so a host with a NixOS config fails on
+# macOS (platform mismatch) whatever the input change was.
+verify_flake() {
+	local root="$1" system="$2"
+	if [[ $(nix eval --impure --expr \
+		"(builtins.getFlake \"git+file://${root}\").apps.${system} or {} ? build" 2>/dev/null) == "true" ]]; then
+		(cd "$root" && nix run ".#build") >&2
+	else
+		nix flake check "$root" >&2
+	fi
+}
+
 cmd_apply_flake_input() {
-	local root="$1" name="$2" old_rev new_rev success error
+	local root="$1" name="$2" system="$3" old_rev new_rev success error
 	old_rev=$(locked_rev "$root" "$name")
 	success=true
 	error=""
@@ -212,7 +225,7 @@ cmd_apply_flake_input() {
 		error="nix flake lock failed for ${name}"
 	fi
 	new_rev=$(locked_rev "$root" "$name")
-	if $success && ! nix flake check "$root"; then
+	if $success && ! verify_flake "$root" "$system"; then
 		success=false
 		error="build verification failed"
 	fi
@@ -234,7 +247,7 @@ cmd_apply() {
 	if $is_package; then
 		cmd_apply_overlay "$root" "$name" "$system"
 	else
-		cmd_apply_flake_input "$root" "$name"
+		cmd_apply_flake_input "$root" "$name" "$system"
 	fi
 }
 
