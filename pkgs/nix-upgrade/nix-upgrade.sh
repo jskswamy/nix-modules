@@ -115,23 +115,70 @@ package_platforms() {
 		"(builtins.getFlake \"git+file://${root}\").packages.${system}.${name}.meta.platforms or [\"${system}\"]"
 }
 
+package_evaluates_on() {
+	local root="$1" platform="$2" name="$3"
+	[[ $(nix eval --impure --expr \
+		"(builtins.getFlake \"git+file://${root}\").packages.${platform} ? \"${name}\"" 2>/dev/null) == "true" ]]
+}
+
+# nix-update hashes a src by building it for its own platform, which this
+# machine can't do for other systems (and once the version is bumped it
+# skips their hash silently). A fixed-output hash only depends on the
+# bytes, so refetch the foreign URL through this system's own src
+# derivation and swap the old hash for the new one in the package file.
+refresh_foreign_hash() {
+	local root="$1" system="$2" platform="$3" name="$4" info url old new file
+	info=$(nix eval --impure --json --expr "
+		let
+		  f = builtins.getFlake \"git+file://${root}\";
+		  native = f.packages.${system}.\"${name}\";
+		  foreign = f.packages.${platform}.\"${name}\";
+		in {
+		  url = builtins.head foreign.src.urls;
+		  nativeUrl = builtins.head native.src.urls;
+		  hash = foreign.src.outputHash;
+		  position = native.meta.position;
+		}") || return 1
+	url=$(jq -r '.url' <<<"$info")
+	# Same src on every platform (e.g. a source tarball): already updated.
+	[[ $url == "$(jq -r '.nativeUrl' <<<"$info")" ]] && return 0
+	old=$(jq -r '.hash' <<<"$info")
+	new=$(nix build --no-link --impure --expr "
+		(builtins.getFlake \"git+file://${root}\").packages.${system}.\"${name}\".src.overrideAttrs (_: {
+		  urls = [ \"${url}\" ];
+		  outputHash = \"\";
+		  outputHashAlgo = \"sha256\";
+		})" 2>&1 | grep -oE 'got: +sha256-[A-Za-z0-9+/=]+' | awk '{print $2}' || true)
+	[[ -n $new ]] || return 1
+	# meta.position points into the flake's store copy; map it back.
+	file=$(jq -r '.position' <<<"$info" | sed -E 's|^/nix/store/[^/]+-source/||; s|:[0-9]+$||')
+	file="${root}/${file}"
+	[[ $(grep -cF "$old" "$file") == 1 ]] || return 1
+	sed -i "s|${old}|${new}|" "$file"
+}
+
 cmd_apply_overlay() {
 	local root="$1" name="$2" system="$3" old_version new_version platform success error
 	old_version=$(package_version "$root" "$system" "$name")
 	success=true
 	error=""
-	while read -r platform; do
-		local build_flag=()
-		[[ $platform == "$system" ]] && build_flag=(--build)
-		if ! (cd "$root" && nix-update --flake "${build_flag[@]}" --system "$platform" "$name"); then
+	if ! (cd "$root" && nix-update --flake --build --system "$system" "$name"); then
+		success=false
+		error="nix-update failed for ${system}"
+	fi
+	while $success && read -r platform; do
+		[[ $platform == "$system" ]] && continue
+		# The flake drops packages that don't evaluate on a platform.
+		package_evaluates_on "$root" "$platform" "$name" || continue
+		if ! refresh_foreign_hash "$root" "$system" "$platform" "$name"; then
 			success=false
-			error="nix-update failed for ${platform}"
+			error="hash refresh failed for ${platform}"
 		fi
 		# Limit the loop to the handful of systems this tool knows how to
-		# drive nix-update for. meta.platforms can expand to dozens of
-		# entries (e.g. lib.platforms.unix); intersect against the known
-		# set, falling back to the current system alone when there's no
-		# overlap at all (e.g. an impossible platform list).
+		# hash for. meta.platforms can expand to dozens of entries (e.g.
+		# lib.platforms.unix); intersect against the known set, falling
+		# back to the current system alone when there's no overlap at all
+		# (e.g. an impossible platform list).
 	done < <(package_platforms "$root" "$system" "$name" | jq -r --arg sys "$system" '
 		(["aarch64-darwin", "x86_64-darwin", "x86_64-linux", "aarch64-linux"]) as $known
 		| (map(select(. as $p | $known | index($p) != null))) as $intersect
