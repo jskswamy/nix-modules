@@ -6,6 +6,9 @@
 # judgment. NIX_UPGRADE_INTROSPECT_NIX is set by the Nix wrapper
 # (../nix-upgrade.nix) to the store path of introspect.nix.
 set -euo pipefail
+# Without this, a failure inside $(...) is ignored, so a broken
+# introspection silently drops every overlay package from discover.
+shopt -s inherit_errexit
 
 usage() {
 	cat <<'USAGE'
@@ -45,7 +48,10 @@ discover_overlay_packages() {
 		version=$(jq -r '.version' <<<"$entry")
 		[[ $owner == "null" || $repo == "null" ]] && continue
 		latest=$(latest_github_release "$owner" "$repo")
-		[[ -z $latest ]] && continue
+		if [[ -z $latest ]]; then
+			echo "nix-upgrade: skipped ${name}: no release found for ${owner}/${repo} (is gh authenticated?)" >&2
+			continue
+		fi
 		up_to_date=$([[ $version == "$latest" ]] && echo true || echo false)
 		jq -n --arg name "$name" --arg current "$version" --arg latest "$latest" --argjson upToDate "$up_to_date" \
 			'{name: $name, kind: "overlay", current: $current, latest: $latest, upToDate: $upToDate}'
