@@ -95,16 +95,18 @@ cmd_discover() {
 	fi
 }
 
+# Every getFlake below uses git+file, not path: a path flake copies
+# git-ignored files (e.g. decrypted secrets) into the world-readable store.
 package_version() {
 	local root="$1" system="$2" name="$3"
 	nix eval --impure --raw --expr \
-		"(builtins.getFlake \"path:${root}\").packages.${system}.${name}.version" 2>/dev/null || echo ""
+		"(builtins.getFlake \"git+file://${root}\").packages.${system}.${name}.version" 2>/dev/null || echo ""
 }
 
 package_platforms() {
 	local root="$1" system="$2" name="$3"
 	nix eval --impure --json --expr \
-		"(builtins.getFlake \"path:${root}\").packages.${system}.${name}.meta.platforms or [\"${system}\"]"
+		"(builtins.getFlake \"git+file://${root}\").packages.${system}.${name}.meta.platforms or [\"${system}\"]"
 }
 
 cmd_apply_overlay() {
@@ -170,7 +172,7 @@ cmd_apply() {
 	local name="$1" root system is_package
 	root=$(repo_root)
 	system=$(current_system)
-	if nix eval --impure --json --expr "(builtins.getFlake \"path:${root}\").packages.${system} or {}" |
+	if nix eval --impure --json --expr "(builtins.getFlake \"git+file://${root}\").packages.${system} or {}" |
 		jq -e --arg n "$name" 'has($n)' >/dev/null 2>&1; then
 		is_package=true
 	else

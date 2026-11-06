@@ -8,7 +8,9 @@
   flakePath,
   system,
 }: let
-  flake = builtins.getFlake "path:${flakePath}";
+  # git+file, not path: a path flake copies git-ignored files (e.g.
+  # decrypted secrets) into the world-readable store.
+  flake = builtins.getFlake "git+file://${flakePath}";
   pkgs = flake.packages.${system} or {};
 
   githubUrlRegex = "https://github\\.com/([^/]+)/([^/]+)/.*";
