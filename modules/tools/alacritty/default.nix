@@ -15,6 +15,28 @@
     rev = "2749b407b597790e6f08b218c2bc2acdf66210a0";
     sha256 = "sha256-F8ye16jhfldsyxcOqxVS0PNecVcQcAPnEahDKS4PGwE=";
   };
+
+  # Merino isn't in alacritty-theme; generate it into the same themes dir.
+  names = ["black" "red" "green" "yellow" "blue" "magenta" "cyan" "white"];
+  merinoTheme = p: let
+    half = off: lib.listToAttrs (lib.imap0 (i: n: lib.nameValuePair n (builtins.elemAt p.ansi (i + off))) names);
+  in
+    (pkgs.formats.toml {}).generate "merino.toml" {
+      colors = {
+        primary = {inherit (p) background foreground;};
+        cursor = {
+          cursor = p.cursor;
+          text = p.cursorText;
+        };
+        selection = {
+          background = p.selectionBackground;
+          text = p.selectionForeground;
+        };
+        normal = half 0;
+        bright = half 8;
+      };
+    };
+  merino = import ../../theme/merino.nix;
 in {
   imports = [
     ../../_common
@@ -104,5 +126,7 @@ in {
       source = "${alacrittyTheme}/themes";
       recursive = true;
     };
+    home.file.".config/alacritty/themes/merino_dark.toml".source = merinoTheme merino.dark;
+    home.file.".config/alacritty/themes/merino_light.toml".source = merinoTheme merino.light;
   };
 }

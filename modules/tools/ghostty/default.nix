@@ -12,6 +12,19 @@
   variantTitle =
     lib.toUpper (builtins.substring 0 1 variant)
     + builtins.substring 1 1000 variant;
+
+  # Ghostty has no Merino built in; install it as user themes.
+  merinoTheme = p:
+    lib.concatImapStrings (i: c: "palette = ${toString (i - 1)}=${c}\n") p.ansi
+    + ''
+      background = ${p.background}
+      foreground = ${p.foreground}
+      cursor-color = ${p.cursor}
+      cursor-text = ${p.cursorText}
+      selection-background = ${p.selectionBackground}
+      selection-foreground = ${p.selectionForeground}
+    '';
+  merino = import ../../theme/merino.nix;
 in {
   imports = [
     ../../_common
@@ -51,6 +64,8 @@ in {
       # Included by config/ghostty/config via `config-file = ?~/.config/ghostty/theme.conf`,
       # so the rest of that file stays a plain instant-edit symlink.
       ".config/ghostty/theme.conf".text = "theme = light:${variantTitle} Light,dark:${variantTitle} Dark\n";
+      ".config/ghostty/themes/Merino Dark".text = merinoTheme merino.dark;
+      ".config/ghostty/themes/Merino Light".text = merinoTheme merino.light;
 
       ".local/bin/ghostty-terminfo" = {
         source = ./scripts/ghostty-terminfo;

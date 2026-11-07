@@ -8,7 +8,7 @@
 {lib, ...}: {
   options.theme.variant = lib.mkOption {
     type = lib.types.str;
-    default = "gruvbox";
+    default = "merino";
     example = "catppuccin";
     description = ''
       Base colour-scheme name, lowercase, without a light/dark suffix.
