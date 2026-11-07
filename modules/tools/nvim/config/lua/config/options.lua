@@ -6,8 +6,9 @@
 vim.o.shell = "fish"
 vim.o.shellcmdflag = "-c"
 
--- Use 24-bit colors for proper colorscheme rendering
-vim.o.termguicolors = true
+-- ANSI colors only, so the terminal theme (Rex's palette) drives the colors;
+-- see lua/plugins/colorscheme.lua
+vim.o.termguicolors = false
 
 -- Add Mason bin to PATH so linters/formatters can be found
 local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"

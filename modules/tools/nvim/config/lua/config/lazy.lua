@@ -41,7 +41,7 @@ require("lazy").setup({
 		version = false, -- always use the latest git commit
 		-- version = "*", -- try installing the latest stable version for plugins that support semver
 	},
-	install = { colorscheme = { "gruvbox", "habamax" } },
+	install = { colorscheme = { "default" } },
 	checker = { enabled = false }, -- check for plugin updates manually
 	rocks = { enabled = false }, -- disable luarocks support (not needed)
 	performance = {
