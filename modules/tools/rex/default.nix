@@ -80,6 +80,32 @@ in {
       "Workspace.balancesSplitsOnCreation" = true;
       "Workspace.experiments.groupsActivityByPriority" = true;
       "Workspace.activityGrouping" = "priority";
+
+      # Appearance, matching the other terminals' Merino pair (theme.variant).
+      "Workspace.lightThemeID" = "merino-light";
+      "Workspace.darkThemeID" = "merino-dark";
+      "Workspace.terminalFontSmoothing" = true;
+      "Workspace.terminalSmoothScrolling" = true;
+      "Workspace.cursorShadersEnabled" = true;
+      "Workspace.animationStyle" = "snappy";
+      "Workspace.tabIconTintMode" = "off";
+
+      # Panes and windows.
+      "Workspace.focusFollowsMouse" = true;
+      "Workspace.inactivePaneFadeMode" = "both";
+      "Workspace.usesStandardInactiveWindowPaneStyles" = true;
+      "Workspace.showsProgramActivityNotifications" = false;
+      "Workspace.experiments.usesNewQuickSwitcher" = true;
+
+      "rex.agents.names-sessions" = true;
+
+      # Developer mode and its server settings (Settings → Server). Tailnet
+      # access is left out: it needs a one-time Tailscale login per machine.
+      "rex.developer-mode-enabled" = true;
+      "rex.server.run-mode" = "bundled";
+      "rex.server.automatic-restart-enabled" = true;
+      "rex.server.block-plugin-reload-enabled" = false;
+      "rex.server.web-client-origin-patterns" = ["https://rex.superlogical.com"];
     });
   };
 }
