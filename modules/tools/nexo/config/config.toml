@@ -5,3 +5,8 @@ paths = [
   "~/source/github.com/*",
 ]
 git-from-home = true
+
+# Name containers from the remote (org/team/repo); a missing team and its
+# separator drop out, giving org/repo. Needs the session-naming fork build.
+[session]
+name-template = "{org}/{team}/{repo}"
