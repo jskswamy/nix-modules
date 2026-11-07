@@ -1264,6 +1264,6 @@ rex.bind("ctrl+a>shift+;", "client.palette.toggle") -- ctrl+a > :
 rex.bind("ctrl+a>shift+/", "client.sidebar.filter.focus") -- ctrl+a > ?
 rex.bind("ctrl+a>\\", "client.sidebar.toggle")
 rex.bind("ctrl+a>a", "client.sidebar.activity.toggle")
-rex.bind("ctrl+a>`", "client.visibility.toggle")
+rex.bind("cmd+escape", "client.visibility.toggle") -- single chord so it works from other apps
 rex.bind("ctrl+a>shift+r", "client.config.reload") -- ctrl+a > R
 rex.bind("ctrl+a>s", "client.settings")
