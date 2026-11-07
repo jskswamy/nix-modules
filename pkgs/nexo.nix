@@ -1,17 +1,17 @@
 # nexo - Terminal workspace, project, container, and coding-agent switcher
-# Not available in nixpkgs; upstream v0.1.0 predates the Rex backend adapter,
-# so we build from the main commit that ships internal/backend/rex.
-# https://github.com/vieitesss/nexo
+# Not available in nixpkgs. Built from the jskswamy fork's
+# feat/configurable-session-naming branch (upstream main + session naming).
+# https://github.com/jskswamy/nexo (fork of vieitesss/nexo)
 _: prev: {
   nexo = prev.buildGoModule rec {
     pname = "nexo";
-    version = "0.1.0-unstable-2026-10-26";
+    version = "0.1.0-unstable-2026-11-05";
 
     src = prev.fetchFromGitHub {
-      owner = "vieitesss";
+      owner = "jskswamy";
       repo = "nexo";
-      rev = "3f4d7d14b30f57d739808a060b5d9c2209b0efe2";
-      hash = "sha256-1TLgNxUtycL19xz9VIn7Js5YFJxfo5FNAXRLdxap5Ws=";
+      rev = "7f4e3cbc62cb5545d06b7b1033c9c0ff292ce91e";
+      hash = "sha256-+nP1gB6p2vSvzlOkXXkx2xInpx2Mvr0luXej6z6/OWM=";
     };
 
     vendorHash = "sha256-WqJ+vuNBgW5Eohhz1YfI7OfqyUdzcl7IEeDgwVHjmKo=";
@@ -55,7 +55,7 @@ _: prev: {
 
     meta = with prev.lib; {
       description = "Fast terminal switcher for projects, containers, and coding agents";
-      homepage = "https://github.com/vieitesss/nexo";
+      homepage = "https://github.com/jskswamy/nexo";
       license = licenses.mit;
       mainProgram = "nexo";
       platforms = ["aarch64-darwin" "x86_64-darwin" "x86_64-linux" "aarch64-linux"];
