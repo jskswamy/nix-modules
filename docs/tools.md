@@ -106,7 +106,7 @@ authentication still comes from the existing agenix environment file.
 
 ### `tools.alacritty`
 
-GPU terminal emulator. Settings plus the upstream theme collection its `general.import` points at.
+GPU terminal emulator. Settings plus the upstream theme collection its `general.import` points at. Font, bold/italic, cursor and Option-as-Alt come from the shared `terminal.*` options; cell spacing is converted to whole pixels.
 
 - **Installs the package:** yes
 - **Enables:** `programs.alacritty`
@@ -192,10 +192,10 @@ The daily-driver shell. Config lives in `conf.d/*.fish` and `functions/*.fish`, 
 
 ### `tools.ghostty`
 
-Terminal emulator config, a generated `theme.conf` derived from `theme.variant`, and the `ghostty-terminfo` helper.
+Terminal emulator config, a generated `theme.conf` derived from `theme.variant`, a generated `terminal.conf` from the shared `terminal.*` options (font, cell spacing, bold/italic, cursor, clipboard, the `ctrl+b` prefix keys from `terminal.keys`, and the global hotkey when `terminal.hotkey.app = "ghostty"`), and the `ghostty-terminfo` helper.
 
 - **Installs the package:** no by default — see above
-- **Writes:** `~/.config/ghostty/config`<br>`~/.config/ghostty/theme.conf`<br>`~/.local/bin/ghostty-terminfo`
+- **Writes:** `~/.config/ghostty/config`<br>`~/.config/ghostty/theme.conf`<br>`~/.config/ghostty/terminal.conf`<br>`~/.local/bin/ghostty-terminfo`
 
 <a id="toolsk-git"></a>
 
@@ -231,7 +231,7 @@ Terminal workspace manager for AI coding agents: keybindings, the herdr-lazy plu
 
 ### `tools.herdr-app`
 
-Desktop multiplexer client config: font and keyboard mappings for the Herdr desktop app. Deliberately config-only — upstream ships no Homebrew cask and no Nix package; the usual source is herdr's install script (`Herdr.app` in /Applications, `herdr-app` symlinked into `~/.local/bin`). Managed via the `terminal` group.
+Desktop multiplexer client config: font (from the shared `terminal.*` options, written as a generated `settings.json`) and keyboard mappings for the Herdr desktop app. Deliberately config-only — upstream ships no Homebrew cask and no Nix package; the usual source is herdr's install script (`Herdr.app` in /Applications, `herdr-app` symlinked into `~/.local/bin`). Managed via the `terminal` group.
 
 **Key scheme is generated, not stored.** The herdr TUI's `~/.config/herdr/config.toml` `[keys]` is the single source of truth. At activation, `herdr --default-config` supplies the installed binary's baked-in defaults, config.toml applies user overrides, and a generator translates the effective `ctrl+a` prefix scheme into herdr-app's `keys.json` (which takes herdr's two-keystroke sequences — same mechanism as Zed's chains). Bindings with no desktop equivalent (resize_mode, `[keys.command]` plugin blocks, `focus_agent`'s indexed jump) skip loudly on stderr. `~/.config/herdr-app/keys.json` is therefore not a managing symlink: it is regenerated whole on every switch, and the app hot-reloads it. Desktop-only overrides that the TUI cannot express (e.g. alt-backspace as esc+word-delete) go in `tools.herdr-app.extraKeys`.
 
@@ -366,13 +366,17 @@ Command-line snippet manager, with the snippet file.
 ### `tools.rex`
 
 Rex terminal and multiplexer configuration: `ctrl+a` prefix keybindings
-(`init.lua`), macOS GUI and terminal defaults (`com.superlogical.rex`), a
+(`init.lua`), macOS GUI and terminal defaults (`com.superlogical.rex`, with
+font, cursor and theme from the shared `terminal.*` and `theme.variant`
+options), a generated `terminal.lua` holding the `ctrl+a` prefix keys
+shared through `terminal.keys` and the global hotkey when
+`terminal.hotkey.app = "rex"`, a
 `~/.local/bin/rex` CLI wrapper for the embedded app-bundle binary on Darwin,
 and Skillshare wiring for the `rex` agent skill and `SessionStart` hook
 (`claude` and `codex`).
 
 - **Installs the package:** no by default
-- **Writes:** `~/.config/rex/init.lua`<br>`~/.local/bin/rex` (Darwin)
+- **Writes:** `~/.config/rex/init.lua`<br>`~/.config/rex/terminal.lua`<br>`~/.local/bin/rex` (Darwin)
 
 <a id="toolsk-serena-mcp"></a>
 

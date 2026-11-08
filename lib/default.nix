@@ -41,6 +41,40 @@
       description = "Whether to apply the ${name} configuration.";
     };
 
+  # Assertions for an app's shared prefix keys (terminal.keys): every
+  # action must be one the app maps, no key may serve two actions, and no
+  # key may take over one the app's hand-written config already binds.
+  # `reserved` is that list of hand-written keys, in the same syntax.
+  prefixKeyAssertions = lib: {
+    option,
+    keys,
+    actions,
+    reserved,
+  }: let
+    unknown = lib.subtractLists (builtins.attrNames actions) (builtins.attrNames keys);
+    bound = lib.concatLists (builtins.attrValues keys);
+    dupes = lib.unique (lib.filter (k: lib.count (x: x == k) bound > 1) bound);
+    clashes = lib.unique (lib.intersectLists bound reserved);
+    show = ks: lib.concatMapStringsSep ", " (k: "\"${k}\"") ks;
+  in [
+    {
+      assertion = unknown == [];
+      message = "${option}: unknown action(s) ${show unknown}. Known actions: ${lib.concatStringsSep ", " (builtins.attrNames actions)}.";
+    }
+    {
+      assertion = dupes == [];
+      message = "${option}: key(s) ${show dupes} are given to more than one action.";
+    }
+    {
+      assertion = clashes == [];
+      message = "${option}: key(s) ${show clashes} are already bound in the app's hand-written config; pick another key or remove that binding.";
+    }
+  ];
+
+  # Every capture of `regex` in `text`, taking each match's last group.
+  allMatches = lib: regex: text:
+    map lib.last (lib.filter builtins.isList (builtins.split regex text));
+
   # A package this repo defines. Always taken from this repo's overlay,
   # never from the consumer's `pkgs.${name}`: a name like `aide` also
   # exists in nixpkgs (the unrelated AIDE intrusion detector), and

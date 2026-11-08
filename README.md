@@ -135,6 +135,15 @@ Every themeable tool maps it to its own settings — Ghostty's capitalized
 theme names, Alacritty's colorscheme file, and so on — so switching themes
 is a one-line change.
 
+**`terminal.*`** does the same for how the terminal apps draw text. Ghostty,
+Rex, Herdr-app and Alacritty take their font, cell spacing, bold/italic,
+cursor, copy-on-select and Option-as-Alt from it, so they look alike.
+`terminal.keys` holds the keys pressed after the prefix (split, focus,
+zoom, tabs), generated into both Ghostty (`ctrl+b`) and Rex (`ctrl+a`);
+Herdr keeps its own `config.toml`, whose built-in defaults use the same
+keys. `terminal.hotkey.app` picks the one app (`"rex"` or `"ghostty"`) that binds
+the global show/hide hotkey, since only one app can own it.
+
 **`nixModules.sourceRoot`** decides where config files come from:
 
 - unset (default) — files are read from this flake's immutable store path.

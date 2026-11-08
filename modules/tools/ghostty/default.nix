@@ -3,10 +3,73 @@
   lib,
   ...
 }: let
-  inherit (import ../../../lib) mkSource mkToolEnable;
+  inherit (import ../../../lib) mkSource mkToolEnable prefixKeyAssertions allMatches;
   src = mkSource config ./config "modules/tools/ghostty/config";
   cfg = config.tools.ghostty;
   inherit (config.theme) variant;
+  t = config.terminal;
+
+  # Shared look-and-feel (modules/terminal), as Ghostty keys. Each is a
+  # default, so tools.ghostty.settings overrides any one of them.
+  faceStyle =
+    if t.boldItalic
+    then "default"
+    else false;
+
+  sharedSettings =
+    {
+      font-family = t.font.family;
+      font-size = t.font.size;
+      adjust-cell-height = "${toString t.cell.heightPercent}%";
+      adjust-cell-width = "${toString t.cell.widthPercent}%";
+      # Ghostty treats only `false` specially; any other value is a style name.
+      font-style-bold = faceStyle;
+      font-style-italic = faceStyle;
+      font-style-bold-italic = faceStyle;
+      font-synthetic-style = t.boldItalic;
+      cursor-style = t.cursor.style;
+      cursor-style-blink = t.cursor.blink;
+      copy-on-select =
+        if t.copyOnSelect
+        then "clipboard"
+        else false;
+      macos-option-as-alt = t.optionAsAlt;
+    }
+    // lib.optionalAttrs (!t.font.ligatures) {font-feature = "-calt,-liga,-dlig";};
+
+  # Shared prefix keys (terminal.keys) as Ghostty actions.
+  prefix = "ctrl+b";
+  actions = {
+    splitRight = "new_split:right";
+    splitDown = "new_split:down";
+    focusLeft = "goto_split:left";
+    focusDown = "goto_split:down";
+    focusUp = "goto_split:up";
+    focusRight = "goto_split:right";
+    focusNext = "goto_split:next";
+    focusPrevious = "goto_split:previous";
+    closePane = "close_surface";
+    zoom = "toggle_split_zoom";
+    equalize = "equalize_splits";
+    resizeMode = "activate_key_table:resize";
+    newTab = "new_tab";
+    nextTab = "next_tab";
+    previousTab = "previous_tab";
+    renameTab = "prompt_surface_title";
+    closeTab = "close_tab";
+  };
+  # Unknown actions are dropped here and reported by the assertion below.
+  keybinds = lib.concatStrings (lib.mapAttrsToList (action: keys:
+    lib.concatMapStrings (key: "keybind = ${prefix}>${key}=${actions.${action}}\n") keys)
+  (lib.filterAttrs (action: _: actions ? ${action}) cfg.keys));
+
+  # ctrl+b keys the hand-written config binds itself (tab 1-9, quick terminal).
+  reservedKeys = allMatches lib "(^|\n)keybind = ctrl\\+b>([^=\n]+)=" (builtins.readFile ./config/config);
+
+  terminalConf =
+    lib.generators.toKeyValue {mkKeyValue = lib.generators.mkKeyValueDefault {} " = ";} cfg.settings
+    + keybinds
+    + lib.optionalString (t.hotkey.app == "ghostty") "keybind = global:${t.hotkey.key}=toggle_visibility\n";
 
   # Ghostty's built-in theme names are capitalized ("Gruvbox Light").
   variantTitle =
@@ -29,10 +92,35 @@ in {
   imports = [
     ../../_common
     ../../theme
+    ../../terminal
   ];
 
   options.tools.ghostty = {
     enable = mkToolEnable lib "ghostty";
+
+    keys = lib.mkOption {
+      type = with lib.types; attrsOf (listOf str);
+      default = {};
+      example = {splitRight = ["v"];};
+      description = ''
+        Ghostty's ctrl+b prefix keys, by action. Filled from the shared
+        `terminal.keys` as defaults; set an action here to change it for
+        Ghostty only.
+      '';
+    };
+
+    settings = lib.mkOption {
+      type = with lib.types; attrsOf (oneOf [str bool int float]);
+      default = {};
+      example = {font-size = 14;};
+      description = ''
+        Ghostty keys written to the generated terminal.conf. Filled with
+        the shared `terminal.*` values as defaults; set a key here to
+        override it for Ghostty only. Use this rather than the
+        hand-written config: Ghostty loads terminal.conf after that file,
+        so a key set there is overridden.
+      '';
+    };
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
@@ -56,6 +144,15 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    tools.ghostty.settings = lib.mapAttrs (_: lib.mkDefault) sharedSettings;
+    tools.ghostty.keys = lib.mapAttrs (_: lib.mkDefault) t.keys;
+    assertions = prefixKeyAssertions lib {
+      option = "tools.ghostty.keys";
+      inherit (cfg) keys;
+      inherit actions;
+      reserved = reservedKeys;
+    };
+
     home.packages = lib.optional (cfg.package != null) cfg.package;
 
     home.file = {
@@ -63,6 +160,7 @@ in {
 
       # Included by config/ghostty/config via `config-file = ?~/.config/ghostty/theme.conf`,
       # so the rest of that file stays a plain instant-edit symlink.
+      ".config/ghostty/terminal.conf".text = terminalConf;
       ".config/ghostty/theme.conf".text = "theme = light:${variantTitle} Light,dark:${variantTitle} Dark\n";
       ".config/ghostty/themes/Merino Dark".text = merinoTheme merino.dark;
       ".config/ghostty/themes/Merino Light".text = merinoTheme merino.light;

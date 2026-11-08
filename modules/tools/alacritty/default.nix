@@ -8,6 +8,11 @@
   inherit (import ../../../lib) mkToolEnable;
   cfg = config.tools.alacritty;
   inherit (config.theme) variant;
+  t = config.terminal;
+  faceStyle = style:
+    if t.boldItalic
+    then style
+    else "Regular";
 
   alacrittyTheme = pkgs.fetchFromGitHub {
     owner = "alacritty";
@@ -41,6 +46,7 @@ in {
   imports = [
     ../../_common
     ../../theme
+    ../../terminal
   ];
 
   options.tools.alacritty.enable = mkToolEnable lib "alacritty";
@@ -49,7 +55,16 @@ in {
     programs.alacritty = {
       enable = lib.mkDefault true;
       settings = {
-        cursor.style = lib.mkDefault "Block";
+        cursor.style = {
+          shape = lib.mkDefault (lib.toSentenceCase t.cursor.style);
+          blinking = lib.mkDefault (
+            if t.cursor.blink
+            then "On"
+            else "Never"
+          );
+        };
+
+        selection.save_to_clipboard = lib.mkDefault t.copyOnSelect;
 
         scrolling = {
           history = lib.mkDefault 500; # Extremely aggressive for performance (was 1000)
@@ -66,19 +81,34 @@ in {
           decorations = lib.mkDefault "None"; # Remove decorations for fastest rendering
           blur = lib.mkDefault false; # Disable blur for performance
           # Make Option key send Alt sequences on macOS
-          option_as_alt = lib.mkDefault "Both";
+          option_as_alt = lib.mkDefault (
+            if t.optionAsAlt
+            then "Both"
+            else "None"
+          );
           resize_increments = lib.mkDefault true; # Resize by character grid for performance
         };
 
-        font = {
+        # Font from the shared terminal options. Alacritty is not libghostty
+        # and has no ligatures; its spacing is in whole pixels, not percent.
+        font = lib.mapAttrsRecursive (_: lib.mkDefault) {
           normal = {
-            family = lib.mkDefault "FiraCode Nerd Font Mono";
-            style = lib.mkDefault "Regular";
+            inherit (t.font) family;
+            style = "Regular";
           };
-          size = lib.mkMerge [
-            (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 10)
-            (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
-          ];
+          bold.style = faceStyle "Bold";
+          italic.style = faceStyle "Italic";
+          bold_italic.style = faceStyle "Bold Italic";
+          # Linux keeps its own smaller size.
+          size =
+            if pkgs.stdenv.hostPlatform.isDarwin
+            then t.font.size
+            else 10;
+          # shortcut: point size stands in for cell size, so pixels are approximate; tune here if Alacritty looks off next to Ghostty.
+          offset = {
+            x = builtins.floor (t.font.size * 0.6 * t.cell.widthPercent / 100.0 + 0.5);
+            y = builtins.floor (t.font.size * t.cell.heightPercent / 100.0 + 0.5);
+          };
         };
 
         general = {

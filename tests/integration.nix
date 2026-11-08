@@ -222,6 +222,66 @@ let
   rexDarwin = mkOn "aarch64-darwin" [T.rex];
   rexLinux = mkOn "x86_64-linux" [T.rex];
   rexDisabled = mk [T.rex {tools.rex.enable = false;}];
+  sharedTerm = mkOn "aarch64-darwin" [
+    T.rex
+    T.ghostty
+    T.herdr-app
+    T.alacritty
+    {
+      terminal.font.size = 14;
+      terminal.hotkey.app = "ghostty";
+    }
+  ];
+  # Each app overrides one shared value; the shared one still reaches the rest.
+  perApp = mkOn "aarch64-darwin" [
+    T.rex
+    T.ghostty
+    T.herdr-app
+    T.alacritty
+    {
+      tools.ghostty.settings.font-size = 15;
+      tools.herdr-app.settings.font_size = 16;
+      programs.alacritty.settings.font.size = 17;
+      targets.darwin.defaults."com.superlogical.rex"."Workspace.terminalFontPointSize" = 18.0;
+    }
+  ];
+  keysOverride = mkOn "aarch64-darwin" [
+    T.rex
+    T.ghostty
+    {
+      terminal.keys.zoom = ["shift+z"];
+      tools.ghostty.keys.splitRight = ["s"];
+    }
+  ];
+  allTerms = [T.rex T.ghostty T.herdr-app T.alacritty];
+  termFails = extra: failedMessages (allTerms ++ [extra]);
+  hasFail = needles: msgs: builtins.any (m: builtins.all (n: lib.hasInfix n m) needles) msgs;
+  boldOn = mkOn "aarch64-darwin" [T.ghostty T.rex {terminal.boldItalic = true;}];
+  altOff = mkOn "aarch64-darwin" [T.rex {terminal.optionAsAlt = false;}];
+  koGhostty = keysOverride.home.file.".config/ghostty/terminal.conf".text;
+  koRex = keysOverride.home.file.".config/rex/terminal.lua".text;
+  # Herdr's built-in prefix keys (herdr --default-config), which stay
+  # unmanaged; each must remain one of the shared keys for its action.
+  herdrDefaults = {
+    splitRight = "v";
+    splitDown = "minus";
+    focusLeft = "h";
+    focusDown = "j";
+    focusUp = "k";
+    focusRight = "l";
+    focusNext = "tab";
+    focusPrevious = "shift+tab";
+    closePane = "x";
+    zoom = "z";
+    resizeMode = "r";
+    newTab = "c";
+    nextTab = "n";
+    previousTab = "p";
+    renameTab = "shift+t";
+    closeTab = "shift+x";
+  };
+  perAppGhostty = perApp.home.file.".config/ghostty/terminal.conf".text;
+  ghosttyConf = sharedTerm.home.file.".config/ghostty/terminal.conf".text;
   ssRex = mk [T.skillshare T.rex T.codex];
   ssRexHook = builtins.fromJSON (builtins.readFile (lib.last (lib.findFirst (e: e.name == "rex") null ssRex.tools.skillshare.resources.hooks).args));
 in {
@@ -786,6 +846,55 @@ in {
     && d."Workspace.balancesSplitsOnCreation" == true
     && d."Workspace.experiments.groupsActivityByPriority" == true
     && d."Workspace.activityGrouping" == "priority";
+  "terminal options reach every app" =
+    sharedTerm.targets.darwin.defaults."com.superlogical.rex"."Workspace.terminalFontPointSize"
+    == 14.0
+    && lib.hasInfix "font-size = 14\n" ghosttyConf
+    && (builtins.fromJSON sharedTerm.home.file.".config/herdr-app/settings.json".text).font_size == 14
+    && sharedTerm.programs.alacritty.settings.font.size == 14;
+  "each terminal app can override a shared value" =
+    lib.hasInfix "font-size = 15\n" perAppGhostty
+    && !(lib.hasInfix "font-size = 12" perAppGhostty)
+    && lib.hasInfix "font-family = FiraCode Nerd Font Mono\n" perAppGhostty
+    && (builtins.fromJSON perApp.home.file.".config/herdr-app/settings.json".text).font_size == 16
+    && perApp.programs.alacritty.settings.font.size == 17
+    && perApp.targets.darwin.defaults."com.superlogical.rex"."Workspace.terminalFontPointSize" == 18.0;
+  "shared prefix keys reach Ghostty and Rex" =
+    lib.hasInfix "keybind = ctrl+b>shift+\\=new_split:right\n" ghosttyConf
+    && lib.hasInfix "keybind = ctrl+b>tab=goto_split:next\n" ghosttyConf
+    && lib.hasInfix ''rex.bind("ctrl+a>shift+\\", "pane.split.right")'' rexDarwin.home.file.".config/rex/terminal.lua".text
+    && lib.hasInfix ''rex.bind("ctrl+a>0", "pane_or_float_balance")'' rexDarwin.home.file.".config/rex/terminal.lua".text;
+  "prefix keys override shared and per app" =
+    lib.hasInfix "keybind = ctrl+b>shift+z=toggle_split_zoom\n" koGhostty
+    && !(lib.hasInfix "ctrl+b>z=" koGhostty)
+    && lib.hasInfix ''rex.bind("ctrl+a>shift+z", "pane.zoom")'' koRex
+    && lib.hasInfix "keybind = ctrl+b>s=new_split:right\n" koGhostty
+    && !(lib.hasInfix "ctrl+b>v=" koGhostty)
+    && lib.hasInfix ''rex.bind("ctrl+a>v", "pane.split.right")'' koRex;
+  "herdr default prefix keys match the shared keys" =
+    lib.all (a: builtins.elem (lib.replaceStrings ["minus"] ["-"] herdrDefaults.${a}) rexDarwin.terminal.keys.${a})
+    (builtins.attrNames herdrDefaults);
+  "default terminal config raises no assertion" = termFails {} == [];
+  "a shared key taken by a hand-written Rex key is rejected" =
+    hasFail ["tools.rex.keys" "\"m\"" "hand-written"] (termFails {terminal.keys.zoom = ["m"];});
+  "a Ghostty key taken by its hand-written config is rejected" =
+    hasFail ["tools.ghostty.keys" "\"1\"" "hand-written"] (termFails {tools.ghostty.keys.zoom = ["1"];});
+  "a key given to two actions is rejected" =
+    hasFail ["tools.rex.keys" "\"x\"" "more than one action"] (termFails {terminal.keys.zoom = ["x"];});
+  "an unknown action name is rejected" =
+    hasFail ["tools.ghostty.keys" "unknown action" "\"zoomm\""] (termFails {terminal.keys.zoomm = ["shift+z"];});
+  "hotkey owner must be enabled" =
+    hasFail ["terminal.hotkey.app" "tools.rex"] (failedMessages [T.ghostty {terminal.hotkey.app = "rex";}])
+    && failedMessages [T.ghostty] == [];
+  "bold and italic on use Ghostty's default face" =
+    lib.hasInfix "font-style-bold = default\n" boldOn.home.file.".config/ghostty/terminal.conf".text
+    && boldOn.targets.darwin.defaults."com.superlogical.rex"."Workspace.terminalUsesBoldFace";
+  "option as alt off is written to Rex" =
+    altOff.targets.darwin.defaults."com.superlogical.rex"."Workspace.terminalOptionKeyBehavior" == "composesText";
+  "global hotkey is bound by exactly one app" =
+    lib.hasInfix "keybind = global:cmd+escape=toggle_visibility" ghosttyConf
+    && !(lib.hasInfix "cmd+escape" sharedTerm.home.file.".config/rex/terminal.lua".text)
+    && lib.hasInfix "cmd+escape" rexDarwin.home.file.".config/rex/terminal.lua".text;
   "disabled rex writes no config" =
     !(rexDisabled.home.file ? ".config/rex/init.lua")
     && !(rexDisabled.home.file ? ".local/bin/rex");

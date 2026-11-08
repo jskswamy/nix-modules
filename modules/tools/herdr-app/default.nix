@@ -4,9 +4,9 @@
   pkgs,
   ...
 }: let
-  inherit (import ../../../lib) mkSource mkToolEnable;
-  src = mkSource config ./config "modules/tools/herdr-app/config";
+  inherit (import ../../../lib) mkToolEnable;
   cfg = config.tools.herdr-app;
+  t = config.terminal;
 
   generateKeys = pkgs.writeScript "herdr-app-generate-keys" ''
     export PATH=${lib.makeBinPath [pkgs.python3]}:$PATH
@@ -16,6 +16,7 @@ in {
   imports = [
     ../../_common
     ../../theme
+    ../../terminal
   ];
 
   options.tools.herdr-app = {
@@ -32,6 +33,17 @@ in {
         package; the usual source is herdr's install script, which puts
         Herdr.app in /Applications and a herdr-app symlink in
         ~/.local/bin.
+      '';
+    };
+
+    settings = lib.mkOption {
+      inherit (pkgs.formats.json {}) type;
+      default = {};
+      example = {font_size = 14;};
+      description = ''
+        Contents of ~/.config/herdr-app/settings.json. Filled with the
+        shared `terminal.*` values as defaults; set a key here to override
+        it for herdr-app only.
       '';
     };
 
@@ -64,14 +76,25 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    tools.herdr-app.settings = lib.mapAttrs (_: lib.mkDefault) {
+      zoom = 1;
+      font = t.font.family;
+      font_size = t.font.size;
+      font_ligatures = t.font.ligatures;
+      option_as_alt =
+        if t.optionAsAlt
+        then "on"
+        else "off";
+    };
+
     home.packages = lib.optional (cfg.package != null) cfg.package;
 
     home.file = {
       # herdr-app — desktop multiplexer client. Its terminal panes embed
       # libghostty (the app vendors ghostty), so the rendering engine is
-      # already Ghostty's; the font matches via this settings file.
+      # already Ghostty's; the font comes from the shared terminal options.
       #
-      # Only settings.json is a managed symlink. keys.json is GENERATED
+      # settings.json is generated from Nix. keys.json is GENERATED
       # by the activation below from the herdr TUI's config.toml (the
       # single source of truth for the shared ctrl+a scheme), so the two
       # tools cannot drift: herdr --default-config pins the TUI's
@@ -84,7 +107,7 @@ in {
       # keys.json is read but never stomped. Invalid output — or rather,
       # a schema or keystroke the app rejects — shows up as keys.error
       # next to the file.
-      ".config/herdr-app/settings.json".source = src.file "settings.json";
+      ".config/herdr-app/settings.json".text = builtins.toJSON cfg.settings;
     };
 
     home.activation.herdrAppKeys =
