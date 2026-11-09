@@ -1259,4 +1259,6 @@ do
 	end
 end
 rex.bind("ctrl+a>shift+r", "client.config.reload") -- ctrl+a > R
-rex.bind("ctrl+a>s", "client.settings")
+-- ctrl+a>s: session switcher, matching tmux's choose-tree (prefix s).
+-- Settings stays on cmd+, (the macOS global shortcut).
+rex.bind("ctrl+a>s", "session.switch")

@@ -69,9 +69,13 @@ name = "terminal"
 # alt+..., cmd/super, and punctuation-with-modifiers may depend on your terminal/tmux setup.
 prefix = "ctrl+a"
 
-# Prefix-mode actions
-# help = "prefix+?"
-# settings = "prefix+s"
+# prefix+s is session/workspace picking everywhere (tmux choose-tree,
+# Rex session.switch). Disabled here so herdr's default Settings-on-s
+# can't shadow the muscle memory; Settings keeps its GUI shortcut.
+settings = ""
+# Workspace (session) picker moved onto the muscle-memory key, beside
+# its default prefix+w.
+workspace_picker = "prefix+s"
 # detach = "prefix+q"
 # reload_config = "prefix+shift+r"
 # open_notification_target = "prefix+o"
