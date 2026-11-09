@@ -10,6 +10,17 @@
 }: let
   inherit (lib) mkOption types;
   inherit (config.terminal.hotkey) app;
+
+  # Face sets for families this config knows, encoded by hand (Nix cannot
+  # query installed fonts at eval time). Fira Code ships a true Bold face
+  # but no Italic. Unknown families are conservatively style-less.
+  fontFaces = {
+    "FiraCode Nerd Font Mono" = {
+      hasBold = true;
+      hasItalic = false;
+    };
+  };
+  faceHas = style: (fontFaces.${config.terminal.font.family}.${style} or false);
 in {
   # The chosen owner must be enabled, or nothing binds the hotkey.
   config.assertions = lib.optional (app != null) {
@@ -55,6 +66,21 @@ in {
         default = true;
         description = "Whether to draw the font's ligatures (ignored by Alacritty, which has none).";
       };
+
+      # Whether the family ships true Bold / Italic faces, from fontFaces
+      # above. Unknown families default to no, which keeps today's
+      # style-free rendering exactly like boldItalic = false. Override
+      # these (or extend fontFaces) when switching families.
+      hasBold = mkOption {
+        type = types.bool;
+        default = faceHas "hasBold";
+        description = "Whether the font family ships a true Bold face.";
+      };
+      hasItalic = mkOption {
+        type = types.bool;
+        default = faceHas "hasItalic";
+        description = "Whether the font family ships a true Italic face.";
+      };
     };
 
     cell = {
@@ -98,6 +124,23 @@ in {
       type = types.bool;
       default = true;
       description = "Whether selecting text copies it to the clipboard.";
+    };
+
+    # Face policy, resolved once here so every terminal maps the same
+    # answer instead of re-deriving it: a style draws with its own face
+    # when the font has one, and boldItalic still forces both on (with
+    # synthesis for faces the font lacks). Each tool maps these to its
+    # native keys - Rex's terminalUsesBoldFace / Ghostty's
+    # font-style-bold / Alacritty's font.bold.style.
+    face.bold = mkOption {
+      type = types.bool;
+      default = config.terminal.font.hasBold || config.terminal.boldItalic;
+      description = "Whether bold text draws with the font's Bold face.";
+    };
+    face.italic = mkOption {
+      type = types.bool;
+      default = config.terminal.font.hasItalic || config.terminal.boldItalic;
+      description = "Whether italic text draws with the font's Italic face.";
     };
 
     optionAsAlt = mkOption {

@@ -128,9 +128,13 @@ in {
         "Workspace.terminalFontName" = t.font.family;
         "Workspace.terminalFontPointSize" = t.font.size * 1.0;
         "Workspace.terminalAllowsLigatures" = t.font.ligatures;
+        # Face policy from the shared terminal options: bold draws with
+        # the font's true Bold face when the family has one (Fira Code
+        # does, its Italic is not a face), and boldItalic still forces
+        # both on with synthesis for what is missing.
         "Workspace.terminalSynthesizesMissingStyles" = t.boldItalic;
-        "Workspace.terminalUsesBoldFace" = t.boldItalic;
-        "Workspace.terminalUsesItalicFace" = t.boldItalic;
+        "Workspace.terminalUsesBoldFace" = t.face.bold;
+        "Workspace.terminalUsesItalicFace" = t.face.italic;
         "Workspace.terminalCharacterSpacing" = "${toString t.cell.widthPercent}%";
         "Workspace.terminalCellHeightPercent" = t.cell.heightPercent * 1.0;
         "Workspace.terminalCopyOnSelect" = t.copyOnSelect;

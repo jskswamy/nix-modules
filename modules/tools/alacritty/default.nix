@@ -9,8 +9,11 @@
   cfg = config.tools.alacritty;
   inherit (config.theme) variant;
   t = config.terminal;
-  faceStyle = style:
-    if t.boldItalic
+  # Alacritty looks up styles by name, so a style without a real face in
+  # the family must map to Regular; the shared face policy (modules/terminal)
+  # already knows which faces the family ships.
+  faceStyle = on: style:
+    if on
     then style
     else "Regular";
 
@@ -96,9 +99,10 @@ in {
             inherit (t.font) family;
             style = "Regular";
           };
-          bold.style = faceStyle "Bold";
-          italic.style = faceStyle "Italic";
-          bold_italic.style = faceStyle "Bold Italic";
+          bold.style = faceStyle t.face.bold "Bold";
+          italic.style = faceStyle t.face.italic "Italic";
+          bold_italic.style =
+            faceStyle (t.face.bold && t.face.italic) "Bold Italic";
           # Linux keeps its own smaller size.
           size =
             if pkgs.stdenv.hostPlatform.isDarwin

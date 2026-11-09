@@ -11,8 +11,11 @@
 
   # Shared look-and-feel (modules/terminal), as Ghostty keys. Each is a
   # default, so tools.ghostty.settings overrides any one of them.
-  faceStyle =
-    if t.boldItalic
+  # Ghostty treats only `false` specially; any other value is a style
+  # name, so the shared face policy maps true -> "default" (the font's
+  # own Bold/Italic face) and false -> false (draw as regular text).
+  styleKey = on:
+    if on
     then "default"
     else false;
 
@@ -22,10 +25,9 @@
       font-size = t.font.size;
       adjust-cell-height = "${toString t.cell.heightPercent}%";
       adjust-cell-width = "${toString t.cell.widthPercent}%";
-      # Ghostty treats only `false` specially; any other value is a style name.
-      font-style-bold = faceStyle;
-      font-style-italic = faceStyle;
-      font-style-bold-italic = faceStyle;
+      font-style-bold = styleKey t.face.bold;
+      font-style-italic = styleKey t.face.italic;
+      font-style-bold-italic = styleKey (t.face.bold && t.face.italic);
       font-synthetic-style = t.boldItalic;
       cursor-style = t.cursor.style;
       cursor-style-blink = t.cursor.blink;
