@@ -1,26 +1,26 @@
 # Use upstream V2 binaries: nixpkgs still packages V1.
 _final: prev: let
-  version = "2.2.5";
+  version = "2.2.6";
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-darwin-arm64.zip";
       stripRoot = false;
-      hash = "sha256-gjgkAGAdoibwX5NJgEJ1MnD8DgS7IWXLtZ54W+SjSMM=";
+      hash = "sha256-4EJvIb1mN0NwfLoIQsvF+VY482+HAUKw9+/qW1cBLeg=";
     };
     x86_64-darwin = prev.fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-darwin-x64-baseline.zip";
       stripRoot = false;
-      hash = "sha256-dVbc1i69vlcTdxefj4MzEXMSqD336OrBVPhPHCcmi4E=";
+      hash = "sha256-pYr2PyXLY2MsSSdDRGs5t4rRHbIMeWrJPp2lXC2CQR8=";
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-baseline-musl.tar.gz";
       stripRoot = false;
-      hash = "sha256-oS89/6bAJTn0FftPNCy1f4yzZ93vgnIYrE7U2I6y9+A=";
+      hash = "sha256-fx7IhETLKGJn10uki7XkGOpOPIxX0GJNsulvUKw/dy0=";
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-arm64-musl.tar.gz";
       stripRoot = false;
-      hash = "sha256-wPeb38pb23zRGCRTc3sFzDtuQcWvIBATg/NwqN1YFDE=";
+      hash = "sha256-ftsksKjrvuy8EFSOTg59Y8UB/gI7suwrX979N78iK+w=";
     };
   };
 in {

@@ -1,11 +1,11 @@
 # Override entire to latest version using pre-built binaries
 _final: prev: let
-  entireVersion = "0.12.2";
+  entireVersion = "0.13.1";
 
   sources = {
     aarch64-darwin = prev.fetchzip {
       url = "https://github.com/entireio/cli/releases/download/v${entireVersion}/entire_darwin_arm64.tar.gz";
-      hash = "sha256-nGKwxnfuqdDHeVGw/FNTRDxI9f1zfbJ+tMOXGuuIh6o=";
+      hash = "sha256-ounjdk2yXy6aaswPx02BZlq1Yo29eHOFgC7ZY1XR+eQ=";
       stripRoot = false;
     };
     x86_64-darwin = prev.fetchzip {
@@ -15,12 +15,12 @@ _final: prev: let
     };
     x86_64-linux = prev.fetchzip {
       url = "https://github.com/entireio/cli/releases/download/v${entireVersion}/entire_linux_amd64.tar.gz";
-      hash = "sha256-7e6Wxs/9YKLsWga31mRW0KbZtD0fyZStPz2QCTipWKs=";
+      hash = "sha256-8VOSr0s2cvgx7SDJGOiHU3zUI2yQXXnqgXvgi04ZOM8=";
       stripRoot = false;
     };
     aarch64-linux = prev.fetchzip {
       url = "https://github.com/entireio/cli/releases/download/v${entireVersion}/entire_linux_arm64.tar.gz";
-      hash = "sha256-9IuDVUkYLcDzZ8HGyq0ptyeZjBqxBHzQANp3n1RMG+U=";
+      hash = "sha256-qgmKAJUU51sLyFynJQ4s8hOveIu3U39U1Ezxw0rOCGg=";
       stripRoot = false;
     };
   };
