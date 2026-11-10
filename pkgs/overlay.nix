@@ -22,6 +22,7 @@ import ./agentgateway.nix final prev
 // import ./moshi-hook.nix final prev
 // import ./nexo.nix final prev
 // import ./nix-upgrade.nix final prev
+// import ./omp.nix final prev
 // import ./rtk.nix final prev
 // import ./pkl.nix final prev
 // import ./skillshare.nix final prev
