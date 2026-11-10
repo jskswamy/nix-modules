@@ -193,12 +193,14 @@ plugin_root="$tmp/state/skillshare/plugins/skillshare-demo/content/dist/plugins/
 mkdir -p "$plugin_root"
 printf 'export default {}\n' >"$plugin_root/index.js"
 oc_home="$tmp/oc"
-mkdir -p "$oc_home"
+jq --arg dir "$oc_home" '.opencodeConfigDirs = [$dir]' "$decl" >"$tmp/opencode.json"
+mv "$tmp/opencode.json" "$decl"
+run --no-sync
+check "empty OpenCode config directory is seeded with opencode.jsonc before Skillshare runs" '[[ -f $oc_home/opencode.jsonc && ! -e $oc_home/opencode.json ]]'
+rm -f "$oc_home/opencode.jsonc"
 file_url="file://$plugin_root/index.js"
 dir_url="file://$plugin_root"
 python3 -c 'import json,sys; json.dump({"provider":{"keep":True},"plugins":[sys.argv[1]]}, open(sys.argv[2],"w"))' "$file_url" "$oc_home/opencode.json"
-jq --arg dir "$oc_home" '.opencodeConfigDirs = [$dir]' "$decl" >"$tmp/opencode.json"
-mv "$tmp/opencode.json" "$decl"
 run --no-sync
 check "reconcile registers OpenCode directories even without sync" '[[ $rc == 0 ]]'
 check "OpenCode plugin file URL gains its directory" 'python3 -c "import json,sys; data=json.load(open(sys.argv[1])); assert data[\"provider\"]=={\"keep\":True}; assert data[\"plugins\"]==[sys.argv[2], sys.argv[3]]" "$oc_home/opencode.json" "$file_url" "$dir_url"'

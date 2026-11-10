@@ -94,6 +94,15 @@ ensure() {
 	done
 }
 
+# OpenCode itself and Aide write `opencode.jsonc`; Skillshare creates
+# `opencode.json` only when `opencode.jsonc` is absent. Seed `opencode.jsonc`
+# in empty OpenCode config directories before Skillshare binds or syncs.
+mapfile -t opencode_dirs < <(jq -r '.opencodeConfigDirs // [] | .[]' "$decl")
+for dir in "${opencode_dirs[@]}"; do
+	mkdir -p "$dir"
+	[[ -e $dir/opencode.jsonc || -e $dir/opencode.json ]] || printf '{}\n' >"$dir/opencode.jsonc"
+done
+
 ensure targets '(.targets // [])[].name' "$ss" target list
 
 # Missing excludes go in one call per target; each call costs a second or
@@ -173,7 +182,6 @@ fi
 # Repair after sync, and also when sync is skipped: a previous registration
 # still needs the directory. Skillshare's file URL stays; it is the identity
 # the next sync matches.
-mapfile -t opencode_dirs < <(jq -r '.opencodeConfigDirs // [] | .[]' "$decl")
 if ((${#opencode_dirs[@]})); then
 	say "registering OpenCode plugin directories"
 	"${PYTHON:-python3}" "$(dirname "$0")/opencode-plugins.py" "${opencode_dirs[@]}" || {
