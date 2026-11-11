@@ -159,8 +159,7 @@ in {
         "Workspace.tabIconTintMode" = "off";
 
         # Panes and windows.
-        # Toolbar (tab bar) floats in when the pointer reaches the top.
-        "Workspace.toolbarBehavior" = "onHover";
+        "Workspace.toolbarBehavior" = "alwaysShow";
         "Workspace.focusFollowsMouse" = true;
         "Workspace.inactivePaneFadeMode" = "both";
         "Workspace.usesStandardInactiveWindowPaneStyles" = true;
