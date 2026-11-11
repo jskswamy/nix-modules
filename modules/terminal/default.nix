@@ -92,7 +92,7 @@ in {
       };
       widthPercent = mkOption {
         type = types.int;
-        default = -5;
+        default = 0;
         description = "Character spacing as a percentage of the font's (Ghostty's adjust-cell-width).";
       };
     };

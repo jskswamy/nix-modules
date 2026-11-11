@@ -833,7 +833,7 @@ in {
     == true
     && d."Workspace.terminalFontName" == "FiraCode Nerd Font Mono"
     && d."Workspace.terminalFontPointSize" == 12.0
-    && d."Workspace.terminalCharacterSpacing" == "-5%"
+    && d."Workspace.terminalCharacterSpacing" == "0%"
     && d."Workspace.terminalCellHeightPercent" == 15.0
     && d."Workspace.terminalOptionKeyBehavior" == "actsAsAlt"
     && !(d ? "Workspace.terminalPaddingX")
