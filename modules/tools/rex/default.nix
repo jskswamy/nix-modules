@@ -166,7 +166,7 @@ in {
         "Workspace.showsProgramActivityNotifications" = false;
         "Workspace.experiments.usesNewQuickSwitcher" = true;
 
-        "rex.agents.names-sessions" = true;
+        "rex.agents.names-sessions" = false;
 
         # Developer mode and its server settings (Settings → Server). Tailnet
         # access is left out: it needs a one-time Tailscale login per machine.
