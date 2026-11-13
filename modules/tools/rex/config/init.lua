@@ -981,7 +981,6 @@ rex.bind("ctrl+a>]", "session.next")
 rex.bind("ctrl+a>shift+0", "session.next") -- ctrl+a > )
 rex.bind("ctrl+a>[", "session.previous")
 rex.bind("ctrl+a>shift+9", "session.previous") -- ctrl+a > (
-rex.bind("ctrl+a>u", "session.open_on_web")
 rex.bind("ctrl+a>shift+s", "client.host.switch") -- ctrl+a > S
 
 -- Nexo Project, Agent & Previous-Session Switcher
