@@ -373,7 +373,8 @@ shared through `terminal.keys` and the global hotkey when
 `terminal.hotkey.app = "rex"`, a
 `~/.local/bin/rex` CLI wrapper for the embedded app-bundle binary on Darwin,
 and Skillshare wiring for the `rex` agent skill and `SessionStart` hook
-(`claude` and `codex`).
+(`claude` and `codex`). Agents are told not to rename the Rex session
+unless `tools.rex.sessionNaming` is set.
 
 - **Installs the package:** no by default
 - **Writes:** `~/.config/rex/init.lua`<br>`~/.config/rex/terminal.lua`<br>`~/.local/bin/rex` (Darwin)

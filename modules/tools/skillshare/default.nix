@@ -116,6 +116,8 @@
   claudeTargets = ofAgent ["claude"];
   rexTargets = ofAgent ["claude" "codex"];
   rexEnabled = config.tools.rex.enable or false;
+  # Same flag `rex skill setup` appends to its stub and hook when naming is off.
+  rexNamingFlag = lib.optionalString (!(config.tools.rex.sessionNaming or false)) " --feature-session-naming=false";
   # Exact byte-for-byte stub expected by `rex skill status` (must not be
   # reformatted by markdownlint/prettier).
   rexSkill = pkgs.writeTextDir "rex/SKILL.md" ''
@@ -127,7 +129,7 @@
     ---
     <!-- Installed by "rex skill setup". Remove it with "rex skill remove". -->
 
-    Run `rex __internal skill` and follow the guide it prints. The guide comes from
+    Run `rex __internal skill${rexNamingFlag}` and follow the guide it prints. The guide comes from
     the installed Rex CLI, so it describes the commands available in that version.
 
     If the command fails, the installed Rex version predates the guide. Start with
@@ -247,7 +249,7 @@
           hooks = [
             {
               type = "command";
-              command = "/bin/sh -c 'rex __internal session-start --agent ${cfg.profiles.${t}.agent} 2>/dev/null || true'";
+              command = "/bin/sh -c 'rex __internal session-start --agent ${cfg.profiles.${t}.agent}${rexNamingFlag} 2>/dev/null || true'";
               timeout = 5;
             }
           ];

@@ -62,6 +62,11 @@ in {
   options.tools.rex = {
     enable = mkToolEnable lib "rex";
 
+    sessionNaming = lib.mkEnableOption ''
+      telling agents to name the Rex session after their task. Off by
+      default, matching `rex skill setup` without `--session-naming`
+    '';
+
     keys = lib.mkOption {
       type = with lib.types; attrsOf (listOf str);
       default = {};
@@ -166,7 +171,7 @@ in {
         "Workspace.showsProgramActivityNotifications" = false;
         "Workspace.experiments.usesNewQuickSwitcher" = true;
 
-        "rex.agents.names-sessions" = false;
+        "rex.agents.names-sessions" = cfg.sessionNaming;
 
         # Developer mode and its server settings (Settings → Server). Tailnet
         # access is left out: it needs a one-time Tailscale login per machine.

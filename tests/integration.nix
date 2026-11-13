@@ -902,6 +902,6 @@ in {
     builtins.elem "rex" (ssNames "skills" ssRex)
     && ssNames "hooks" ssRex == ["rex" "rtk"]
     && lib.sort (a: b: a < b) (builtins.attrNames ssRexHook.bindings) == ["claude" "codex"]
-    && (builtins.head (builtins.head ssRexHook.bindings.claude.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent claude 2>/dev/null || true'"
-    && (builtins.head (builtins.head ssRexHook.bindings.codex.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent codex 2>/dev/null || true'";
+    && (builtins.head (builtins.head ssRexHook.bindings.claude.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent claude --feature-session-naming=false 2>/dev/null || true'"
+    && (builtins.head (builtins.head ssRexHook.bindings.codex.events.SessionStart).hooks).command == "/bin/sh -c 'rex __internal session-start --agent codex --feature-session-naming=false 2>/dev/null || true'";
 }
