@@ -10,3 +10,18 @@ git-from-home = true
 # separator drop out, giving org/repo. Needs the session-naming fork build.
 [session]
 name-template = "{org}/{team}/{repo}"
+
+# Extra keys on a Projects row: open the project beside the current pane
+# instead of in its own session. Backends without a behavior hide its key.
+[[tui.project-actions]]
+key = "ctrl+s"
+behavior = "split-right"
+label = "split"
+
+[[tui.project-actions]]
+key = "alt+w"
+behavior = "float"
+
+[[tui.project-actions]]
+key = "alt+t"
+behavior = "tab"

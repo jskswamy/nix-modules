@@ -1,17 +1,17 @@
 # nexo - Terminal workspace, project, container, and coding-agent switcher
-# Not available in nixpkgs. Built from the jskswamy fork's
-# feat/configurable-session-naming branch (upstream main + session naming).
+# Not available in nixpkgs. Built from the jskswamy fork's main branch
+# (upstream main + session naming + configurable TUI project actions).
 # https://github.com/jskswamy/nexo (fork of vieitesss/nexo)
 _: prev: {
   nexo = prev.buildGoModule rec {
     pname = "nexo";
-    version = "0.1.0-unstable-2026-11-05";
+    version = "0.1.0-unstable-2026-11-13";
 
     src = prev.fetchFromGitHub {
       owner = "jskswamy";
       repo = "nexo";
-      rev = "7f4e3cbc62cb5545d06b7b1033c9c0ff292ce91e";
-      hash = "sha256-+nP1gB6p2vSvzlOkXXkx2xInpx2Mvr0luXej6z6/OWM=";
+      rev = "da4fba3a96fcdb77bfdf05561c20d7a7aae7d998";
+      hash = "sha256-sYoJpwJGhv3+33PXhtrrlMNAqwZtNQp4PCa6hEfLBng=";
     };
 
     vendorHash = "sha256-WqJ+vuNBgW5Eohhz1YfI7OfqyUdzcl7IEeDgwVHjmKo=";

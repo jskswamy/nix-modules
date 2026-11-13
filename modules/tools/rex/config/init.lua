@@ -1021,6 +1021,9 @@ local function nexo_argv(ctx, subcmd, tab)
 	end
 	if block_id ~= "" and subcmd ~= "tui" then
 		argv[#argv + 1] = "REX_BLOCK=" .. tostring(block_id)
+	elseif block_id ~= "" then
+		-- The nexo float is focused while it runs; project actions split here.
+		argv[#argv + 1] = "NEXO_ORIGIN_PANE=" .. tostring(block_id)
 	end
 	argv[#argv + 1] = "PATH=" .. path_env
 	argv[#argv + 1] = nexo_bin
