@@ -269,6 +269,21 @@
     if cfg.package != null
     then lib.getExe cfg.package
     else "skillshare";
+
+  # One reconcile invocation for activation and the on-demand updater.
+  reconcile = ''
+    XDG_CONFIG_HOME=${lib.escapeShellArg config.xdg.configHome} \
+    PYTHON=${pkgs.python3}/bin/python3 \
+    PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
+      ${pkgs.bash}/bin/bash ${./.}/reconcile.sh ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)}'';
+
+  # Upstream updates need the network and take minutes, so they run on
+  # demand rather than on every activation unless updateOnActivation is set.
+  updater = pkgs.writeShellScriptBin "skillshare-update" ''
+    # Update every managed plugin and standalone skill, then sync them to
+    # each agent, after adding anything declared but missing.
+    ${reconcile} --update "$@"
+  '';
 in {
   options.tools.skillshare = {
     declarations = mkOption {
@@ -305,6 +320,8 @@ in {
         Independent of syncOnActivation; plugin updates can modify native
         installations. Requires network access and can slow activation.
         Failures warn without aborting activation. Dry runs never update.
+        Leave it off to update on demand with the installed
+        `skillshare-update` command instead.
       '';
     };
 
@@ -421,7 +438,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage cfg.rtkPackage cfg.codebaseMemoryPackage];
+    home.packages = lib.filter (p: p != null) [cfg.package cfg.timeServerPackage cfg.rtkPackage cfg.codebaseMemoryPackage updater];
 
     assertions = [
       {
@@ -485,11 +502,7 @@ in {
       if [[ -v DRY_RUN ]]; then
         verboseEcho "Skipping skillshare reconcile in dry run"
       else
-        XDG_CONFIG_HOME=${lib.escapeShellArg config.xdg.configHome} \
-        PYTHON=${pkgs.python3}/bin/python3 \
-        PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
-          ${pkgs.bash}/bin/bash ${./.}/reconcile.sh ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)} \
-          ${lib.optionalString (!cfg.syncOnActivation) "--no-sync"} ||
+        ${reconcile} ${lib.optionalString (!cfg.syncOnActivation) "--no-sync"} ||
           warnEcho "skillshare reconcile reported failures; see the warnings above"
       fi
     '';

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Reconciles mutable Skillshare state with Home Manager's declarations.
 #
-#   reconcile.sh SKILLSHARE DECLARATIONS.json [--no-sync]
+#   reconcile.sh SKILLSHARE DECLARATIONS.json [--no-sync] [--update]
+#
+# --update updates plugins and standalone skills whatever the
+# updateOnActivation policy says; `skillshare-update` runs it on demand.
 #
 # DECLARATIONS.json holds lists under targets, skills, plugins, mcp and
 # hooks; `excludes`, a map of target to skill exclude patterns; and
@@ -15,7 +18,19 @@
 # but only after every step has been attempted.
 set -uo pipefail
 
-ss=$1 decl=$2 mode=${3:-sync}
+ss=$1 decl=$2
+shift 2
+sync=1 update=0
+for arg; do
+	case $arg in
+	--no-sync) sync=0 ;;
+	--update) update=1 ;;
+	*)
+		echo "skillshare: unknown option $arg" >&2
+		exit 2
+		;;
+	esac
+done
 cfg="${XDG_CONFIG_HOME:-$HOME/.config}/skillshare/config.yaml"
 status=0
 
@@ -126,7 +141,7 @@ ensure plugins '(.packages // {}) | keys[]' "$ss" plugin list
 ensure mcp '(.servers // [])[].name' "$ss" mcp check --no-dns
 ensure hooks '(.source.entries // {}) | keys[]' "$ss" hooks list
 
-if jq -e '.updateOnActivation == true' "$decl" >/dev/null; then
+if ((update)) || jq -e '.updateOnActivation == true' "$decl" >/dev/null; then
 	say "updating managed plugins"
 	"$ss" plugin update --all --global --json </dev/null || {
 		warn "plugin update failed"
@@ -139,7 +154,7 @@ if jq -e '.updateOnActivation == true' "$decl" >/dev/null; then
 	}
 fi
 
-if [[ $mode != --no-sync ]]; then
+if ((sync)); then
 	# A declared hook owns its Agent entries: an identical hook another tool
 	# wrote (Aide's RTK hook) is a conflict that blocks every hook write.
 	# --replace takes over only that entry's duplicates.

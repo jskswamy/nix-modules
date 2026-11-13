@@ -214,6 +214,12 @@ jq '.updateOnActivation = false' "$decl" >"$tmp/policy.json"
 mv "$tmp/policy.json" "$decl"
 run
 check "disabled update policy leaves updates explicit" '! grep -q -e "^plugin update " -e "^update " "$FAKE_LOG" && synced && [[ $rc == 0 ]]'
+run --update
+check "--update updates before synchronization despite the policy" '[[ $(grep -E "^(plugin update |update |sync )" "$FAKE_LOG" | tr "\n" ,) == "plugin update --all --global --json,update --all --global --json,sync --all,sync plugins," ]] && [[ $rc == 0 ]]'
+run --no-sync --update
+check "--update combines with --no-sync" 'grep -qx "plugin update --all --global --json" "$FAKE_LOG" && ! grep -q "^sync " "$FAKE_LOG" && [[ $rc == 0 ]]'
+run --bogus
+check "an unknown option fails before touching skillshare" '[[ $rc == 2 ]] && [[ ! -s $FAKE_LOG ]]'
 jq '.updateOnActivation = true' "$decl" >"$tmp/policy.json"
 mv "$tmp/policy.json" "$decl"
 run
