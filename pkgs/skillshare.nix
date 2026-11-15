@@ -1,13 +1,13 @@
 # Provide skillshare (skill, plugin and MCP manager) using pre-built binaries
 _final: prev: let
-  version = "0.30.6";
+  version = "0.30.8";
 
   base = "https://github.com/runkids/skillshare/releases/download/v${version}";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "${base}/skillshare_${version}_darwin_arm64.tar.gz";
-      hash = "sha256-VbmBwMwX8xzF6OYpyevgr0UMRejwaqfS/qJS0+ex/eE=";
+      hash = "sha256-c/CwtxFM9Czv2nlRB6BiUru54QdR1q3bF0zYuaWpecc=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "${base}/skillshare_${version}_darwin_amd64.tar.gz";
@@ -15,11 +15,11 @@ _final: prev: let
     };
     aarch64-linux = prev.fetchurl {
       url = "${base}/skillshare_${version}_linux_arm64.tar.gz";
-      hash = "sha256-X/eLZVDBM4BvwVDI9UlMRRnaOcQVHd8TJIRWuHSaWaM=";
+      hash = "sha256-bTW+806KNKQRGlM9T7/jrVaoz2dnDftEqu8u49LUVKM=";
     };
     x86_64-linux = prev.fetchurl {
       url = "${base}/skillshare_${version}_linux_amd64.tar.gz";
-      hash = "sha256-2N3qgvCiZ55owt/c7LM1PuAqGuEtSyCbjgp4ObcmB+k=";
+      hash = "sha256-W9mdBncXHWGQCfSUZKq8s/rdhrfoe4XrZrQEdrnP/l4=";
     };
   };
 
