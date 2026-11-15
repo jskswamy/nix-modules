@@ -1,16 +1,29 @@
--- Follow the terminal's theme: with termguicolors off (config/options.lua),
--- Nvim's built-in "default" scheme draws only with ANSI colors 0-15 and the
--- terminal background, so Rex's (or any terminal's) palette shows through.
--- 'background' picks its light or dark variant.
+-- Match Rex's Merino theme (GitHub Primer Default with softer yellows from
+-- modules/theme/merino.nix) in truecolor, switching live with macOS appearance.
 
--- Rex answers neither OSC 11 nor feeds its mode-2031 theme reports to Nvim, so
--- Nvim's own background detection never fires there. Rex picks its light/dark
--- theme from the macOS appearance, so follow that.
--- shortcut: re-checked on start and focus only, not mid-focus; add a timer if
--- appearance changes while Nvim is focused matter.
+local function current_scheme()
+	return vim.o.background == "light" and "github_light_default" or "github_dark_default"
+end
+
+local function apply_scheme(bg)
+	if vim.o.background ~= bg then
+		vim.o.background = bg
+	end
+	local target = current_scheme()
+	if vim.g.colors_name ~= target then
+		pcall(vim.cmd.colorscheme, target)
+	end
+end
+
 if vim.fn.has("mac") == 1 then
+	local busy = false
 	local function sync()
+		if busy then
+			return
+		end
+		busy = true
 		vim.system({ "defaults", "read", "-g", "AppleInterfaceStyle" }, { text = true }, function(r)
+			busy = false
 			-- Light mode removes the key ("does not exist"); any other
 			-- failure leaves 'background' alone rather than guessing.
 			local bg = r.code == 0 and (r.stdout or ""):match("Dark") and "dark"
@@ -19,30 +32,85 @@ if vim.fn.has("mac") == 1 then
 				return
 			end
 			vim.schedule(function()
-				if vim.o.background ~= bg then
-					vim.o.background = bg
-				end
+				apply_scheme(bg)
 			end)
 		end)
 	end
 	vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, { callback = sync })
+	local timer = (vim.uv or vim.loop).new_timer()
+	if timer then
+		timer:start(3000, 3000, vim.schedule_wrap(sync))
+	end
 	sync()
 end
 
--- "default" leaves comments in the text color under ANSI-only colors; dim
--- them with bright black, which every terminal theme defines.
-vim.api.nvim_create_autocmd("ColorScheme", {
-	pattern = "default",
-	callback = function()
-		vim.api.nvim_set_hl(0, "Comment", { ctermfg = 8, italic = true })
-	end,
-})
+local float_links = {
+	SnacksPicker = { link = "NormalFloat" },
+	SnacksPickerNormal = { link = "NormalFloat" },
+	SnacksPickerBorder = { link = "FloatBorder" },
+	SnacksPickerTitle = { link = "FloatTitle" },
+	SnacksInputNormal = { link = "NormalFloat" },
+	SnacksInputBorder = { link = "FloatBorder" },
+	SnacksInputTitle = { link = "FloatTitle" },
+	BlinkCmpMenu = { link = "NormalFloat" },
+	BlinkCmpMenuBorder = { link = "FloatBorder" },
+	BlinkCmpDoc = { link = "NormalFloat" },
+	BlinkCmpDocBorder = { link = "FloatBorder" },
+	WhichKeyNormal = { link = "NormalFloat" },
+	WhichKeyBorder = { link = "FloatBorder" },
+}
 
 return {
 	{
+		"projekt0n/github-nvim-theme",
+		lazy = false,
+		priority = 1000,
+		config = function()
+			require("github-theme").setup({
+				options = {
+					styles = {
+						comments = "italic",
+					},
+				},
+				palettes = {
+					-- Merino dark/light yellow overrides (modules/theme/merino.nix)
+					github_dark_default = {
+						bg0 = "#0d1117",
+						fg0 = "#e6edf3",
+						yellow = { base = "#d29922", bright = "#e3b341" },
+					},
+					github_light_default = {
+						bg0 = "#ffffff",
+						fg0 = "#1f2328",
+						yellow = { base = "#9d5c00", bright = "#c47a00" },
+					},
+				},
+				groups = {
+					-- Distinct elevated surface + visible border for floating/popup windows
+					github_dark_default = vim.tbl_extend("force", float_links, {
+						NormalFloat = { bg = "#161b22", fg = "#e6edf3" },
+						FloatBorder = { bg = "#161b22", fg = "#388bfd" },
+						FloatTitle = { bg = "#161b22", fg = "#58a6ff", style = "bold" },
+						Pmenu = { bg = "#161b22", fg = "#e6edf3" },
+						PmenuSel = { bg = "#1f2937", style = "bold" },
+					}),
+					github_light_default = vim.tbl_extend("force", float_links, {
+						NormalFloat = { bg = "#f6f8fa", fg = "#1f2328" },
+						FloatBorder = { bg = "#f6f8fa", fg = "#0969da" },
+						FloatTitle = { bg = "#f6f8fa", fg = "#0969da", style = "bold" },
+						Pmenu = { bg = "#f6f8fa", fg = "#1f2328" },
+						PmenuSel = { bg = "#dbeafe", style = "bold" },
+					}),
+				},
+			})
+			apply_scheme(vim.o.background)
+		end,
+	},
+
+	{
 		"LazyVim/LazyVim",
 		opts = {
-			colorscheme = "default",
+			colorscheme = current_scheme,
 		},
 	},
 
