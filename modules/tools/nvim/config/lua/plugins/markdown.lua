@@ -17,6 +17,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.signcolumn = "no"
 		vim.opt_local.cursorline = false
 		vim.opt_local.conceallevel = 2
+		vim.opt_local.concealcursor = "nc"
 		vim.opt_local.spell = false
 
 		-- Quiet markdownlint squiggles while reading; toggle back with <leader>ud
@@ -44,7 +45,8 @@ return {
 			preview = {
 				icon_provider = "mini",
 				filetypes = { "markdown", "quarto", "rmd", "typst" },
-				hybrid_modes = { "n" },
+				modes = { "n", "no", "c" },
+				hybrid_modes = {},
 			},
 			markdown = {
 				code_blocks = {
