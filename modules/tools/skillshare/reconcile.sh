@@ -105,7 +105,15 @@ ensure() {
 				fi
 			done
 		fi
-		"$ss" "${args[@]}" </dev/null || warn "could not add $kind $name; existing state kept"
+		"$ss" "${args[@]}" </dev/null || {
+			warn "could not add $kind $name; existing state kept"
+			continue
+		}
+		# `mcp add` has no flag for per-client options; write them into the new entry.
+		if [[ $kind == mcp ]] && jq -e '(.options // {}) != {}' <<<"$entry" >/dev/null; then
+			OPTS=$(jq -c .options <<<"$entry") NAME=$name yq -i '.mcp.servers[strenv(NAME)].options = env(OPTS)' "$cfg" ||
+				warn "could not set options for mcp $name"
+		fi
 	done
 }
 

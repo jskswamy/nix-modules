@@ -25,6 +25,11 @@
         type = types.listOf types.str;
         description = "Noninteractive Skillshare CLI arguments that add the entry.";
       };
+      options = mkOption {
+        type = types.attrsOf (types.attrsOf types.anything);
+        default = {};
+        description = "MCP only: per-client `options` written into the entry once added.";
+      };
     };
   };
   entries = kind:
@@ -198,7 +203,7 @@
     inherit name;
     args = ["mcp" "add" name] ++ targetArgs targets ++ rest;
   };
-  mcp = lib.mapAttrsToList (name: s: mcpAdd name s.profiles s.args) cfg.mcpServers;
+  mcp = lib.mapAttrsToList (name: s: mcpAdd name s.profiles s.args // {inherit (s) options;}) cfg.mcpServers;
   unknownMcpProfiles = lib.concatLists (lib.mapAttrsToList (name: s:
     map (p: "${name} -> ${p}") (builtins.filter (p: !(cfg.profiles ? ${p})) s.profiles))
   cfg.mcpServers);
@@ -216,6 +221,22 @@
         description = ''
           `skillshare mcp add` arguments after the target flags:
           `["--url" URL]` for an HTTP server, `["--" COMMAND ARGS...]` for stdio.
+        '';
+      };
+      options = mkOption {
+        type = types.attrsOf (types.attrsOf types.anything);
+        default = {};
+        example = {
+          claude.oauth = {
+            clientId = "123.apps.googleusercontent.com";
+            callbackPort = 8765;
+          };
+        };
+        description = ''
+          Skillshare `options`: native per-server fields keyed by client,
+          which `skillshare mcp add` has no flag for (Claude's `oauth`, a
+          Codex timeout). Written into the new entry right after it is
+          added. Credentials must be environment references, never literals.
         '';
       };
     };
@@ -276,7 +297,7 @@
   reconcile = ''
     XDG_CONFIG_HOME=${lib.escapeShellArg config.xdg.configHome} \
     PYTHON=${pkgs.python3}/bin/python3 \
-    PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
+    PATH=${lib.makeBinPath [pkgs.jq pkgs.yq-go pkgs.coreutils pkgs.gnugrep]}:${config.home.profileDirectory}/bin:$PATH \
       ${pkgs.bash}/bin/bash ${./.}/reconcile.sh ${lib.escapeShellArg skillshare} ${pkgs.writeText "skillshare-declarations.json" (builtins.toJSON declarations)}'';
 
   # Upstream updates need the network and take minutes, so they run on

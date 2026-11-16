@@ -251,4 +251,15 @@ chmod 0755 "$ro_store"
 check "reconcile stages read-only store skill dir as writable and repairs 0555 destination" '[[ -w $XDG_CONFIG_HOME/skillshare/skills/rex && -w $XDG_CONFIG_HOME/skillshare/.nix-sources/rex/SKILL.md ]] && grep -qx "install $XDG_CONFIG_HOME/skillshare/.nix-sources/rex -y" "$FAKE_LOG"'
 check "reconcile removes imperative rex-stub skill dirs (including ~/.agents/skills) before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && ! -e $HOME/.agents/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
 
+# `mcp add` has no flag for per-client options; reconcile writes them into
+# the new entry, and never into one that already existed.
+jq '.mcp += [{"name": "oauthsrv", "args": ["mcp", "add", "oauthsrv", "--url", "https://x.invalid/mcp"], "options": {"claude": {"oauth": {"clientId": "id", "callbackPort": 8765}}}}]' "$decl" >"$tmp/opts.json"
+mv "$tmp/opts.json" "$decl"
+printf 'mcp:\n  servers:\n    oauthsrv:\n      url: https://x.invalid/mcp\n' >"$XDG_CONFIG_HOME/skillshare/config.yaml"
+run --no-sync
+check "a newly added MCP server gets its declared options" '[[ $(yq -o=json -I=0 ".mcp.servers.oauthsrv.options" "$XDG_CONFIG_HOME/skillshare/config.yaml") == "{\"claude\":{\"oauth\":{\"clientId\":\"id\",\"callbackPort\":8765}}}" ]]'
+yq -i "del(.mcp.servers.oauthsrv.options)" "$XDG_CONFIG_HOME/skillshare/config.yaml"
+run --no-sync
+check "an existing MCP server is not given options again" '[[ $(yq ".mcp.servers.oauthsrv.options" "$XDG_CONFIG_HOME/skillshare/config.yaml") == null ]]'
+
 exit "$fails"

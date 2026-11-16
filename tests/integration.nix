@@ -155,10 +155,15 @@ let
           profiles = ["claude-extra"];
           args = ["--url" "https://mcp.example.invalid/mcp"];
         };
+        mcpServers.oauth = {
+          profiles = ["claude-extra"];
+          args = ["--url" "https://oauth.example.invalid/mcp"];
+          options.claude.oauth.clientId = "id";
+        };
       };
     }
   ];
-  ssCli = mk [T.skillshare T.codex T.antigravity-cli T.opencode];
+  ssCli =mk [T.skillshare T.codex T.antigravity-cli T.opencode];
   ssCliTargets = name: ssTargets (lib.findFirst (e: e.name == name) null ssCli.tools.skillshare.resources.plugins);
   ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
@@ -789,7 +794,10 @@ in {
     == {
       name = "extra";
       args = ["mcp" "add" "extra" "--target" "claude-extra" "--url" "https://mcp.example.invalid/mcp"];
+      options = {};
     };
+  "skillshare passes per-client MCP options to reconcile" =
+    (ssExtraEntry "mcp" "oauth").options == {claude.oauth.clientId = "id";};
   "skillshare routes default MCP to consumer profiles too" =
     ssTargets (ssExtraEntry "mcp" "time") == ["claude" "claude-extra" "pi"];
   "skillshare rejects MCP routed to an unknown profile" =
