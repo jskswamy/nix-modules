@@ -3,8 +3,7 @@
 --    code blocks, and LaTeX/Typst rendering.
 -- 2. Applies distraction-free reader options (word wrap, breakindent, hidden
 --    line numbers/signcolumn, visual-line j/k, quieted lint diagnostics).
--- 3. Configures snacks.zen (and snacks.image) for a centered reading column
---    that keeps Rex's background color.
+--    Zen & Presentation modes live in lua/plugins/zen.lua.
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "markdown", "markdown.mdx", "quarto", "rmd" },
@@ -59,25 +58,6 @@ return {
 		keys = {
 			{ "<leader>um", "<cmd>Markview toggle<cr>", desc = "Toggle Markview" },
 			{ "<leader>uM", "<cmd>Markview splitToggle<cr>", desc = "Toggle Markview Split" },
-		},
-	},
-
-	{
-		"folke/snacks.nvim",
-		opts = {
-			statuscolumn = { enabled = true },
-			zen = {
-				toggles = {
-					dim = false,
-					git_signs = false,
-					mini_diff_signs = false,
-					diagnostics = false,
-				},
-				win = {
-					width = 100,
-					backdrop = { transparent = true, blend = 0 },
-				},
-			},
 		},
 	},
 }

@@ -86,13 +86,15 @@ return {
 					},
 				},
 				groups = {
-					-- Distinct elevated surface + visible border for floating/popup windows
+					-- Distinct elevated surface + visible border for floating/popup windows,
+					-- plus soft shaded backdrop margins for Zen / Presentation mode.
 					github_dark_default = vim.tbl_extend("force", float_links, {
 						NormalFloat = { bg = "#161b22", fg = "#e6edf3" },
 						FloatBorder = { bg = "#161b22", fg = "#388bfd" },
 						FloatTitle = { bg = "#161b22", fg = "#58a6ff", style = "bold" },
 						Pmenu = { bg = "#161b22", fg = "#e6edf3" },
 						PmenuSel = { bg = "#1f2937", style = "bold" },
+						SnacksZenBackdrop = { bg = "#161b22" },
 					}),
 					github_light_default = vim.tbl_extend("force", float_links, {
 						NormalFloat = { bg = "#f6f8fa", fg = "#1f2328" },
@@ -100,6 +102,7 @@ return {
 						FloatTitle = { bg = "#f6f8fa", fg = "#0969da", style = "bold" },
 						Pmenu = { bg = "#f6f8fa", fg = "#1f2328" },
 						PmenuSel = { bg = "#dbeafe", style = "bold" },
+						SnacksZenBackdrop = { bg = "#f6f8fa" },
 					}),
 				},
 			})
