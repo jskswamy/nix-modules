@@ -300,4 +300,122 @@ vim.fn.executable = orig_executable
 vim.env.REX_SESSION = nil
 vim.env.REX_BLOCK = nil
 
+-- Inline Commit Review highlight groups (Dark & Light Merino themes)
+local dark_groups = gh_theme_setup and gh_theme_setup.groups and gh_theme_setup.groups.github_dark_default or {}
+local light_groups = gh_theme_setup and gh_theme_setup.groups and gh_theme_setup.groups.github_light_default or {}
+
+check(
+	"Dark theme defines full-file inline diff highlights (Add/Change/Delete line + word)",
+	dark_groups.GitSignsAddLn
+		and dark_groups.GitSignsAddInline
+		and dark_groups.GitSignsChangeLn
+		and dark_groups.GitSignsChangeInline
+		and dark_groups.GitSignsDeleteVirtLn
+		and dark_groups.GitSignsDeleteInline
+)
+check(
+	"Light theme defines full-file inline diff highlights (Add/Change/Delete line + word)",
+	light_groups.GitSignsAddLn
+		and light_groups.GitSignsAddInline
+		and light_groups.GitSignsChangeLn
+		and light_groups.GitSignsChangeInline
+		and light_groups.GitSignsDeleteVirtLn
+		and light_groups.GitSignsDeleteInline
+)
+
+-- Git Commit Review module tests
+local ok_gr, gr_specs = pcall(dofile, "modules/tools/nvim/config/lua/plugins/git-review.lua")
+check("git-review.lua plugin spec loads", ok_gr and type(gr_specs) == "table" and type(_G.GitReview) == "table")
+local gr_spec = ok_gr and gr_specs[1] or {}
+local gr_keys = {}
+for _, k in ipairs(gr_spec.keys or {}) do
+	gr_keys[k[1]] = k[2]
+end
+check(
+	"Git review entry keymaps (<leader>gr, <leader>gR, <leader>gd) are registered",
+	type(gr_keys["<leader>gr"]) == "function"
+		and type(gr_keys["<leader>gR"]) == "function"
+		and type(gr_keys["<leader>gd"]) == "function"
+)
+
+if type(_G.GitReview) == "table" then
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_set_current_buf(buf)
+	local old_lines = {
+		"removed_header_line",
+		"local a = 1",
+		"local old_name = 'hello world'",
+		"local middle_deleted = true",
+		"return a",
+	}
+	local new_lines = {
+		"local a = 1",
+		"local new_name = 'hello universe'",
+		"print(added_line)",
+		"return a",
+		"-- trailing added line",
+	}
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, new_lines)
+	_G.GitReview.render_buffer_diff(buf, old_lines, new_lines, { commit = "abc1234", file = "test.lua" })
+
+	local ns = _G.GitReview.ns
+	local marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
+	local has_add_ln, has_change_ln, has_delete_virt, has_change_word, has_above_top = false, false, false, false, false
+	for _, m in ipairs(marks) do
+		local row = m[2]
+		local d = m[4] or {}
+		if d.line_hl_group == "GitSignsAddLn" then
+			has_add_ln = true
+		end
+		if d.line_hl_group == "GitSignsChangeLn" then
+			has_change_ln = true
+		end
+		if d.hl_group == "GitSignsChangeInline" or d.hl_group == "GitSignsAddInline" then
+			has_change_word = true
+		end
+		if d.virt_lines and #d.virt_lines > 0 then
+			has_delete_virt = true
+			if row == 0 and d.virt_lines_above then
+				has_above_top = true
+			end
+		end
+	end
+	check("Inline review highlights added lines in green (GitSignsAddLn)", has_add_ln)
+	check("Inline review highlights modified lines in yellow (GitSignsChangeLn)", has_change_ln)
+	check("Inline review highlights changed words inline (GitSignsChangeInline)", has_change_word)
+	check("Inline review renders deleted lines as red virtual lines (including before line 1)", has_delete_virt and has_above_top)
+	check(
+		"Active review registers <leader>gf and <leader>gq dynamically",
+		vim.fn.maparg("<leader>gf", "n") ~= "" and vim.fn.maparg("<leader>gq", "n") ~= ""
+	)
+
+	-- Hunk navigation moves cursor between hunks cleanly
+	vim.api.nvim_win_set_cursor(0, { 1, 0 })
+	_G.GitReview.next_hunk()
+	local row_after_next = vim.api.nvim_win_get_cursor(0)[1]
+	check("next_hunk() jumps to the next changed hunk", row_after_next >= 2)
+	_G.GitReview.prev_hunk()
+	local row_after_prev = vim.api.nvim_win_get_cursor(0)[1]
+	check("prev_hunk() jumps back to the previous hunk", row_after_prev == 1)
+
+	-- Clearing review removes extmarks and dynamic keymaps
+	_G.GitReview.clear(buf)
+	local remaining = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, {})
+	check(
+		"clear() removes all inline review extmarks and unregisters <leader>gf/<leader>gq",
+		#remaining == 0 and vim.fn.maparg("<leader>gf", "n") == "" and vim.fn.maparg("<leader>gq", "n") == ""
+	)
+
+	-- Completely deleted file (new_lines = {}) still renders virtual red deleted lines on row 0
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "" })
+	_G.GitReview.render_buffer_diff(buf, { "deleted line 1", "deleted line 2" }, {}, { commit = "abc1234", file = "deleted.lua" })
+	local del_marks = vim.api.nvim_buf_get_extmarks(buf, ns, 0, -1, { details = true })
+	check(
+		"Deleted file (empty new_lines) still renders virtual red deleted lines on row 0",
+		#del_marks == 1 and del_marks[1][4] and del_marks[1][4].virt_lines and #del_marks[1][4].virt_lines == 2
+	)
+	_G.GitReview.clear(buf)
+	vim.api.nvim_buf_delete(buf, { force = true })
+end
+
 assert(#failures == 0, table.concat(failures, "; "))
