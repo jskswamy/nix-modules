@@ -1,0 +1,59 @@
+#!/usr/bin/env sh
+# Smart interactive router for `cat`:
+# - Whenever stdout is not a terminal (e.g. `cat file | pbcopy`, `cat a > b`),
+#   or when flags (`-n`, `-p`) or multiple files are given, pass straight
+#   through to `bat` (which falls back to `/bin/cat` if `bat` is absent).
+# - When run interactively on a single readable file:
+#   - *.md / *.markdown / *.mdx -> `leaf` (terminal Markdown reader)
+#   - *.pdf / images            -> `nvim` (`snacks.image` Kitty graphics viewer)
+#   - everything else           -> `bat`
+
+run_bat() {
+	if command -v bat >/dev/null 2>&1; then
+		exec bat "$@"
+	fi
+	exec /bin/cat "$@"
+}
+
+is_tty=0
+if [ "${SMART_CAT_FORCE_TTY:-}" = "1" ]; then
+	is_tty=1
+elif [ "${SMART_CAT_FORCE_TTY:-}" = "0" ]; then
+	is_tty=0
+elif [ -t 0 ] && [ -t 1 ]; then
+	is_tty=1
+fi
+
+if [ "$is_tty" -ne 1 ] || [ "$#" -ne 1 ]; then
+	run_bat "$@"
+fi
+
+file="$1"
+case "$file" in
+-*)
+	run_bat "$@"
+	;;
+esac
+
+if [ ! -f "$file" ] || [ ! -r "$file" ]; then
+	run_bat "$@"
+fi
+
+ext=$(printf '%s' "${file##*.}" | tr '[:upper:]' '[:lower:]')
+case "$ext" in
+md | markdown | mdx)
+	if command -v leaf >/dev/null 2>&1; then
+		exec leaf "$file"
+	fi
+	run_bat "$file"
+	;;
+pdf | png | jpg | jpeg | gif | webp | bmp | tiff | tif | heic | avif | icns)
+	if command -v nvim >/dev/null 2>&1; then
+		exec nvim "$file"
+	fi
+	run_bat "$file"
+	;;
+*)
+	run_bat "$file"
+	;;
+esac

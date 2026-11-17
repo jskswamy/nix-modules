@@ -439,6 +439,9 @@ in {
     "deadnix"
     "pkl"
     "terraform"
+    "imagemagick"
+    "ghostscript"
+    "poppler-utils"
   ];
   "nvim supplies Java for the Pkl language server" = builtins.elem (lib.getName pkgs.jre_headless) nvimPackageNames;
   "nvim supplies Python with pip" = builtins.elem (lib.getName (pkgs.python3.withPackages (ps: [ps.pip]))) nvimPackageNames;
@@ -475,7 +478,8 @@ in {
   "bat with package null installs nothing" = !(installs (mk [T.bat {tools.bat.package = null;}]) "bat");
   "bat sets cat, MANPAGER and BAT_THEME" =
     bat.home.shellAliases.cat
-    == "bat"
+    == "smart-cat"
+    && bat.home.file ? ".local/bin/smart-cat"
     && bat.home.sessionVariables.MANPAGER == "bat -l man -p"
     && bat.home.sessionVariables.BAT_THEME == "ansi";
   "bivouac editor tab is a single Fresh pane" =

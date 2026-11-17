@@ -418,4 +418,172 @@ if type(_G.GitReview) == "table" then
 	vim.api.nvim_buf_delete(buf, { force = true })
 end
 
+-- snacks.image & Multi-Page PDF Viewer tests (image.lua)
+vim.env.TERM_PROGRAM = "rex"
+vim.env.SNACKS_GHOSTTY = nil
+local ok_img, img_specs = pcall(dofile, "modules/tools/nvim/config/lua/plugins/image.lua")
+check("image.lua plugin spec loads", ok_img and type(img_specs) == "table" and type(_G.PdfViewer) == "table")
+local img_spec = ok_img and img_specs[1] or {}
+local img_opts = img_spec.opts and img_spec.opts.image or {}
+
+check(
+	"snacks.image is enabled with inline document rendering",
+	img_opts.enabled == true and img_opts.doc and img_opts.doc.enabled == true and img_opts.doc.inline == true
+)
+check("image.lua sets SNACKS_GHOSTTY=1 when running inside Rex", vim.env.SNACKS_GHOSTTY == "1")
+
+if type(_G.PdfViewer) == "table" then
+	local pdf_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_set_current_buf(pdf_buf)
+	local attached_srcs = {}
+	local yanked_cmd = nil
+	local orig_sys = vim.system
+	local orig_exec = vim.fn.executable
+	vim.fn.executable = function()
+		return 1
+	end
+	vim.system = function(cmd, _)
+		if cmd[1] == "pdfinfo" then
+			return {
+				wait = function()
+					return { code = 0, stdout = "Title: Demo\nPages:          5\nPage size: 612 x 792 pts\n" }
+				end,
+			}
+		elseif cmd[1] == "pdftotext" then
+			yanked_cmd = cmd
+			return {
+				wait = function()
+					return { code = 0, stdout = "Extracted page text" }
+				end,
+			}
+		end
+		return {
+			wait = function()
+				return { code = 0, stdout = "" }
+			end,
+		}
+	end
+	_G.Snacks = {
+		image = {
+			buf = {
+				attach = function(_, opts)
+					table.insert(attached_srcs, opts and opts.src or "")
+				end,
+			},
+		},
+	}
+
+	_G.PdfViewer.attach_pdf(pdf_buf, "/tmp/sample.pdf")
+	check(
+		"attach_pdf parses page count (5), attaches #page=1, and updates winbar",
+		vim.b[pdf_buf].pdf_pages == 5
+			and vim.b[pdf_buf].pdf_page == 1
+			and attached_srcs[#attached_srcs] == "/tmp/sample.pdf#page=1"
+			and (vim.wo.winbar or ""):find("Page 1 / 5", 1, true) ~= nil
+	)
+	check(
+		"attach_pdf binds j, n, k, p, gg, G, y, Y, q on PDF buffer",
+		vim.fn.maparg("j", "n") ~= ""
+			and vim.fn.maparg("n", "n") ~= ""
+			and vim.fn.maparg("k", "n") ~= ""
+			and vim.fn.maparg("p", "n") ~= ""
+			and vim.fn.maparg("y", "n") ~= ""
+			and vim.fn.maparg("Y", "n") ~= ""
+			and vim.fn.maparg("q", "n") ~= ""
+	)
+
+	_G.PdfViewer.next_page(pdf_buf)
+	check(
+		"next_page advances to page 2 and attaches #page=2",
+		vim.b[pdf_buf].pdf_page == 2 and attached_srcs[#attached_srcs] == "/tmp/sample.pdf#page=2"
+	)
+
+	_G.PdfViewer.prev_page(pdf_buf)
+	local count_before_clamp = #attached_srcs
+	_G.PdfViewer.prev_page(pdf_buf) -- already on page 1; should clamp without re-attaching
+	check(
+		"prev_page returns to page 1 and clamps without redundant re-attach",
+		vim.b[pdf_buf].pdf_page == 1 and #attached_srcs == count_before_clamp
+	)
+
+	_G.PdfViewer.goto_page(pdf_buf, 99)
+	check(
+		"goto_page clamps to last page (5)",
+		vim.b[pdf_buf].pdf_page == 5 and attached_srcs[#attached_srcs] == "/tmp/sample.pdf#page=5"
+	)
+
+	_G.PdfViewer.yank_page(pdf_buf)
+	check(
+		"yank_page runs pdftotext for the current page (-f 5 -l 5)",
+		yanked_cmd and yanked_cmd[1] == "pdftotext" and yanked_cmd[3] == "5" and yanked_cmd[5] == "5"
+	)
+
+	-- Opening a .pdf buffer via snacks.image (which sets filetype=image) initializes PDF controls without duplicate page-1 attach
+	local ft_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_name(ft_buf, "/tmp/auto.pdf")
+	vim.api.nvim_set_current_buf(ft_buf)
+	local count_before_ft = #attached_srcs
+	vim.bo[ft_buf].filetype = "image"
+	check(
+		"FileType=image on .pdf initializes pdf_pages and winbar without duplicate page-1 attach",
+		vim.b[ft_buf].pdf_pages == 5
+			and vim.b[ft_buf].pdf_page == 1
+			and #attached_srcs == count_before_ft
+	)
+	_G.PdfViewer.next_page(ft_buf)
+	check(
+		"next_page after FileType=image attaches #page=2",
+		vim.b[ft_buf].pdf_page == 2 and (attached_srcs[#attached_srcs] or ""):find("auto%.pdf#page=2") ~= nil
+	)
+
+	vim.system = orig_sys
+	vim.fn.executable = orig_exec
+	vim.api.nvim_buf_delete(ft_buf, { force = true })
+	vim.api.nvim_buf_delete(pdf_buf, { force = true })
+end
+
+-- smart-cat router script tests
+local smart_cat = vim.fn.getcwd() .. "/modules/tools/bat/scripts/smart-cat"
+check("smart-cat script exists and is executable", vim.fn.executable(smart_cat) == 1)
+
+if vim.fn.executable(smart_cat) == 1 then
+	local sc_tmp = vim.fn.tempname()
+	vim.fn.mkdir(sc_tmp .. "/bin", "p")
+	for _, tool in ipairs({ "bat", "leaf", "nvim" }) do
+		local p = sc_tmp .. "/bin/" .. tool
+		vim.fn.writefile({
+			"#!/usr/bin/env sh",
+			'printf "%s:%s\\n" "' .. tool .. '" "$*"',
+		}, p)
+		vim.fn.setfperm(p, "rwxr-xr-x")
+	end
+	local md_file = sc_tmp .. "/readme.md"
+	local pdf_file = sc_tmp .. "/paper.pdf"
+	local png_file = sc_tmp .. "/diagram.png"
+	local txt_file = sc_tmp .. "/notes.txt"
+	vim.fn.writefile({ "# hello" }, md_file)
+	vim.fn.writefile({ "%PDF-1.7" }, pdf_file)
+	vim.fn.writefile({ "PNG" }, png_file)
+	vim.fn.writefile({ "hello" }, txt_file)
+
+	local function run_sc(args, force_tty)
+		local env = {
+			PATH = sc_tmp .. "/bin:/usr/bin:/bin",
+			SMART_CAT_FORCE_TTY = force_tty and "1" or "0",
+		}
+		local res = vim.system(vim.list_extend({ smart_cat }, args), { text = true, env = env }):wait(2000)
+		return vim.trim(res.stdout or "")
+	end
+
+	check("smart-cat routes piped .md to bat", run_sc({ md_file }, false) == "bat:" .. md_file)
+	check("smart-cat routes piped .pdf (e.g. cat foo.pdf | pbcopy) to bat", run_sc({ pdf_file }, false) == "bat:" .. pdf_file)
+	check("smart-cat routes interactive .md to leaf", run_sc({ md_file }, true) == "leaf:" .. md_file)
+	check("smart-cat routes interactive .pdf to nvim", run_sc({ pdf_file }, true) == "nvim:" .. pdf_file)
+	check("smart-cat routes interactive .png to nvim", run_sc({ png_file }, true) == "nvim:" .. png_file)
+	check("smart-cat routes interactive .txt to bat", run_sc({ txt_file }, true) == "bat:" .. txt_file)
+	check("smart-cat routes flags (-n) on .md to bat", run_sc({ "-n", md_file }, true) == "bat:-n " .. md_file)
+	check("smart-cat routes multiple files to bat", run_sc({ md_file, txt_file }, true) == "bat:" .. md_file .. " " .. txt_file)
+	vim.fn.delete(sc_tmp, "rf")
+end
+
 assert(#failures == 0, table.concat(failures, "; "))

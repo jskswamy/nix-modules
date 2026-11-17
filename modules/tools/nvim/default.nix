@@ -59,6 +59,9 @@ in {
         ((import ../../../pkgs/pkl.nix pkgs pkgs).pkl)
         jre_headless # Mason's pkl-lsp runs a Java archive.
         terraform
+        imagemagick # snacks.image format conversion & PDF rasterization
+        ghostscript # PDF backend required by ImageMagick
+        poppler-utils # pdfinfo & pdftotext for multi-page PDF navigation/yank
       ];
       description = ''
         Parser build tools, Mason runtimes, search utilities and configured

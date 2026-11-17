@@ -30,7 +30,11 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
-    home.shellAliases.cat = "bat";
+    home.file.".local/bin/smart-cat" = {
+      source = ./scripts/smart-cat;
+      executable = true;
+    };
+    home.shellAliases.cat = "smart-cat";
     home.sessionVariables = {
       MANPAGER = "bat -l man -p";
       BAT_THEME = "ansi";
