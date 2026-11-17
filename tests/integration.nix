@@ -33,6 +33,8 @@ let
   lazygitHunk = mk [T.lazygit T.hunk];
   lazygitDelta = mk [T.lazygit T.delta];
   hunkOnly = mk [T.hunk];
+  leaf = mk [T.leaf];
+  leafDisabled = mk [T.leaf {tools.leaf.enable = false;}];
   fish = mk [T.fish];
   fishStarship = mk [T.fish T.starship];
   workspaceRelative = mk [T.fish {nixModules.workspaceRoot = "src";}];
@@ -163,7 +165,7 @@ let
       };
     }
   ];
-  ssCli =mk [T.skillshare T.codex T.antigravity-cli T.opencode];
+  ssCli = mk [T.skillshare T.codex T.antigravity-cli T.opencode];
   ssCliTargets = name: ssTargets (lib.findFirst (e: e.name == name) null ssCli.tools.skillshare.resources.plugins);
   ssExtraEntry = kind: name: lib.findFirst (e: e.name == name) null ssExtra.tools.skillshare.resources.${kind};
   ssExtraTarget = lib.findFirst (e: e.name == "claude-extra") null ssExtra.tools.skillshare.declarations.targets;
@@ -607,6 +609,15 @@ in {
     && builtins.elem "*.go merge=mergiraf" c.programs.git.attributes;
   "git-tools includes git-absorb, jujutsu and mergiraf" =
     installs gitTools "git-absorb" && installs gitTools "jujutsu" && installs gitTools "mergiraf";
+  "leaf installs package and writes config and Merino themes" =
+    installs leaf "leaf"
+    && leaf.home.file ? ".config/leaf/config.toml"
+    && leaf.home.file ? ".config/leaf/themes/merino-dark.toml"
+    && leaf.home.file ? ".config/leaf/themes/merino-light.toml";
+  "disabled leaf installs nothing and writes no config" =
+    !(installs leafDisabled "leaf")
+    && !(leafDisabled.home.file ? ".config/leaf/config.toml");
+  "git-tools includes leaf" = gitTools.tools.leaf.enable && installs gitTools "leaf";
 
   # skillshare: owns mutable state, so Home Manager installs the binary and
   # reconciles through the CLI but never writes its config.yaml.

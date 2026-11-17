@@ -4,7 +4,7 @@ function glow --description "glow, but pin light/dark style to macOS appearance"
     # defaults to "dark", rendering pale-gray text unreadable against
     # Ghostty's light theme. Ask macOS directly instead.
     set -l style dark
-    if test "(defaults read -g AppleInterfaceStyle 2>/dev/null)" != Dark
+    if test -x /usr/bin/defaults; and test "(/usr/bin/defaults read -g AppleInterfaceStyle 2>/dev/null)" != Dark
         set style light
     end
     command glow -s $style -p -w (tput cols) $argv

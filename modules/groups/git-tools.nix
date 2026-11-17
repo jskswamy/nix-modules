@@ -17,5 +17,6 @@
     ../tools/gpg
     ../tools/tig
     ../tools/hunk
+    ../tools/leaf
   ];
 }

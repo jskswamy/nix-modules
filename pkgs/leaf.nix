@@ -39,7 +39,31 @@ in {
     ];
 
     installPhase = ''
-      install -Dm755 $src $out/bin/leaf
+      install -Dm755 $src $out/bin/.leaf-wrapped
+
+      cat > $out/bin/leaf <<EOF
+      #!/bin/sh
+      if [ -z "\''${LEAF_THEME:-}" ]; then
+        if [ -x /usr/bin/defaults ] && [ "\$(/usr/bin/defaults read -g AppleInterfaceStyle 2>/dev/null)" != "Dark" ]; then
+          if [ -f "\''${XDG_CONFIG_HOME:-\$HOME/.config}/leaf/themes/merino-light.toml" ]; then
+            export LEAF_THEME="merino-light"
+          else
+            export LEAF_THEME="arctic"
+          fi
+        elif [ -f "\''${XDG_CONFIG_HOME:-\$HOME/.config}/leaf/themes/merino-dark.toml" ]; then
+          export LEAF_THEME="merino-dark"
+        fi
+      fi
+      exec "$out/bin/.leaf-wrapped" "\$@"
+      EOF
+      chmod 0755 $out/bin/leaf
+
+      install -d $out/share/bash-completion/completions
+      install -d $out/share/fish/vendor_completions.d
+      install -d $out/share/zsh/site-functions
+      $out/bin/.leaf-wrapped --auto-complete bash:dump > $out/share/bash-completion/completions/leaf.bash
+      $out/bin/.leaf-wrapped --auto-complete fish:dump > $out/share/fish/vendor_completions.d/leaf.fish
+      $out/bin/.leaf-wrapped --auto-complete zsh:dump > $out/share/zsh/site-functions/_leaf
     '';
 
     meta = with prev.lib; {

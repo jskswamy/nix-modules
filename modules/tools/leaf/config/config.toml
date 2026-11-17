@@ -1,0 +1,8 @@
+# leaf configuration — https://github.com/RivoLink/leaf
+#
+# The leaf wrapper in pkgs/leaf.nix selects merino-light or merino-dark via
+# LEAF_THEME when unset; this sets the fallback theme and centers Neovim at
+# the current viewport line on Ctrl+E.
+theme = "merino-dark"
+editor = 'nvim +{$line} +"normal! zz"'
+file-history-length = 50

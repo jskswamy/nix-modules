@@ -93,7 +93,7 @@ that is not in one of its tools.
 | `agent-tools` | `antigravity-cli`, `ast-grep`, `codex`, `duckdb`, `opencode`, `herdr`, `ccstatusline`, `beads`, `fabric`, `pet`, `aide`, `skillshare` |
 | `cli-tools`   | `eza`, `bat`, `fd`, `ripgrep`, `fzf`, `zoxide`, `jump`, `any-nix-shell`                                                               |
 | `editor`      | `nvim`, `vim`, `fresh`                                                                                                                |
-| `git-tools`   | `git`, `git-absorb`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `jujutsu`, `lazygit`, `mergiraf`, `gpg`, `tig`, `hunk`     |
+| `git-tools`   | `git`, `git-absorb`, `git-lfs`, `git-lfs-transfer`, `delta`, `difftastic`, `jujutsu`, `lazygit`, `mergiraf`, `gpg`, `tig`, `hunk`, `leaf` |
 | `mcp`         | `agentgateway`, `context7-mcp`, `serena-mcp`, `mcp-nixos`, `local-mcp`                                                                |
 | `shell`       | `fish`, `zsh`, `starship`, `direnv`                                                                                                   |
 | `ssh`         | `ssh`                                                                                                                                 |
@@ -120,7 +120,7 @@ Tools include `agentgateway`, `aide`, `alacritty`, `antigravity-cli`,
 `any-nix-shell`, `bat`, `beads`, `ccstatusline`, `codebase-memory-mcp`,
 `codex`, `context7-mcp`, `delta`, `difftastic`, `direnv`, `eza`, `fabric`,
 `fd`, `fish`, `fzf`, `ghostty`, `git`, `git-lfs`, `git-lfs-transfer`, `gpg`,
-`herdr`, `herdr-app`, `hunk`, `jump`, `lazygit`, `local-mcp`, `mcp-nixos`,
+`herdr`, `herdr-app`, `hunk`, `jump`, `lazygit`, `leaf`, `local-mcp`, `mcp-nixos`,
 `nvim`, `pet`, `rex`, `ripgrep`, `serena-mcp`, `ssh`, `starship`, `tig`,
 `tmux`, `tmuxp`, `vim`, `zoxide`, `zsh`.
 
