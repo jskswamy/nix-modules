@@ -8,6 +8,7 @@ let
   };
   byName = name: builtins.head (builtins.filter (e: e.name == name) introspect);
   hunk = byName "hunk";
+  leaf = byName "leaf";
   beads = byName "beads";
   opencode = byName "opencode";
   moshiHook = byName "moshi-hook";
@@ -15,6 +16,9 @@ in {
   "hunk owner" = hunk.owner == "modem-dev";
   "hunk repo" = hunk.repo == "hunk";
   "hunk version present" = hunk.version != null;
+  "leaf owner" = leaf.owner == "RivoLink";
+  "leaf repo" = leaf.repo == "leaf";
+  "leaf version present" = leaf.version == "1.29.3";
   "beads owner" = beads.owner == "gastownhall";
   "beads repo" = beads.repo == "beads";
   "opencode owner" = opencode.owner == "anomalyco";
