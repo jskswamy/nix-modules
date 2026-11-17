@@ -6,6 +6,7 @@
 {
   imports = [
     ../tools/git
+    ../tools/gh-dash
     ../tools/git-absorb
     ../tools/git-lfs
     ../tools/git-lfs-transfer

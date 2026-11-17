@@ -510,6 +510,15 @@ local tool_specs = {
 		split = { direction = "horizontal", side = "after", ratio = 0.50 },
 	},
 	{
+		key = "p",
+		name = "gh_dash",
+		title = "GitHub PRs (gh-dash)",
+		label = "gh-dash",
+		command = { "gh-dash" },
+		bounds = { 0.06, 0.06, 0.88, 0.88 },
+		split = { direction = "horizontal", side = "after", ratio = 0.50 },
+	},
+	{
 		key = "h",
 		name = "hunk_diff",
 		title = "Hunk Diff (Watch)",

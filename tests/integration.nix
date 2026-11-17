@@ -618,6 +618,8 @@ in {
     !(installs leafDisabled "leaf")
     && !(leafDisabled.home.file ? ".config/leaf/config.toml");
   "git-tools includes leaf" = gitTools.tools.leaf.enable && installs gitTools "leaf";
+  "gh-dash installs its package" = installs (mk [T."gh-dash"]) "gh-dash";
+  "git-tools includes gh-dash" = gitTools.tools."gh-dash".enable && installs gitTools "gh-dash";
 
   # skillshare: owns mutable state, so Home Manager installs the binary and
   # reconciles through the CLI but never writes its config.yaml.
