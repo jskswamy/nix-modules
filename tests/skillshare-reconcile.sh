@@ -45,7 +45,12 @@ case "$*" in
 		}}) | {packages: from_entries}'
 	;;
 "mcp check --no-dns --json") names mcp | jq '{servers: map({name: .})}' ;;
-"hooks list --json") names hook | jq 'map({key: ., value: {}}) | {source: {entries: from_entries}}' ;;
+"hooks list --json")
+	mkdir -p "$FAKE_STATE/hook-defs"
+	names hook | jq --arg dir "$FAKE_STATE/hook-defs" 'map(. as $k | {key: $k, value: ($ENV[$k] // {})}) | {source: {entries: from_entries}}' |
+		jq --slurpfile defs <(for f in "$FAKE_STATE/hook-defs"/*.json; do [[ -f $f ]] && jq -n --arg k "$(basename "$f" .json)" --slurpfile v "$f" '{($k): ($v[0] // {})}'; done | jq -s 'add // {}') \
+			'.source.entries |= with_entries(.value = ($defs[0][.key] // {}))'
+	;;
 "target add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/target" ;;
 "target "*" --add-exclude "*)
 	fail "$2" && exit 1
@@ -53,7 +58,7 @@ case "$*" in
 	shift 2
 	while (($#)); do echo "$t:$2" >>"$FAKE_STATE/filter" && shift 2; done
 	;;
-"install "*) fail "$2" && exit 1; basename "$2" >>"$FAKE_STATE/skill" ;;
+"install "*) fail "$2" && exit 1; grep -qx "$(basename "$2")" "$FAKE_STATE/skill" 2>/dev/null || basename "$2" >>"$FAKE_STATE/skill" ;;
 "plugin add "*)
 	fail "$3" && exit 1
 	name=$(basename "$3") targets=()
@@ -71,7 +76,13 @@ case "$*" in
 	for target in "${targets[@]}"; do echo "$name:$target" >>"$FAKE_STATE/binding"; done
 	;;
 "mcp add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/mcp" ;;
-"hooks add "*) fail "$3" && exit 1; echo "$3" >>"$FAKE_STATE/hook" ;;
+"hooks add "* | "hooks edit "*)
+	fail "$3" && exit 1
+	grep -qx "$3" "$FAKE_STATE/hook" 2>/dev/null || echo "$3" >>"$FAKE_STATE/hook"
+	mkdir -p "$FAKE_STATE/hook-defs"
+	[[ -s ${5:-} ]] && cp "$5" "$FAKE_STATE/hook-defs/$3.json"
+	exit 0
+	;;
 "plugin update --all --global --json") fail pluginupdate && exit 1; exit 0 ;;
 "update --all --global --json") fail skillupdate && exit 1; exit 0 ;;
 "sync --all" | "sync plugins") fail sync && exit 1; exit 0 ;;
@@ -111,7 +122,7 @@ run() {
 	rc=$?
 	set -e
 }
-adds() { grep -cE '^(target add|target .* --add-exclude|install|plugin add|mcp add|hooks add) ' "$FAKE_LOG" || true; }
+adds() { grep -cE '^(target add|target .* --add-exclude|install|plugin add|mcp add|hooks add|hooks edit) ' "$FAKE_LOG" || true; }
 synced() { grep -qx 'sync --all' "$FAKE_LOG" && grep -qx 'sync plugins' "$FAKE_LOG"; }
 
 run
@@ -250,6 +261,27 @@ run
 chmod 0755 "$ro_store"
 check "reconcile stages read-only store skill dir as writable and repairs 0555 destination" '[[ -w $XDG_CONFIG_HOME/skillshare/skills/rex && -w $XDG_CONFIG_HOME/skillshare/.nix-sources/rex/SKILL.md ]] && grep -qx "install $XDG_CONFIG_HOME/skillshare/.nix-sources/rex -y" "$FAKE_LOG"'
 check "reconcile removes imperative rex-stub skill dirs (including ~/.agents/skills) before sync while keeping non-stub dirs" '[[ ! -e $HOME/.claude/skills/rex && ! -e $HOME/.agents/skills/rex && -f $HOME/.claude-extra/skills/rex/SKILL.md ]]'
+chmod 0555 "$ro_store"
+run --no-sync
+check "unchanged read-only store skill is not reinstalled" '! grep -q "^install " "$FAKE_LOG"'
+chmod 0755 "$ro_store" && chmod 0644 "$ro_store/SKILL.md"
+printf -- '---\nname: rex\nmetadata:\n  rex-stub: "2"\n---\nupdated\n' >"$ro_store/SKILL.md"
+chmod 0444 "$ro_store/SKILL.md" && chmod 0555 "$ro_store"
+run --no-sync
+chmod 0755 "$ro_store"
+check "changed read-only store skill is restaged and force-reinstalled" 'grep -qx "install $XDG_CONFIG_HOME/skillshare/.nix-sources/rex -y --force" "$FAKE_LOG" && grep -qx "updated" "$XDG_CONFIG_HOME/skillshare/.nix-sources/rex/SKILL.md"'
+
+hook_file="$tmp/rex-hook.json"
+printf '{"bindings":{"claude":{"events":{"SessionStart":[{"hooks":[{"type":"command","command":"rex --feature-session-naming=false"}]}]}}}}' >"$hook_file"
+jq --arg hf "$hook_file" '.hooks += [{"name": "rex", "args": ["hooks", "add", "rex", "--file", $hf]}]' "$decl" >"$tmp/hook.json"
+mv "$tmp/hook.json" "$decl"
+run --no-sync
+check "new hook with definition file is added" 'grep -qx "hooks add rex --file $hook_file" "$FAKE_LOG"'
+run --no-sync
+check "unchanged hook definition is not edited" '! grep -qE "^hooks (add|edit) " "$FAKE_LOG"'
+printf '{"bindings":{"claude":{"events":{"SessionStart":[{"hooks":[{"type":"command","command":"rex"}]}]}}}}' >"$hook_file"
+run --no-sync
+check "changed hook definition is updated via hooks edit" 'grep -qx "hooks edit rex --file $hook_file" "$FAKE_LOG"'
 
 # `mcp add` has no flag for per-client options; reconcile writes them into
 # the new entry, and never into one that already existed.

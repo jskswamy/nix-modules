@@ -64,23 +64,49 @@ ensure() {
 	while IFS= read -r entry; do
 		name=$(jq -r .name <<<"$entry")
 		if grep -qxF -- "$name" <<<"$existing"; then
-			[[ $kind == plugins ]] || continue
-			# Add only new targets, keeping explicit updates and disabled bindings.
-			entry=$(jq -c --argjson cur "$out" '
-				. as $e | $cur.packages[.name] as $p
-				| [.args | to_entries[] | select(.value == "--target")
-					| $e.args[.key + 1] as $t
-					| select(($p.bindings // {} | has($t)) | not) | $t] as $missing
-				| select(($missing | length) > 0)
-				| select(($p.source // "") != "")
-				| .args = (["plugin", "add", $p.source, "--plugin", ($p.plugin // .name), "--name", .name]
-					+ (if ($p.sourceRef // "") == "" then [] else ["--source-ref", $p.sourceRef] end)
-					+ ($missing | map(["--target", .]) | add) + ["--json"])
-			' <<<"$entry") || {
-				warn "could not read plugin bindings for $name"
-				continue
-			}
-			[[ -n $entry ]] || continue
+			case $kind in
+			plugins)
+				# Add only new targets, keeping explicit updates and disabled bindings.
+				entry=$(jq -c --argjson cur "$out" '
+					. as $e | $cur.packages[.name] as $p
+					| [.args | to_entries[] | select(.value == "--target")
+						| $e.args[.key + 1] as $t
+						| select(($p.bindings // {} | has($t)) | not) | $t] as $missing
+					| select(($missing | length) > 0)
+					| select(($p.source // "") != "")
+					| .args = (["plugin", "add", $p.source, "--plugin", ($p.plugin // .name), "--name", .name]
+						+ (if ($p.sourceRef // "") == "" then [] else ["--source-ref", $p.sourceRef] end)
+						+ ($missing | map(["--target", .]) | add) + ["--json"])
+				' <<<"$entry") || {
+					warn "could not read plugin bindings for $name"
+					continue
+				}
+				[[ -n $entry ]] || continue
+				;;
+			hooks)
+				local hfile
+				hfile=$(jq -r '.args as $a | [range($a | length) | select($a[.] == "--file") | $a[. + 1]][0] // empty' <<<"$entry")
+				[[ -s $hfile ]] || continue
+				entry=$(jq -c --argjson cur "$out" --slurpfile want "$hfile" '
+					select(($cur.source.entries[.name] // {}) != $want[0])
+					| .args[1] = "edit"
+				' <<<"$entry") || {
+					warn "could not compare hook definition for $name"
+					continue
+				}
+				[[ -n $entry ]] || continue
+				;;
+			skills)
+				local ssrc
+				ssrc=$(jq -r '.args[1] // empty' <<<"$entry")
+				[[ -d $ssrc && ! -w $ssrc ]] || continue
+				diff -qr "$ssrc" "${cfg%/config.yaml}/.nix-sources/$name" >/dev/null 2>&1 &&
+					{ [[ ! -e ${cfg%/config.yaml}/skills/$name/SKILL.md ]] ||
+						diff -qr "$ssrc" "${cfg%/config.yaml}/skills/$name" >/dev/null 2>&1; } && continue
+				entry=$(jq -c 'if (.args | index("--force")) then . else .args += ["--force"] end' <<<"$entry")
+				;;
+			*) continue ;;
+			esac
 		fi
 		todo+=("$entry")
 	done < <(jq -c --arg k "$kind" '.[$k] // [] | .[]' "$decl")
