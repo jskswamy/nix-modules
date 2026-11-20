@@ -607,4 +607,210 @@ if vim.fn.executable(smart_cat) == 1 then
 	vim.fn.delete(sc_tmp, "rf")
 end
 
+-- Editor enhancements, QoL options, blink signature help, markview hybrid mode, and lockfile pins
+dofile("modules/tools/nvim/config/lua/config/options.lua")
+check(
+	"options.lua configures histogram diff algorithm and linematch:60",
+	vim.o.diffopt:find("algorithm:histogram", 1, true) ~= nil
+		and vim.o.diffopt:find("linematch:60", 1, true) ~= nil
+)
+
+local ok_blink, blink_specs = pcall(dofile, "modules/tools/nvim/config/lua/plugins/blink.lua")
+local blink_opts = ok_blink and blink_specs[1] and blink_specs[1].opts or {}
+check(
+	"blink.lua enables signature help and auto-show documentation with rounded borders",
+	blink_opts.signature
+		and blink_opts.signature.enabled == true
+		and blink_opts.signature.window
+		and blink_opts.signature.window.border == "rounded"
+		and blink_opts.completion
+		and blink_opts.completion.documentation
+		and blink_opts.completion.documentation.auto_show == true
+)
+
+local ok_md, md_specs = pcall(dofile, "modules/tools/nvim/config/lua/plugins/markdown.lua")
+local markview_opts = nil
+for _, s in ipairs(ok_md and md_specs or {}) do
+	if s[1] == "OXY2DEV/markview.nvim" then
+		markview_opts = s.opts
+	end
+end
+check(
+	"markdown.lua enables Insert-mode hybrid unconcealing (hybrid_modes = { 'i' })",
+	markview_opts
+		and markview_opts.preview
+		and type(markview_opts.preview.hybrid_modes) == "table"
+		and vim.tbl_contains(markview_opts.preview.hybrid_modes, "i")
+)
+
+local ok_ed, ed_specs = pcall(dofile, "modules/tools/nvim/config/lua/plugins/editor.lua")
+check("editor.lua plugin spec loads", ok_ed and type(ed_specs) == "table" and type(_G.EditorEnhancements) == "table")
+local ed_by_name = {}
+for _, s in ipairs(ok_ed and ed_specs or {}) do
+	ed_by_name[s[1]] = s
+end
+check(
+	"editor.lua configures oil.nvim, treesj, quicker.nvim, gitsigns.nvim, and Rex pane sender",
+	ed_by_name["stevearc/oil.nvim"] ~= nil
+		and ed_by_name["Wansmer/treesj"] ~= nil
+		and ed_by_name["stevearc/quicker.nvim"] ~= nil
+		and ed_by_name["lewis6991/gitsigns.nvim"] ~= nil
+		and ed_by_name["folke/snacks.nvim"] ~= nil
+)
+
+if type(_G.EditorEnhancements) == "table" then
+	local rev_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_set_current_buf(rev_buf)
+	vim.bo[rev_buf].filetype = "lua"
+	vim.api.nvim_buf_set_lines(rev_buf, 0, -1, false, {
+		"local x = 1",
+		"local y = 2",
+	})
+	_G.EditorEnhancements.add_review_comment({
+		buf = rev_buf,
+		file = "/tmp/demo.lua",
+		relpath = "demo.lua",
+		ft = "lua",
+		start_line = 2,
+		end_line = 2,
+		header = "demo.lua:2",
+		code = "local y = 2",
+	}, "Rename y to count")
+
+	local rmarks = vim.api.nvim_buf_get_extmarks(rev_buf, _G.EditorEnhancements.review_ns, 0, -1, { details = true })
+	check("add_review_comment places virtual comment badge on buffer line", #rmarks == 1 and rmarks[1][4] and rmarks[1][4].virt_lines ~= nil)
+	local formatted = _G.EditorEnhancements.format_review_queue_prompt()
+	check(
+		"format_review_queue_prompt builds structured markdown with code snippet and feedback",
+		type(formatted) == "string"
+			and formatted:find("demo.lua:2", 1, true) ~= nil
+			and formatted:find("Rename y to count", 1, true) ~= nil
+	)
+	local flushed = _G.EditorEnhancements.flush_review_comments()
+	local rmarks_after = vim.api.nvim_buf_get_extmarks(rev_buf, _G.EditorEnhancements.review_ns, 0, -1, {})
+	check(
+		"flush_review_comments delivers prompt and clears virtual comment badges",
+		flushed == formatted and #rmarks_after == 0 and #_G.EditorEnhancements.get_review_queue() == 0
+	)
+	vim.api.nvim_buf_delete(rev_buf, { force = true })
+
+	-- open_in_leaf launches Snacks.terminal floating overlay with leaf
+	local leaf_launched = nil
+	local orig_exec2 = vim.fn.executable
+	vim.fn.executable = function(bin)
+		if bin == "leaf" then
+			return 1
+		end
+		return orig_exec2(bin)
+	end
+	_G.Snacks = _G.Snacks or {}
+	_G.Snacks.terminal = function(cmd, opts)
+		leaf_launched = { cmd = cmd, opts = opts }
+	end
+	local leaf_ok = _G.EditorEnhancements.open_in_leaf("/tmp/notes.md")
+	check(
+		"open_in_leaf launches Snacks.terminal floating window with leaf --watch, LEAF_EDITOR bridge, and target file",
+		leaf_ok
+			and leaf_launched
+			and leaf_launched.cmd[1] == "leaf"
+			and leaf_launched.cmd[2] == "--watch"
+			and leaf_launched.cmd[3] == "/tmp/notes.md"
+			and leaf_launched.opts.win.position == "float"
+			and leaf_launched.opts.env
+			and type(leaf_launched.opts.env.LEAF_EDITOR) == "string"
+			and leaf_launched.opts.env.LEAF_EDITOR:find("leaf-nvim-edit", 1, true) ~= nil
+	)
+
+	-- toggle_leaf_split opens leaf --watch in a right split and keeps focus in the editor window
+	leaf_launched = nil
+	local split_ok = _G.EditorEnhancements.toggle_leaf_split("/tmp/notes.md")
+	check(
+		"toggle_leaf_split launches leaf --watch in a right split with auto_insert=false",
+		split_ok
+			and leaf_launched
+			and leaf_launched.cmd[1] == "leaf"
+			and leaf_launched.cmd[2] == "--watch"
+			and leaf_launched.cmd[3] == "/tmp/notes.md"
+			and leaf_launched.opts.win.position == "right"
+			and leaf_launched.opts.auto_insert == false
+	)
+	vim.fn.executable = orig_exec2
+
+	-- leaf_edit_from_rpc jumps host Neovim buffer to the requested line
+	local md_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_set_current_buf(md_buf)
+	vim.api.nvim_buf_set_lines(md_buf, 0, -1, false, { "line 1", "line 2", "line 3", "line 4", "line 5" })
+	_G.EditorEnhancements.leaf_edit_from_rpc("", 4)
+	vim.wait(100, function()
+		return vim.api.nvim_win_get_cursor(0)[1] == 4
+	end, 10)
+	check("leaf_edit_from_rpc jumps host Neovim cursor to line sent by Ctrl+E in leaf", vim.api.nvim_win_get_cursor(0)[1] == 4)
+	vim.cmd("stopinsert")
+	vim.api.nvim_buf_delete(md_buf, { force = true })
+
+	-- Verify open_modified_files_picker passes raw 2-char git porcelain status (or nil) so Snacks.picker.format.file_git_status never errors on 'NEW'/'HEAD'/'REPO'
+	local picked_spec = nil
+	_G.Snacks.picker = {
+		pick = function(spec)
+			picked_spec = spec
+		end,
+	}
+	local valid_snacks_git_xy = function(xy)
+		if xy == nil then
+			return true
+		end
+		if type(xy) ~= "string" or #xy ~= 2 then
+			return false
+		end
+		local s = xy:gsub("T", "M")
+		if s:match("%?%?") or s:match("!!") or s:match("UU") or s:match("DD") or s:match("AA") or s:match("U") then
+			return true
+		end
+		if s:match("^[MADRC]") or s:match("[MADRC]$") then
+			return true
+		end
+		return false
+	end
+
+	_G.EditorEnhancements.open_modified_files_picker({ include_recent_tracked = true })
+	local all_valid_status = picked_spec and type(picked_spec.items) == "table" and #picked_spec.items > 0
+	local all_relative_file = picked_spec and type(picked_spec.items) == "table" and #picked_spec.items > 0
+	for _, it in ipairs((picked_spec and picked_spec.items) or {}) do
+		if not valid_snacks_git_xy(it.status) then
+			all_valid_status = false
+		end
+		-- Snacks.picker.util.path concatenates item.cwd .. "/" .. item.file, so item.file must be relative when item.cwd is set
+		if type(it.file) ~= "string" or it.file:sub(1, 1) == "/" or not it.cwd then
+			all_relative_file = false
+		end
+		local joined = it.cwd .. "/" .. it.file
+		if vim.fn.filereadable(joined) ~= 1 then
+			all_relative_file = false
+		end
+	end
+	check(
+		"open_modified_files_picker items only pass valid 2-char git porcelain xy or nil in item.status (no 'unknown status: NEW')",
+		all_valid_status == true
+	)
+	check(
+		"open_modified_files_picker sets relative item.file with item.cwd so Snacks.picker.util.path resolves without double-prefixing",
+		all_relative_file == true
+	)
+end
+
+local lock_json = table.concat(vim.fn.readfile("modules/tools/nvim/config/lazy-lock.json"), "\n")
+local lock_ok, lock_data = pcall(vim.json.decode, lock_json)
+check(
+	"lazy-lock.json pins mini.surround, yanky.nvim, dial.nvim, inc-rename.nvim, oil.nvim, treesj, and quicker.nvim",
+	lock_ok
+		and type(lock_data) == "table"
+		and lock_data["mini.surround"] ~= nil
+		and lock_data["yanky.nvim"] ~= nil
+		and lock_data["dial.nvim"] ~= nil
+		and lock_data["inc-rename.nvim"] ~= nil
+		and lock_data["oil.nvim"] ~= nil
+		and lock_data["treesj"] ~= nil
+		and lock_data["quicker.nvim"] ~= nil
+)
+
 assert(#failures == 0, table.concat(failures, "; "))

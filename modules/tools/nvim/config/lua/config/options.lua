@@ -6,6 +6,7 @@ vim.o.winborder = "rounded"
 vim.o.scrolloff = 8
 vim.o.updatetime = 100
 vim.o.swapfile = false
+vim.opt.diffopt:append({ "algorithm:histogram", "indent-heuristic", "linematch:60" })
 
 -- Append Mason bin to PATH so Nix tools take precedence while Mason tools resolve cleanly
 vim.env.PATH = vim.env.PATH .. ":" .. vim.fn.stdpath("data") .. "/mason/bin"

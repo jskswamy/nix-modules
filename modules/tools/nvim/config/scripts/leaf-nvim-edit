@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Bridge leaf's Ctrl+E editor hook (`leaf-nvim-edit {$line} {$path}`) back into
+# the host Neovim instance when leaf is running inside a Neovim terminal
+# ($NVIM is set), jumping to the exact line and entering Insert mode instead of
+# spawning a nested Neovim. Falls back to standalone `nvim` when run outside Neovim.
+
+line="${1:-1}"
+shift || true
+file="${1:-}"
+
+if [[ -n "${NVIM:-}" ]]; then
+	escaped_file="${file//\\/\\\\}"
+	escaped_file="${escaped_file//\"/\\\"}"
+	nvim --headless -u NONE -i NONE -l - "$NVIM" "$line" "$escaped_file" <<'LUA'
+local sock = arg[1]
+local line = tonumber(arg[2]) or 1
+local file = arg[3] or ""
+local ok, chan = pcall(vim.fn.sockconnect, "pipe", sock, { rpc = true })
+if ok and chan and chan > 0 then
+	local expr = string.format(
+		"v:lua.EditorEnhancements.leaf_edit_from_rpc(%q, %d)",
+		file,
+		line
+	)
+	pcall(vim.rpcrequest, chan, "nvim_eval", expr)
+	pcall(vim.fn.chanclose, chan)
+end
+LUA
+	exit 0
+fi
+
+if [[ -n "$file" ]]; then
+	exec nvim "+${line}" +"normal! zz" "$file"
+else
+	exec nvim
+fi

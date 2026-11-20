@@ -45,7 +45,7 @@ return {
 				icon_provider = "mini",
 				filetypes = { "markdown", "quarto", "rmd", "typst" },
 				modes = { "n", "no", "c" },
-				hybrid_modes = {},
+				hybrid_modes = { "i" },
 			},
 			markdown = {
 				code_blocks = {

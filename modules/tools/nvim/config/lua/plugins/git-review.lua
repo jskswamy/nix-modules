@@ -329,7 +329,10 @@ local function git_lines(cwd, args)
 end
 
 local function git_root(path)
-	local dir = path and vim.fn.fnamemodify(path, ":h") or vim.fn.getcwd()
+	local dir = (path and path ~= "") and vim.fn.fnamemodify(path, ":p:h") or vim.fn.getcwd()
+	if not (vim.uv or vim.loop).fs_stat(dir) then
+		dir = vim.fn.getcwd()
+	end
 	local lines = git_lines(dir, { "rev-parse", "--show-toplevel" })
 	return lines and lines[1] or vim.fn.getcwd()
 end
