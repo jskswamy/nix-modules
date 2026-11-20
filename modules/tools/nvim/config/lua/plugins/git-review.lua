@@ -123,6 +123,8 @@ local function clear_review(buf)
 		vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
 		pcall(vim.keymap.del, "n", "]h", { buffer = buf })
 		pcall(vim.keymap.del, "n", "[h", { buffer = buf })
+		pcall(vim.keymap.del, "n", "<leader>gf", { buffer = buf })
+		pcall(vim.keymap.del, "n", "<leader>gq", { buffer = buf })
 	end
 	state.buf_hunks[buf] = nil
 	local parent = state.scratch_parent[buf]
@@ -304,7 +306,7 @@ local function render_buffer_diff(buf, old_lines, new_lines, meta)
 
 	vim.keymap.set("n", "]h", next_hunk, { buffer = buf, silent = true, desc = "Next Review Hunk" })
 	vim.keymap.set("n", "[h", prev_hunk, { buffer = buf, silent = true, desc = "Prev Review Hunk" })
-	register_active_review_keys()
+	register_active_review_keys(buf)
 end
 
 local function git_lines(cwd, args)
@@ -472,13 +474,13 @@ local function toggle_current_file()
 	end
 end
 
-register_active_review_keys = function()
+register_active_review_keys = function(buf)
 	vim.keymap.set("n", "<leader>gf", function()
 		pick_commit_files(state.active_commit, state.active_root)
-	end, { silent = true, desc = "Git Review: Files in Active Commit" })
+	end, { buffer = buf, silent = true, desc = "Git Review: Files in Active Commit" })
 	vim.keymap.set("n", "<leader>gq", function()
 		clear_all_reviews()
-	end, { silent = true, desc = "Git Review: Exit Inline Review" })
+	end, { buffer = buf, silent = true, desc = "Git Review: Exit Inline Review" })
 end
 
 unregister_active_review_keys = function()

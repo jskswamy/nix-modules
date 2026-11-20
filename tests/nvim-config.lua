@@ -1,11 +1,12 @@
 -- Run from the repository root: nvim --headless -u NONE -i NONE -l tests/nvim-config.lua
 local specs = dofile("modules/tools/nvim/config/lua/plugins/languages.lua")
-local mason, biome
+local mason, biome, conform_ft
 for _, spec in ipairs(specs) do
 	if spec[1] == "mason-org/mason.nvim" then
 		mason = spec
 	elseif spec.opts and spec.opts.formatters and spec.opts.formatters.biome then
 		biome = spec.opts.formatters.biome.condition
+		conform_ft = spec.opts.formatters_by_ft
 	end
 end
 
@@ -64,6 +65,18 @@ for _, config in ipairs({ "biome.json", "biome.jsonc" }) do
 	vim.fn.delete(root .. "/project/" .. config)
 end
 check("Biome stays disabled without project config", not biome({}, { filename = filename }))
+check(
+	"JS/TS/JSON formatters fall back from biome to prettier with stop_after_first",
+	conform_ft
+		and conform_ft.typescript
+		and conform_ft.typescript[1] == "biome"
+		and conform_ft.typescript[2] == "prettier"
+		and conform_ft.typescript.stop_after_first == true
+		and conform_ft.json
+		and conform_ft.json[1] == "biome"
+		and conform_ft.json[2] == "prettier"
+		and conform_ft.json.stop_after_first == true
+)
 vim.fn.chdir(cwd)
 vim.fn.delete(root, "rf")
 
@@ -385,9 +398,17 @@ if type(_G.GitReview) == "table" then
 	check("Inline review highlights changed words inline (GitSignsChangeInline)", has_change_word)
 	check("Inline review renders deleted lines as red virtual lines (including before line 1)", has_delete_virt and has_above_top)
 	check(
-		"Active review registers <leader>gf and <leader>gq dynamically",
+		"Active review registers <leader>gf and <leader>gq dynamically as buffer-local keymaps",
 		vim.fn.maparg("<leader>gf", "n") ~= "" and vim.fn.maparg("<leader>gq", "n") ~= ""
 	)
+	local other_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_set_current_buf(other_buf)
+	check(
+		"Non-review buffer does not inherit <leader>gf or <leader>gq",
+		vim.fn.maparg("<leader>gf", "n") == "" and vim.fn.maparg("<leader>gq", "n") == ""
+	)
+	vim.api.nvim_set_current_buf(buf)
+	vim.api.nvim_buf_delete(other_buf, { force = true })
 
 	-- Hunk navigation moves cursor between hunks cleanly
 	vim.api.nvim_win_set_cursor(0, { 1, 0 })

@@ -80,11 +80,11 @@ return {
 		"stevearc/conform.nvim",
 		opts = {
 			formatters_by_ft = {
-				javascript = { "biome" },
-				typescript = { "biome" },
-				javascriptreact = { "biome" },
-				typescriptreact = { "biome" },
-				json = { "biome" },
+				javascript = { "biome", "prettier", stop_after_first = true },
+				typescript = { "biome", "prettier", stop_after_first = true },
+				javascriptreact = { "biome", "prettier", stop_after_first = true },
+				typescriptreact = { "biome", "prettier", stop_after_first = true },
+				json = { "biome", "prettier", stop_after_first = true },
 				html = { "prettier" },
 				css = { "prettier" },
 				nix = { "alejandra" },

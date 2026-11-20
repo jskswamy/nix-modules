@@ -16,6 +16,7 @@ local function apply_scheme(bg)
 end
 
 if vim.fn.has("mac") == 1 then
+	local POLL_INTERVAL_MS = 15000
 	local busy = false
 	local function sync()
 		if busy then
@@ -36,10 +37,25 @@ if vim.fn.has("mac") == 1 then
 			end)
 		end)
 	end
-	vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, { callback = sync })
 	local timer = (vim.uv or vim.loop).new_timer()
+	vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
+		callback = function()
+			sync()
+			if timer then
+				timer:stop()
+				timer:start(POLL_INTERVAL_MS, POLL_INTERVAL_MS, vim.schedule_wrap(sync))
+			end
+		end,
+	})
+	vim.api.nvim_create_autocmd("FocusLost", {
+		callback = function()
+			if timer then
+				timer:stop()
+			end
+		end,
+	})
 	if timer then
-		timer:start(3000, 3000, vim.schedule_wrap(sync))
+		timer:start(POLL_INTERVAL_MS, POLL_INTERVAL_MS, vim.schedule_wrap(sync))
 	end
 	sync()
 end

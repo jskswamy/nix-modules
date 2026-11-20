@@ -380,6 +380,7 @@ return {
 		"folke/snacks.nvim",
 		opts = {
 			statuscolumn = { enabled = true },
+			terminal = { shell = "fish" },
 			zen = {
 				toggles = {
 					dim = false,

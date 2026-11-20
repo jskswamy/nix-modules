@@ -14,7 +14,7 @@
     owner = "nvim-treesitter";
     repo = "nvim-treesitter";
     rev = (lib.importJSON ./config/lazy-lock.json)."nvim-treesitter".commit;
-    hash = "sha256-AMpRUNvTDUFx3EBc5POn3niPJlFRwG+Jgc1FR4CnXEk=";
+    hash = "sha256-6ETageMMpoVYRc0ZKbVl4UAKH26ZyM0OUTkOOG6JyrE=";
   };
 in {
   imports = [
