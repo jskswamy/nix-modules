@@ -4,24 +4,24 @@
 # this overlay package so the module's config activation stays, without
 # pulling the ~700 bun-pkg derivations into the system closure.
 _final: prev: let
-  version = "18.20.2";
+  version = "19.0.1";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/can1357/oh-my-pi/releases/download/v${version}/omp-darwin-arm64";
-      hash = "sha256-4t4JdM5YG/zyBE6nlccS+iQP34ME9720s9gbFU0rV/w=";
+      hash = "sha256-L+Qgu9APgYmYFuUcvuuVk6+lnZNo1iydPnhTXVQOMvY=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/can1357/oh-my-pi/releases/download/v${version}/omp-darwin-x64";
-      hash = "sha256-g2/qV7Hfz1PCYFOu89V7bR+D7ANKf4sl14kCLFrbw2U=";
+      hash = "sha256-jWJQLu3ox6QzEXmENNCjGhwCSjq8Vr7cTaIAzM+U/qE=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/can1357/oh-my-pi/releases/download/v${version}/omp-linux-x64";
-      hash = "sha256-80z6VzEe1npF8BuxohUZytTXSHXRgTFvAPoM1qSryqo=";
+      hash = "sha256-bO7wRDCFG7EFDG/aOvRnQS60ShHfCm/4Eh/mAQE8VBU=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/can1357/oh-my-pi/releases/download/v${version}/omp-linux-arm64";
-      hash = "sha256-f4CeUWOMKs5wEkSSPV7GJIW7r9dNt12nQqzjDIepHr8=";
+      hash = "sha256-I37eD0mU1h9SOALEz1YtTki650wYit15LQbQUbkHzs8=";
     };
   };
 in {

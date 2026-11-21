@@ -2,24 +2,24 @@
 # binaries instead of nixpkgs, keeping it at latest release without
 # requiring full rust compilation.
 _final: prev: let
-  codexVersion = "0.169.0";
+  codexVersion = "0.171.0";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/openai/codex/releases/download/rust-v${codexVersion}/codex-package-aarch64-apple-darwin.tar.gz";
-      hash = "sha256-iiMiYN96EsXoPgtLdlnhyNklm0GUJRe8AGjYq1XDZGE=";
+      hash = "sha256-WMiAMuxEbnKSLZEdjwN3MQLaIMFqYFnPIfZ0S85X8hA=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/openai/codex/releases/download/rust-v${codexVersion}/codex-package-x86_64-apple-darwin.tar.gz";
-      hash = "sha256-Cjw5IjW0cSQJSVztArvgZiznoDgjJ2bRwcNK906QXC8=";
+      hash = "sha256-3RMOoyF7Tm/kRUyZlJ4LKOLoqa2NqMOnXwxyZfq3FTs=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/openai/codex/releases/download/rust-v${codexVersion}/codex-package-x86_64-unknown-linux-musl.tar.gz";
-      hash = "sha256-O47QkRScxjpZBGufCUvPohzbTdoV7eRBzjabzuSnG6A=";
+      hash = "sha256-g5HWd1dJa/0UiT7KbL8MlplL8mJ1Zv8fAY9wYAye9rM=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/openai/codex/releases/download/rust-v${codexVersion}/codex-package-aarch64-unknown-linux-musl.tar.gz";
-      hash = "sha256-yNC0qyqXxZW3CxBBLTbQ1UZNzvHh0yRrBz1IAXzfWk8=";
+      hash = "sha256-2MQ77mzxGwHrGLlfTXlhCSvEAigYCAiFnnDau3eEwck=";
     };
   };
 

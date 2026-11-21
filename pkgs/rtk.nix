@@ -1,24 +1,24 @@
 # Provide rtk (Rust Token Killer) from upstream GitHub release binaries
 # instead of nixpkgs, keeping it fast to install without compiling from source.
 _final: prev: let
-  rtkVersion = "1.2.0";
+  rtkVersion = "1.2.1";
 
   sources = {
     aarch64-darwin = prev.fetchurl {
       url = "https://github.com/rtk-ai/rtk/releases/download/v${rtkVersion}/rtk-aarch64-apple-darwin.tar.gz";
-      hash = "sha256-osQR/6SahZW0CMFR6kfJqBImiSSnbq7svDpQZbAiB/8=";
+      hash = "sha256-O8KpLx0+QE75nCAM3cwPSRfWxO1bEnp1GTipb1fU7Zo=";
     };
     x86_64-darwin = prev.fetchurl {
       url = "https://github.com/rtk-ai/rtk/releases/download/v${rtkVersion}/rtk-x86_64-apple-darwin.tar.gz";
-      hash = "sha256-HiPouVQrWEKOZAnEmxw/uSxMDVEl2nLoDwAqRghqbCA=";
+      hash = "sha256-EH4nIlPAqjbJyF+/ndGIvbWNhsa6moW0kSJCC69uTFw=";
     };
     aarch64-linux = prev.fetchurl {
       url = "https://github.com/rtk-ai/rtk/releases/download/v${rtkVersion}/rtk-aarch64-unknown-linux-gnu.tar.gz";
-      hash = "sha256-k8Hc03/V/K6Pp3KltcNKMK8UKs5PQIHI+YMZFGt6EKQ=";
+      hash = "sha256-X9dRUf7q4rgbGET8qYiWEMx3QINhZT7z+V1LnT4nj08=";
     };
     x86_64-linux = prev.fetchurl {
       url = "https://github.com/rtk-ai/rtk/releases/download/v${rtkVersion}/rtk-x86_64-unknown-linux-musl.tar.gz";
-      hash = "sha256-cP7ntKVIxD3elMd+IzVVCYGwvC+wE2kdjIEJtb0O2jc=";
+      hash = "sha256-dfZFJXEb6TVlemsijZKcJL2dGrfWQOo3SouRPltbrAU=";
     };
   };
 
