@@ -1,36 +1,29 @@
 # Things Cloud MCP - MCP server for Things 3 task management via Things Cloud
 # Not available in nixpkgs, so we build from source
-# https://github.com/wbopan/things-cloud-mcp
+# https://github.com/jskswamy/things-cloud-mcp
 #
-# TEMPORARY FORK PIN: upstream's isUntitledTask() hides any task with a
-# blank title from every query, including tasks that have a real note
-# (e.g. a link saved via share extension with no title ever typed in) —
-# making them impossible to find and retitle. Fixed on our fork's main
-# and submitted upstream as https://github.com/wbopan/things-cloud-mcp/pull/20.
-# Revert to upstream owner/rev once that merges and cuts a release.
+# This is a standalone Go project. It began as a fork of
+# wbopan/things-cloud-mcp, which has since been rewritten as a TypeScript
+# Cloudflare Worker and no longer ships a Go server, so there is no upstream
+# to return to. Pin a release tag of the repository above.
 #
-# 2026-08-25: bumped to fork main HEAD (was 0de5d57b, v1.3.2) to pick up
-# "fix: harden Things Cloud sync and writes" (9d11137) — rewrites
-# things-cloud-sdk/histories.go sync/write handling, suspected cause of
-# stale reads (frozen serverIndex) seen after restoring this server.
-#
-# 2026-10-21: bumped to fork main HEAD (b03d51d) — includes upstream
-# maintainer's fix/task7-and-recurring-projection (d0f1dc1) which adds Task7
-# support and occurrence projection for recurring to-dos, plus PR #33 (Task2/Tag2),
-# PR #34 (Mail to Things Command queue items), and our PR #20 (untitled notes).
+# 1.5.0 carries the fixes the original project only made in its rewrite:
+# valid identifiers for new items, positive sort indexes on edit, today in
+# the system time zone, a resend after 409 OutdatedAncestor, recovery after
+# an account reset, and a backoff when reads are throttled.
 _: prev: {
   things-cloud-mcp = prev.buildGoModule rec {
     pname = "things-cloud-mcp";
-    version = "1.4.4-unstable-2026-10-21";
+    version = "1.5.0";
 
     src = prev.fetchFromGitHub {
       owner = "jskswamy";
       repo = "things-cloud-mcp";
-      rev = "b03d51daf6fcabbe620231ccec66bfe29f1b0d2d";
-      hash = "sha256-KuDD97VISpniFFJPLZpICDDk7X6c3+CKGiSf/kc0nZM=";
+      tag = "v${version}";
+      hash = "sha256-wbWs0b9A95lBSWhkJ6iegKbM9iNGE5460p0cfWHywRY=";
     };
 
-    vendorHash = "sha256-k2zliqA+7R4Vu/xzAo5kmhTFf/wf2QVw8ygUocZ1I4k=";
+    vendorHash = "sha256-jnsDmi2wnOa6avPLm8Mc8ZIhncU/ABaxbO6AOH0PW3Q=";
 
     # things-cloud-sdk/ is a separate Go module (its own go.mod), pulled in
     # via a local `replace` directive in go.mod — not a subpackage of the
@@ -38,7 +31,7 @@ _: prev: {
     # buildGoModule errors trying to build it as `things-cloud-mcp/things-cloud-sdk`.
     subPackages = ["."];
 
-    # Upstream hardcodes `addr := ":" + port` in main.go (binds every
+    # main.go hardcodes `addr := ":" + port` (binds every
     # interface). There is no --host flag or env var to restrict this.
     # Patch it to loopback-only so credentials/traffic never leave the
     # machine, matching the design's security guarantee.
@@ -49,7 +42,7 @@ _: prev: {
 
     meta = with prev.lib; {
       description = "MCP server for Things Cloud task management";
-      homepage = "https://github.com/wbopan/things-cloud-mcp";
+      homepage = "https://github.com/jskswamy/things-cloud-mcp";
       mainProgram = "things-cloud-mcp";
       platforms = platforms.darwin;
     };
