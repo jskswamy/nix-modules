@@ -105,6 +105,8 @@ return {
 					-- Distinct elevated surface + visible border for floating/popup windows,
 					-- plus soft shaded backdrop margins for Zen / Presentation mode.
 					github_dark_default = vim.tbl_extend("force", float_links, {
+						-- The theme italicises all @markup.raw; keep fenced code blocks upright.
+						["@markup.raw.block"] = { fg = "#e6edf3", style = "NONE" },
 						NormalFloat = { bg = "#161b22", fg = "#e6edf3" },
 						FloatBorder = { bg = "#161b22", fg = "#388bfd" },
 						FloatTitle = { bg = "#161b22", fg = "#58a6ff", style = "bold" },
@@ -119,6 +121,7 @@ return {
 						GitSignsDeleteInline = { bg = "#541b21", fg = "#ffa198", style = "strikethrough" },
 					}),
 					github_light_default = vim.tbl_extend("force", float_links, {
+						["@markup.raw.block"] = { fg = "#1f2328", style = "NONE" },
 						NormalFloat = { bg = "#f6f8fa", fg = "#1f2328" },
 						FloatBorder = { bg = "#f6f8fa", fg = "#0969da" },
 						FloatTitle = { bg = "#f6f8fa", fg = "#0969da", style = "bold" },
