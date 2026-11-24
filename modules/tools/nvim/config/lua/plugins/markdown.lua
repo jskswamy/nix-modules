@@ -49,9 +49,9 @@ return {
 			},
 			markdown = {
 				code_blocks = {
-					style = "block",
-					min_width = 70,
-					pad_amount = 2,
+					-- "block" pads every line to the longest one, which wraps into
+					-- blank rows because these buffers set 'wrap' (autocmd above).
+					style = "simple",
 				},
 			},
 		},
