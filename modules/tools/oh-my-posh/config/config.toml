@@ -8,7 +8,6 @@
 "$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
 version = 4
 final_space = true
-streaming = 100
 tooltips_action = "replace"
 
 [transient_prompt]
@@ -92,8 +91,9 @@ tooltips_action = "replace"
     template = "❯"
 
 # ---------------------------------------------------------------------------
-# Right prompt (hidden on narrow panes < 100 cols via min_width so tooltips
-# still work on narrow panes without wrapping fish_right_prompt)
+# Right prompt (width-gated in Fish via ~/.config/fish/oh-my-posh.fish so
+# narrow panes < 100 cols hide rprompt without triggering per-segment
+# TerminalWidth probes, while keeping tooltips working on narrow panes)
 # ---------------------------------------------------------------------------
 [[blocks]]
   type = "rprompt"
@@ -102,14 +102,12 @@ tooltips_action = "replace"
     type = "text"
     style = "plain"
     foreground = "blue"
-    min_width = 100
     template = "{{ if .Env.POSH_NIX_FLAKE }}❄ {{ end }}"
 
   [[blocks.segments]]
     type = "go"
     style = "plain"
     foreground = "cyan"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -120,7 +118,6 @@ tooltips_action = "replace"
     type = "node"
     style = "plain"
     foreground = "green"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -131,7 +128,6 @@ tooltips_action = "replace"
     type = "bun"
     style = "plain"
     foreground = "red"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -142,7 +138,6 @@ tooltips_action = "replace"
     type = "deno"
     style = "plain"
     foreground = "green"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -153,7 +148,6 @@ tooltips_action = "replace"
     type = "ruby"
     style = "plain"
     foreground = "red"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -164,7 +158,6 @@ tooltips_action = "replace"
     type = "rust"
     style = "plain"
     foreground = "red"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -175,7 +168,6 @@ tooltips_action = "replace"
     type = "java"
     style = "plain"
     foreground = "red"
-    min_width = 100
     template = " {{ .Full }} "
 
     [blocks.segments.cache]
@@ -186,7 +178,6 @@ tooltips_action = "replace"
     type = "battery"
     style = "plain"
     foreground = "red"
-    min_width = 100
     template = "{{ if le .Percentage 10 }} {{ .Percentage }}% {{ end }}"
 
     [blocks.segments.cache]
