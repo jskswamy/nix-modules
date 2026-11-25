@@ -541,6 +541,8 @@ in {
     && !(lib.hasInfix "1mcp" agConfig);
   "agentgateway registers Claude MCP by default" = agDefault.home.activation ? configureClaudeCodeAgentgateway;
   "agentgateway registration can be disabled" = !(agNoReg.home.activation ? configureClaudeCodeAgentgateway);
+  "local-mcp registers Claude MCP by default" = (mk [T.local-mcp]).home.activation ? configureClaudeCodeLocalMcp;
+  "local-mcp registration can be disabled" = !((mk [T.local-mcp {tools.local-mcp.registerMcp = false;}]).home.activation ? configureClaudeCodeLocalMcp);
   "agentgateway creates session state only for its Darwin daemon" =
     (mkOn "aarch64-darwin" [T.agentgateway]).home.activation ? agentgatewaySessionKey
     && !((mkOn "x86_64-linux" [T.agentgateway]).home.activation ? agentgatewaySessionKey)
@@ -836,6 +838,14 @@ in {
     lib.takeEnd 2 (ssEntry "mcp" "agentgateway").args == ["--url" "http://127.0.0.1:3050/mcp"];
   "skillshare omits AgentGateway when disabled" = !(builtins.elem "agentgateway" (ssNames "mcp" ssNoGateway));
   "skillshare omits AgentGateway on Linux by default" = !(builtins.elem "agentgateway" (ssNames "mcp" (mkOn "x86_64-linux" [T.skillshare])));
+  "skillshare enables 1mcp and drops direct stdio MCPs when enableLocalMcp is set" = let
+    ssLocalMcp = mk [T.skillshare {tools.skillshare.enableLocalMcp = true;}];
+    entry = lib.findFirst (e: e.name == "1mcp") {args = [];} ssLocalMcp.tools.skillshare.resources.mcp;
+  in
+    ssNames "mcp" ssLocalMcp == ["1mcp" "agentgateway" "superlogical"]
+    && lib.takeEnd 2 entry.args == ["--url" "http://127.0.0.1:3051/mcp"]
+    && installs ssLocalMcp "mcp-server-time"
+    && installs ssLocalMcp "codebase-memory-mcp";
 
   # rex: keybindings, Darwin GUI defaults, and Skillshare wiring.
   "rex is exported and included in terminal group" = T ? rex && terminal.tools.rex.enable;

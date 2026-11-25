@@ -38,6 +38,16 @@ in {
       description = "Port 1mcp listens on, and the one Claude Code is pointed at.";
     };
 
+    registerMcp = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Whether to register 1mcp directly with `claude mcp add` on activation.
+        Set to false when another manager such as Skillshare owns MCP
+        registrations across profiles.
+      '';
+    };
+
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
@@ -54,11 +64,13 @@ in {
     home = {
       packages = lib.optional (cfg.package != null) cfg.package;
 
-      activation.configureClaudeCodeLocalMcp = lib.hm.dag.entryAfter ["writeBoundary"] ''
-        if command -v claude &> /dev/null; then
-          $DRY_RUN_CMD claude mcp add --transport http 1mcp "${url}" --scope user 2>/dev/null || true
-        fi
-      '';
+      activation.configureClaudeCodeLocalMcp = lib.mkIf cfg.registerMcp (
+        lib.hm.dag.entryAfter ["writeBoundary"] ''
+          if command -v claude &> /dev/null; then
+            $DRY_RUN_CMD claude mcp add --transport http 1mcp "${url}" --scope user 2>/dev/null || true
+          fi
+        ''
+      );
     };
 
     launchd.agents.local-mcp = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
@@ -71,7 +83,7 @@ in {
           "--config"
           "${config.home.homeDirectory}/.config/1mcp/mcp.json"
           "--port"
-          "3051"
+          "${toString cfg.port}"
         ];
         EnvironmentVariables = {
           PATH = "${config.mcp.daemonPath}:${pkgs.nodejs_24}/bin";

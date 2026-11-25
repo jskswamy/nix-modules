@@ -447,6 +447,17 @@ in {
       '';
     };
 
+    enableLocalMcp = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Whether to register the local 1mcp aggregator endpoint instead of
+        registering the default stdio MCP servers (`chrome-devtools`, `time`,
+        `codebase-memory-mcp`) directly on every profile. The `time` and
+        `codebase-memory-mcp` packages remain installed so 1mcp can run them.
+      '';
+    };
+
     resources = {
       excludes = mkOption {
         type = types.attrsOf (types.listOf types.str);
@@ -502,14 +513,19 @@ in {
         });
 
       mcpServers = defaults ({
-          chrome-devtools.args = ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
           superlogical.args = ["--url" "https://www.superlogical.com/rex/community-mcp"];
         }
-        // lib.optionalAttrs (cfg.timeServerPackage != null) {
-          time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
-        }
-        // lib.optionalAttrs (cfg.codebaseMemoryPackage != null) {
-          codebase-memory-mcp.args = ["--" "${config.home.profileDirectory}/bin/codebase-memory-mcp"];
+        // lib.optionalAttrs (!cfg.enableLocalMcp) ({
+            chrome-devtools.args = ["--" "npx" "-y" "chrome-devtools-mcp@1.11.0" "--browser-url" "http://localhost:9222"];
+          }
+          // lib.optionalAttrs (cfg.timeServerPackage != null) {
+            time.args = ["--" "${config.home.profileDirectory}/bin/mcp-server-time"];
+          }
+          // lib.optionalAttrs (cfg.codebaseMemoryPackage != null) {
+            codebase-memory-mcp.args = ["--" "${config.home.profileDirectory}/bin/codebase-memory-mcp"];
+          })
+        // lib.optionalAttrs cfg.enableLocalMcp {
+          "1mcp".args = ["--url" "http://127.0.0.1:${toString (config.tools.local-mcp.port or 3051)}/mcp"];
         }
         // lib.optionalAttrs cfg.enableAgentgateway {
           agentgateway.args = ["--url" "http://127.0.0.1:${toString (config.tools.agentgateway.port or 3050)}/mcp"];
