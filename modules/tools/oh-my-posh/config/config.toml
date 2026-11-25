@@ -189,6 +189,10 @@ tooltips_action = "replace"
     min_width = 100
     template = "{{ if le .Percentage 10 }} {{ .Percentage }}% {{ end }}"
 
+    [blocks.segments.cache]
+      duration = "2m"
+      strategy = "device"
+
 # ---------------------------------------------------------------------------
 # Tooltips (render on the right while typing matching commands — even on
 # narrow panes)

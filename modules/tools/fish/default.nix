@@ -70,18 +70,12 @@ in {
       cfg.env;
 
     # Nearly all fish config lives in conf.d/*.fish, symlinked below for
-    # instant edits. Only things needing Nix package resolution stay here.
+    # instant edits. Fish automatically sources ~/.config/fish/conf.d/*.fish
+    # at startup — do NOT re-source them in interactiveShellInit, as that
+    # runs every conf.d file (and its subprocesses) twice on every new shell.
     programs.fish = {
       enable = lib.mkDefault true;
       plugins = [];
-      # mkAfter so this lands after home-manager's own integrations
-      # (zoxide, starship, completions path, GPG_TTY) rather than before
-      # them, matching the order these files were written against.
-      interactiveShellInit = lib.mkAfter ''
-        for f in ~/.config/fish/conf.d/*.fish
-          source $f
-        end
-      '';
     };
 
     home.file =

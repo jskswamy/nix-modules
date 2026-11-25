@@ -18,6 +18,9 @@ in {
     programs.direnv = {
       enable = lib.mkDefault true;
       nix-direnv.enable = lib.mkDefault true;
+      # Replaced by conf.d/direnv-fast.fish below so direnv only forks on PWD
+      # changes or direnv/.envrc commands instead of every single prompt.
+      enableFishIntegration = lib.mkDefault false;
 
       config = {
         hide_env_diff = lib.mkDefault true;
@@ -53,6 +56,9 @@ in {
       '';
     };
 
-    home.file.".config/fish/functions/mkenvrc.fish".source = fishSrc.file "functions/mkenvrc.fish";
+    home.file = {
+      ".config/fish/functions/mkenvrc.fish".source = fishSrc.file "functions/mkenvrc.fish";
+      ".config/fish/conf.d/direnv-fast.fish".source = fishSrc.file "conf.d/direnv-fast.fish";
+    };
   };
 }

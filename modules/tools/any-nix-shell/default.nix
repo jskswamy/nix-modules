@@ -31,6 +31,15 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = lib.optional (cfg.package != null) cfg.package;
-    home.file.".config/fish/conf.d/any-nix-shell.fish".source = fishSrc.file "any-nix-shell.fish";
+    # Pre-generate the static fish wrapper at build time when we own the
+    # package, avoiding a ~1s `any-nix-shell fish | source` fork on every
+    # interactive shell startup.
+    home.file.".config/fish/conf.d/any-nix-shell.fish".source =
+      if cfg.package != null
+      then
+        pkgs.runCommand "any-nix-shell.fish" {} ''
+          ${cfg.package}/bin/any-nix-shell fish > "$out"
+        ''
+      else fishSrc.file "any-nix-shell.fish";
   };
 }

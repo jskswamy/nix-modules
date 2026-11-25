@@ -6,20 +6,24 @@
 # C.UTF-8 is built into glibc and so is the fallback there. `locale -a`
 # spells these en_US.utf8 / C.utf8 on Linux; the UTF-8 spelling below is
 # accepted by both.
-set -l available
-command -q locale; and set available (locale -a 2>/dev/null)
-set -l loc
-if set -q available[1]
-    if string match -qri '^en_US\.utf-?8$' -- $available
-        set loc en_US.UTF-8
-    else if string match -qri '^C\.utf-?8$' -- $available
-        set loc C.UTF-8
+# Locale: skip the expensive `locale -a` subprocess when LANG is already a
+# UTF-8 locale (the common case on macOS and NixOS).
+if not string match -qri 'utf-?8$' -- "$LANG"
+    set -l available
+    command -q locale; and set available (locale -a 2>/dev/null)
+    set -l loc
+    if set -q available[1]
+        if string match -qri '^en_US\.utf-?8$' -- $available
+            set loc en_US.UTF-8
+        else if string match -qri '^C\.utf-?8$' -- $available
+            set loc C.UTF-8
+        end
     end
-end
-if test -n "$loc"
-    set -gx LC_CTYPE $loc
-    set -gx LANG $loc
-    set -gx LC_ALL $loc
+    if test -n "$loc"
+        set -gx LC_CTYPE $loc
+        set -gx LANG $loc
+        set -gx LC_ALL $loc
+    end
 end
 
 # General environment

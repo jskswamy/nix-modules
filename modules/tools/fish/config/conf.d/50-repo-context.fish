@@ -25,13 +25,28 @@ function _repo_context_check --on-variable PWD
         end
     end
 
-    # Slow path: only check remotes when inside a git worktree
-    # (git-dir differs from git-common-dir in worktrees but not in main checkouts)
-    # This avoids false positives when a repo merely has a client remote configured
+    # Slow path: only check remotes when inside a git worktree.
+    # Walk up in pure Fish to find `.git`: in a normal checkout `.git` is a
+    # directory (`test -d`), whereas in a worktree `.git` is a regular file
+    # (`test -f`). This avoids spawning `git` on every `cd` and startup.
     if test $matched -eq 0
-        set -l git_dir (git rev-parse --git-dir 2>/dev/null)
-        set -l git_common (git rev-parse --git-common-dir 2>/dev/null)
-        if test -n "$git_dir" -a "$git_dir" != "$git_common"
+        set -l dir "$PWD"
+        set -l is_worktree 0
+        while test -n "$dir"
+            if test -f "$dir/.git"
+                set is_worktree 1
+                break
+            else if test -d "$dir/.git"
+                break
+            end
+            if test "$dir" = /
+                break
+            end
+            set dir (string replace -r '/[^/]*$' '' -- "$dir")
+            test -z "$dir"; and set dir /
+        end
+
+        if test $is_worktree -eq 1
             for remote_name in (git remote 2>/dev/null)
                 set -l remote_url (git remote get-url $remote_name 2>/dev/null)
                 if test -n "$remote_url" && _url_matches_client_org $remote_url

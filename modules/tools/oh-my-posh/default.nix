@@ -39,11 +39,18 @@ in {
         configFile = lib.mkDefault "${config.xdg.configHome}/oh-my-posh/config.toml";
       };
 
+      # Source the `set_poshcontext` hook after `oh-my-posh init fish` (which
+      # defines an empty `set_poshcontext` stub in shellInit). Placed outside
+      # conf.d/ so Fish does not source it prematurely before init.
+      programs.fish.interactiveShellInit = lib.mkAfter ''
+        if test -f ~/.config/fish/oh-my-posh.fish
+          source ~/.config/fish/oh-my-posh.fish
+        end
+      '';
+
       home.file = {
         ".config/oh-my-posh/config.toml".source = src.file "config.toml";
-        # Drop-in for fish providing `set_poshcontext` for flake and devbox
-        # env vars. Harmless where fish is absent.
-        ".config/fish/conf.d/oh-my-posh.fish".source = fishSrc.file "oh-my-posh.fish";
+        ".config/fish/oh-my-posh.fish".source = fishSrc.file "oh-my-posh.fish";
       };
     })
   ];
