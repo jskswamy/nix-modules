@@ -8,6 +8,9 @@
 "$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
 version = 4
 final_space = true
+console_title_template = "{{ if .Root }}⚡ {{ end }}{{ .Folder }}"
+shell_integration = true
+streaming = 50
 tooltips_action = "replace"
 
 [transient_prompt]
@@ -16,6 +19,11 @@ tooltips_action = "replace"
     "{{ if gt .Code 0 }}red{{ end }}",
     "{{ if eq .Code 0 }}green{{ end }}",
   ]
+  template = "❯ "
+
+[secondary_prompt]
+  background = "transparent"
+  foreground = "darkGray"
   template = "❯ "
 
 # ---------------------------------------------------------------------------
@@ -47,7 +55,7 @@ tooltips_action = "replace"
     type = "git"
     style = "plain"
     foreground = "magenta"
-    template = "{{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ .Staging.Modified }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }} "
+    template = "{{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ add .Staging.Added .Staging.Modified .Staging.Deleted }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }}{{ if .Merge }} <red>MERGING</red>{{ end }}{{ if .Rebase }} <red>REBASING</red>{{ end }}{{ if .CherryPick }} <red>CHERRY-PICK</red>{{ end }} "
 
     [blocks.segments.options]
       fetch_status = true
@@ -225,6 +233,13 @@ tooltips_action = "replace"
       us-west-2 = "oregon"
 
 [[tooltips]]
+  type = "gcp"
+  style = "plain"
+  foreground = "yellow"
+  tips = ["gcloud", "gsutil"]
+  template = " {{ .Project }}{{ if .Account }} ({{ .Account }}){{ end }}"
+
+[[tooltips]]
   type = "terraform"
   style = "plain"
   foreground = "magenta"
@@ -238,7 +253,7 @@ tooltips_action = "replace"
   type = "kubectl"
   style = "plain"
   foreground = "green"
-  tips = ["kubectl", "k"]
+  tips = ["kubectl", "k", "helm", "k9s", "kubectx", "kustomize", "stern"]
   template = "⛵ {{ .Context }}{{ if .Namespace }} ({{ .Namespace }}){{ end }}"
 
   [tooltips.options]
@@ -251,5 +266,16 @@ tooltips_action = "replace"
   type = "docker"
   style = "plain"
   foreground = "blue"
-  tips = ["docker", "docker-compose"]
+  tips = ["docker", "docker-compose", "lazydocker", "colima"]
   template = " {{ .Context }}"
+
+[[tooltips]]
+  type = "python"
+  style = "plain"
+  foreground = "yellow"
+  tips = ["uv", "python", "python3", "pytest"]
+  template = " {{ if .Venv }}({{ .Venv }}) {{ end }}{{ .Full }}"
+
+  [tooltips.options]
+    fetch_virtual_env = true
+    display_mode = "always"
