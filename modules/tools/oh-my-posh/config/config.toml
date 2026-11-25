@@ -1,0 +1,267 @@
+# Oh My Posh configuration (~/.config/oh-my-posh/config.toml)
+# Managed by nix-modules (tools.oh-my-posh).
+#
+# Keeps module parity with tools.starship while leveraging Oh My Posh's
+# streaming renderer, per-segment caching, native transient prompts,
+# width-aware right prompts, and interactive command tooltips.
+
+"$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
+version = 4
+final_space = true
+streaming = 100
+tooltips_action = "replace"
+
+[transient_prompt]
+  background = "transparent"
+  foreground_templates = [
+    "{{ if gt .Code 0 }}red{{ end }}",
+    "{{ if eq .Code 0 }}green{{ end }}",
+  ]
+  template = "❯ "
+
+# ---------------------------------------------------------------------------
+# Left prompt (core context — mirrors starship.toml)
+# ---------------------------------------------------------------------------
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground = "yellow"
+    template = "{{ if .Env.REPO_CONTEXT }}🔰 {{ end }}"
+
+  [[blocks.segments]]
+    type = "path"
+    style = "plain"
+    foreground = "cyan"
+    template = "at {{ .Path }}{{ if not .Writable }} {{ end }} "
+
+    [blocks.segments.options]
+      style = "agnoster_short"
+      max_depth = 3
+      home_icon = "~"
+      folder_separator_icon = "/"
+
+  [[blocks.segments]]
+    type = "git"
+    style = "plain"
+    foreground = "magenta"
+    template = "{{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ .Staging.Modified }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }} "
+
+    [blocks.segments.options]
+      fetch_status = true
+      fetch_upstream_icon = false
+
+  [[blocks.segments]]
+    type = "nix-shell"
+    style = "plain"
+    foreground = "blue"
+    template = "🐧 "
+
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground = "green"
+    template = "{{ if .Env.DIRENV_DIR }} {{ end }}"
+
+  [[blocks.segments]]
+    type = "executiontime"
+    style = "plain"
+    foreground = "yellow"
+    template = " {{ .FormattedMs }} "
+
+    [blocks.segments.options]
+      threshold = 2000
+      style = "roundrock"
+
+  [[blocks.segments]]
+    type = "status"
+    style = "plain"
+    foreground = "red"
+    template = "🔴 "
+
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground_templates = [
+      "{{ if gt .Code 0 }}red{{ end }}",
+      "{{ if eq .Code 0 }}green{{ end }}",
+    ]
+    template = "❯"
+
+# ---------------------------------------------------------------------------
+# Right prompt (hidden on narrow panes < 100 cols via min_width so tooltips
+# still work on narrow panes without wrapping fish_right_prompt)
+# ---------------------------------------------------------------------------
+[[blocks]]
+  type = "rprompt"
+
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground = "cyan"
+    min_width = 100
+    template = "{{ if .Env.POSH_AIDE }} {{ .Env.POSH_AIDE }} {{ end }}"
+
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground = "blue"
+    min_width = 100
+    template = "{{ if .Env.POSH_NIX_FLAKE }}❄ {{ end }}"
+
+  [[blocks.segments]]
+    type = "go"
+    style = "plain"
+    foreground = "cyan"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "node"
+    style = "plain"
+    foreground = "green"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "bun"
+    style = "plain"
+    foreground = "red"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "deno"
+    style = "plain"
+    foreground = "green"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "ruby"
+    style = "plain"
+    foreground = "red"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "rust"
+    style = "plain"
+    foreground = "red"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "java"
+    style = "plain"
+    foreground = "red"
+    min_width = 100
+    template = " {{ .Full }} "
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
+
+  [[blocks.segments]]
+    type = "battery"
+    style = "plain"
+    foreground = "red"
+    min_width = 100
+    template = "{{ if le .Percentage 10 }} {{ .Percentage }}% {{ end }}"
+
+# ---------------------------------------------------------------------------
+# Tooltips (render on the right while typing matching commands — even on
+# narrow panes)
+# ---------------------------------------------------------------------------
+[[tooltips]]
+  type = "text"
+  style = "plain"
+  foreground = "blue"
+  tips = ["nix", "nh", "darwin-rebuild", "nixos-rebuild"]
+  template = "{{ if or .Env.IN_NIX_SHELL .Env.POSH_NIX_FLAKE }}❄ {{ if .Env.IN_NIX_SHELL }}shell:{{ .Env.IN_NIX_SHELL }}{{ end }}{{ if and .Env.IN_NIX_SHELL .Env.POSH_NIX_FLAKE }} · {{ end }}{{ if .Env.POSH_NIX_FLAKE }}flake{{ end }}{{ end }}"
+
+[[tooltips]]
+  type = "text"
+  style = "plain"
+  foreground = "green"
+  tips = ["direnv"]
+  template = " {{ if .Env.DIRENV_DIR }}active ({{ .Env.DIRENV_DIR }}){{ else }}inactive{{ end }}"
+
+[[tooltips]]
+  type = "text"
+  style = "plain"
+  foreground = "magenta"
+  tips = ["devbox"]
+  template = " devbox {{ if .Env.POSH_DEVBOX }}{{ .Env.POSH_DEVBOX }}{{ else }}idle{{ end }}"
+
+[[tooltips]]
+  type = "aws"
+  style = "plain"
+  foreground = "yellow"
+  tips = ["aws"]
+  template = " {{ .Profile }}{{ if .Region }} {{ .RegionAlias }}{{ end }}"
+
+  [tooltips.options]
+    display_default = true
+
+    [tooltips.options.region_aliases]
+      ap-south-1 = "mumbai"
+      us-east-1 = "virginia"
+      us-west-2 = "oregon"
+
+[[tooltips]]
+  type = "terraform"
+  style = "plain"
+  foreground = "magenta"
+  tips = ["terraform", "tf"]
+  template = " {{ .WorkspaceName }}{{ if .Version }} {{ .Version }}{{ end }}"
+
+  [tooltips.options]
+    fetch_version = true
+
+[[tooltips]]
+  type = "kubectl"
+  style = "plain"
+  foreground = "green"
+  tips = ["kubectl", "k"]
+  template = "⛵ {{ .Context }}{{ if .Namespace }} ({{ .Namespace }}){{ end }}"
+
+  [tooltips.options]
+    parse_kubeconfig = true
+
+    [tooltips.options.context_aliases]
+      "dev.local.cluster.k8s" = "dev"
+
+[[tooltips]]
+  type = "docker"
+  style = "plain"
+  foreground = "blue"
+  tips = ["docker", "docker-compose"]
+  template = " {{ .Context }}"

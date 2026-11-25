@@ -46,6 +46,7 @@
 
         common = ./modules/_common;
         theme = ./modules/theme;
+        prompt = ./modules/prompt;
 
         # Every tool. Each one can still be switched off individually with
         # `tools.<name>.enable = false`.
