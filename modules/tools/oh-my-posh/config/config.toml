@@ -199,6 +199,13 @@ tooltips_action = "replace"
 [[tooltips]]
   type = "text"
   style = "plain"
+  foreground = "cyan"
+  tips = ["aide"]
+  template = "{{ if .Env.POSH_AIDE }}{{ .Env.POSH_AIDE }}{{ end }}"
+
+[[tooltips]]
+  type = "text"
+  style = "plain"
   foreground = "blue"
   tips = ["nix", "nh", "darwin-rebuild", "nixos-rebuild"]
   template = "{{ if or .Env.IN_NIX_SHELL .Env.POSH_NIX_FLAKE }}❄ {{ if .Env.IN_NIX_SHELL }}shell:{{ .Env.IN_NIX_SHELL }}{{ end }}{{ if and .Env.IN_NIX_SHELL .Env.POSH_NIX_FLAKE }} · {{ end }}{{ if .Env.POSH_NIX_FLAKE }}flake{{ end }}{{ end }}"

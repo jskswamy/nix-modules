@@ -19,6 +19,22 @@ function set_poshcontext
     end
 end
 
+# Populate POSH_AIDE lazily only when rendering the `aide` command tooltip,
+# keeping `set_poshcontext` subprocess-free on normal prompts.
+if functions -q _omp_get_prompt; and not functions -q __omp_get_prompt_inner
+    functions -c _omp_get_prompt __omp_get_prompt_inner
+    function _omp_get_prompt
+        if test "$argv[1]" = tooltip; and contains -- --command=aide $argv
+            if command -q aide
+                set -lx POSH_AIDE (aide prompt --compact 2>/dev/null)
+                __omp_get_prompt_inner $argv
+                return
+            end
+        end
+        __omp_get_prompt_inner $argv
+    end
+end
+
 # Hide the idle right prompt on narrow panes (< 100 cols) without invoking
 # `oh-my-posh print right`, while still allowing command tooltips to render
 # when `_omp_tooltip_command` is active.
