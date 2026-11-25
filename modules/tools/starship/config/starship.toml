@@ -190,6 +190,7 @@ not_allowed_msg = " "
 denied_msg = " "
 
 [custom.aide]
+disabled = true
 command = "aide prompt --compact"
 when = "true"
 symbol = ""

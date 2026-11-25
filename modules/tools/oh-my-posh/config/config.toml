@@ -101,13 +101,6 @@ tooltips_action = "replace"
   [[blocks.segments]]
     type = "text"
     style = "plain"
-    foreground = "cyan"
-    min_width = 100
-    template = "{{ if .Env.POSH_AIDE }} {{ .Env.POSH_AIDE }} {{ end }}"
-
-  [[blocks.segments]]
-    type = "text"
-    style = "plain"
     foreground = "blue"
     min_width = 100
     template = "{{ if .Env.POSH_NIX_FLAKE }}❄ {{ end }}"

@@ -17,15 +17,4 @@ function set_poshcontext
     else
         set -e POSH_DEVBOX
     end
-
-    if command -q aide
-        set -l aide_out (aide prompt --compact 2>/dev/null)
-        if test -n "$aide_out"
-            set -gx POSH_AIDE "$aide_out"
-        else
-            set -e POSH_AIDE
-        end
-    else
-        set -e POSH_AIDE
-    end
 end

@@ -41,7 +41,7 @@ in {
 
       home.file = {
         ".config/oh-my-posh/config.toml".source = src.file "config.toml";
-        # Drop-in for fish providing `set_poshcontext` for flake/devbox/aide
+        # Drop-in for fish providing `set_poshcontext` for flake and devbox
         # env vars. Harmless where fish is absent.
         ".config/fish/conf.d/oh-my-posh.fish".source = fishSrc.file "oh-my-posh.fish";
       };
