@@ -105,6 +105,10 @@
       "commit": "2bf85893c3",
       "agents": ["pi"]
     },
+    "pi-statusline": {
+      "commit": "894a3d883b",
+      "agents": ["pi"]
+    },
     "vigolium-piolium": {
       "commit": "9ffdcace48",
       "agents": ["pi"]

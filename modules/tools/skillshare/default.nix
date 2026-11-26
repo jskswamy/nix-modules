@@ -110,6 +110,10 @@
       pi-subagents = "npm:pi-subagents";
       pi-advisor-flow = "philipbrembeck/pi-advisor";
       pi-btw = "dbachelder/pi-btw";
+      # Runs a Claude Code-style statusLine command in Pi's footer, so Pi
+      # can share tools.oh-my-posh's claude.toml. Pinned: a young
+      # single-maintainer package that runs inside every Pi session.
+      pi-statusline = "npm:pi-statusline@0.0.2";
       vigolium-piolium = "vigolium/piolium";
     }
     // lib.genAttrs jskswamyBundles (_: "jskswamy/skills");
