@@ -50,6 +50,8 @@ in {
 
       home.file = {
         ".config/oh-my-posh/config.toml".source = src.file "config.toml";
+        # Claude Code statusline theme, for `oh-my-posh claude --config <this>`.
+        ".config/oh-my-posh/claude.toml".source = src.file "claude.toml";
         ".config/fish/oh-my-posh.fish".source = fishSrc.file "oh-my-posh.fish";
       };
     })

@@ -1,0 +1,54 @@
+# Oh My Posh as the Claude Code statusline (~/.config/oh-my-posh/claude.toml)
+# Managed by nix-modules (tools.oh-my-posh.claude). Rendered by
+# `oh-my-posh claude`, which reads Claude Code's statusline JSON on stdin.
+
+"$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
+version = 4
+
+[palette]
+  accent = '{{ if .Env.REPO_CONTEXT_COLOR }}{{ .Env.REPO_CONTEXT_COLOR }}{{ else if .Env.REPO_CONTEXT }}#fab387{{ else }}cyan{{ end }}'
+
+# Line one: where the agent is working and what this session has cost.
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+
+  [[blocks.segments]]
+    type = "path"
+    style = "plain"
+    foreground = "p:accent"
+    template = "{{ .Path }} "
+
+    [blocks.segments.options]
+      style = "agnoster_short"
+      max_depth = 3
+      home_icon = "~"
+      folder_separator_icon = "/"
+
+  [[blocks.segments]]
+    type = "git"
+    style = "plain"
+    foreground = "magenta"
+    template = '{{ .HEAD }}{{ if .IsWorkTree }}<p:accent> ⎇</>{{ end }}{{ if or .Working.Changed .Staging.Changed }} <p:accent>●</>{{ end }} '
+
+  [[blocks.segments]]
+    type = "claude"
+    style = "plain"
+    foreground = "#d97757"
+    template = '<darkGray>│</> {{ .Model.DisplayName }}{{ if .Effort }}{{ if .Effort.Level }} <darkGray>{{ .Effort.Level }}</>{{ end }}{{ end }}{{ if .FastMode }} ⚡{{ end }}{{ if .Agent }}{{ if .Agent.Name }} <darkGray>→ {{ .Agent.Name }}</>{{ end }}{{ end }} <darkGray>│</> <{{ if ge (atoi .TokenUsagePercent.String) 80 }}red{{ else }}p:accent{{ end }}>{{ .TokenGaugeUsed }} {{ .TokenUsagePercent }}%</> <darkGray>│</> {{ .FormattedCost }} <darkGray>{{ .FormattedDuration }}</>{{ if .Cost.TotalLinesAdded }} <green>+{{ .Cost.TotalLinesAdded }}</><red>-{{ .Cost.TotalLinesRemoved }}</>{{ end }}'
+
+    [blocks.segments.options]
+      gauge_marked_char = "▰"
+      gauge_unmarked_char = "▱"
+
+# Line two: plan rate limits, shown only when Claude Code sends them.
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+  newline = true
+
+  [[blocks.segments]]
+    type = "claude"
+    style = "plain"
+    foreground = "darkGray"
+    template = '{{ if gt .FiveHourResetsIn 0 }}5h {{ .FiveHourGauge }} {{ .FiveHourUsage }}% ↻{{ .FiveHourResetsAt | date "15:04" }}{{ end }}{{ if gt .SevenDayResetsIn 0 }}  7d {{ .SevenDayGauge }} {{ .SevenDayUsage }}%{{ end }}'
