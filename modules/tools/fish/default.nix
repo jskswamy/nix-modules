@@ -20,6 +20,24 @@
   # Single quotes are the one fish quoting form with no expansion; inside
   # them only \\ and \' are escapes.
   fishQuote = v: "'" + lib.replaceStrings ["\\" "'"] ["\\\\" "\\'"] v + "'";
+
+  # The legacy flat `orgs` list is the `client` context; named contexts win.
+  contexts =
+    lib.optionalAttrs (cfg.repoContext.orgs != []) {
+      client = {
+        name = "client";
+        inherit (cfg.repoContext) orgs;
+        color = "#fab387";
+        icon = "";
+      };
+    }
+    // cfg.repoContext.contexts;
+  # One row per org, so the hook can index name/color/icon by the matched org.
+  contextRows = lib.concatLists (lib.mapAttrsToList
+    (_: c: map (org: {inherit org; inherit (c) name color icon;}) c.orgs)
+    contexts);
+  fishList = var: field:
+    "set -g ${var} " + lib.concatMapStringsSep " " (r: fishQuote r.${field}) contextRows;
 in {
   imports = [
     ../../_common
@@ -38,9 +56,53 @@ in {
 
         conf.d/50-repo-context.fish exports REPO_CONTEXT=client when the
         current directory, or a worktree's remote, belongs to one of these
-        orgs. The list is an option rather than part of that file so the
-        function can live in a public repo while the org names stay
-        wherever the consumer keeps its private configuration.
+        orgs. Shorthand for a `client` entry in `repoContext.contexts`.
+        The list is an option rather than part of that file so the function
+        can live in a public repo while the org names stay wherever the
+        consumer keeps its private configuration.
+      '';
+    };
+
+    repoContext.contexts = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule ({name, ...}: {
+        options = {
+          name = lib.mkOption {
+            type = lib.types.str;
+            default = name;
+            defaultText = lib.literalMD "the attribute name";
+            example = "Acme Corp";
+            description = "Label shown in the prompt pill; spaces and capitals are fine.";
+          };
+          orgs = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            description = "GitHub orgs whose repos belong to this context.";
+          };
+          color = lib.mkOption {
+            type = lib.types.str;
+            default = "#fab387";
+            description = "Hex colour for this context's prompt pill and accent.";
+          };
+          icon = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            example = "🏢";
+            description = "Emoji or glyph shown before the context name.";
+          };
+        };
+      }));
+      default = {};
+      example = {
+        acme = {
+          orgs = ["acme-corp"];
+          color = "#f38ba8";
+          icon = "🏢";
+        };
+      };
+      description = ''
+        Named repo contexts. When the current directory, or a worktree's
+        remote, belongs to one of a context's orgs, the repo-context hook
+        exports REPO_CONTEXT (its `name`), REPO_CONTEXT_COLOR and
+        REPO_CONTEXT_ICON for prompts to render. The first matching org wins.
       '';
     };
 
@@ -87,11 +149,27 @@ in {
           (lib.mapAttrsToList (n: v: "set -gx ${n} ${fishQuote v}") cfg.env)
           + "\n";
       }
-      // lib.optionalAttrs (cfg.repoContext.orgs != []) {
-        # Sorts before 50-repo-context.fish, which consumes the variable.
+      // lib.optionalAttrs (contextRows != []) {
+        # Sorts before 50-repo-context.fish, which consumes these lists.
         ".config/fish/conf.d/49-repo-context-orgs.fish".text =
-          "set -g _REPO_CONTEXT_ORGS "
-          + lib.concatMapStringsSep " " (o: ''"${o}"'') cfg.repoContext.orgs
+          lib.concatMapStringsSep "\n" (x: fishList x.var x.field) [
+            {
+              var = "_REPO_CONTEXT_ORGS";
+              field = "org";
+            }
+            {
+              var = "_REPO_CONTEXT_NAMES";
+              field = "name";
+            }
+            {
+              var = "_REPO_CONTEXT_COLORS";
+              field = "color";
+            }
+            {
+              var = "_REPO_CONTEXT_ICONS";
+              field = "icon";
+            }
+          ]
           + "\n";
       };
   };
