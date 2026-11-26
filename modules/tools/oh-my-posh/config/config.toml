@@ -8,7 +8,8 @@
 "$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
 version = 4
 final_space = true
-console_title_template = "{{ if .Root }}⚡ {{ end }}{{ .Folder }}"
+# Full repo and branch live in the title so the prompt can abbreviate them.
+console_title_template = "{{ if .Root }}⚡ {{ end }}{{ if .Segments.Contains \"Git\" }}{{ .Segments.Git.RepoName }} · {{ .Segments.Git.Ref }}{{ else }}{{ .Folder }}{{ end }}"
 shell_integration = true
 streaming = 50
 tooltips_action = "replace"
@@ -40,26 +41,28 @@ tooltips_action = "replace"
     template = "{{ if .Env.REPO_CONTEXT }}🔰 {{ end }}"
 
   [[blocks.segments]]
+    type = "git"
+    style = "plain"
+    foreground = "magenta"
+    template = "<cyan>at </cyan><darkGray>{{ .RepoName }}</darkGray>{{ if .RelativeDir }}<cyan>/{{ .RelativeDir }}</cyan>{{ end }} {{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ add .Staging.Added .Staging.Modified .Staging.Deleted }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }}{{ if .Merge }} <red>MERGING</red>{{ end }}{{ if .Rebase }} <red>REBASING</red>{{ end }}{{ if .CherryPick }} <red>CHERRY-PICK</red>{{ end }} "
+
+    [blocks.segments.options]
+      fetch_status = true
+      fetch_upstream_icon = false
+      # `<type>/<id>-<description>` shows as `<type>/<id>`; anything else is cut at 30.
+      branch_template = "{{ $id := regexFind \"^[^/]+/([A-Za-z]+-)?[0-9]+\" .Branch }}{{ if $id }}{{ $id }}{{ else if gt (len .Branch) 30 }}{{ trunc 29 .Branch }}…{{ else }}{{ .Branch }}{{ end }}"
+
+  [[blocks.segments]]
     type = "path"
     style = "plain"
     foreground = "cyan"
-    template = "at {{ .Path }}{{ if not .Writable }} {{ end }} "
+    template = "{{ if not (.Segments.Contains \"Git\") }}at {{ .Path }}{{ if not .Writable }} {{ end }} {{ end }}"
 
     [blocks.segments.options]
       style = "agnoster_short"
       max_depth = 3
       home_icon = "~"
       folder_separator_icon = "/"
-
-  [[blocks.segments]]
-    type = "git"
-    style = "plain"
-    foreground = "magenta"
-    template = "{{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ add .Staging.Added .Staging.Modified .Staging.Deleted }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }}{{ if .Merge }} <red>MERGING</red>{{ end }}{{ if .Rebase }} <red>REBASING</red>{{ end }}{{ if .CherryPick }} <red>CHERRY-PICK</red>{{ end }} "
-
-    [blocks.segments.options]
-      fetch_status = true
-      fetch_upstream_icon = false
 
   [[blocks.segments]]
     type = "nix-shell"
