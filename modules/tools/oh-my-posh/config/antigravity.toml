@@ -1,0 +1,56 @@
+# Oh My Posh as the Antigravity CLI statusline (~/.config/oh-my-posh/antigravity.toml)
+# Managed by nix-modules (tools.oh-my-posh). Rendered by
+# `oh-my-posh antigravity`, which reads Antigravity's statusline JSON on stdin.
+# Mirrors claude.toml so every agent's statusline reads the same way.
+
+"$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
+version = 4
+
+[palette]
+  accent = '{{ if .Env.REPO_CONTEXT_COLOR }}{{ .Env.REPO_CONTEXT_COLOR }}{{ else if .Env.REPO_CONTEXT }}#fab387{{ else }}cyan{{ end }}'
+
+# Line one: where the agent is working and what state it is in.
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+
+  [[blocks.segments]]
+    type = "path"
+    style = "plain"
+    foreground = "p:accent"
+    template = "{{ .Path }} "
+
+    [blocks.segments.options]
+      style = "agnoster_short"
+      max_depth = 3
+      home_icon = "~"
+      folder_separator_icon = "/"
+
+  [[blocks.segments]]
+    type = "git"
+    style = "plain"
+    foreground = "magenta"
+    template = '{{ .HEAD }}{{ if .IsWorkTree }}<p:accent> ⎇</>{{ end }}{{ if or .Working.Changed .Staging.Changed }} <p:accent>●</>{{ end }} '
+
+  # The payload also carries the signed-in email; it is left out on purpose.
+  [[blocks.segments]]
+    type = "antigravity"
+    style = "plain"
+    foreground = "#8ab4f8"
+    template = '<darkGray>│</> {{ .Model.DisplayName }}{{ if .ExecutionMode }} <darkGray>{{ .ExecutionMode }}</>{{ end }}{{ if .Sandbox }}{{ if .Sandbox.Enabled }} 🛡{{ end }}{{ end }} <darkGray>│</> <{{ if ge (atoi .TokenUsagePercent.String) 80 }}red{{ else }}p:accent{{ end }}>{{ .TokenGaugeUsed }} {{ .TokenUsagePercent }}%</> {{ if ne .FormattedTokens "0" }}<darkGray>{{ .FormattedTokens }}</>{{ end }}{{ if .ToolConfirmationPending }} <yellow>⏸ confirm</>{{ end }}{{ if gt .PendingInputCount 0 }} <yellow>✉ {{ .PendingInputCount }}</>{{ end }}{{ if gt .TaskCount 0 }} <darkGray>☰ {{ .TaskCount }}</>{{ end }}'
+
+    [blocks.segments.options]
+      gauge_marked_char = "▰"
+      gauge_unmarked_char = "▱"
+
+# Line two: plan quota, shown only when Antigravity sends it.
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+  newline = true
+
+  [[blocks.segments]]
+    type = "antigravity"
+    style = "plain"
+    foreground = "darkGray"
+    template = '{{ range $id, $q := .Quota }}{{ with $q.RemainingFraction }}{{ $id }} {{ printf "%.0f" (mulf . 100) }}% left{{ end }}{{ with $q.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}  {{ end }}'
