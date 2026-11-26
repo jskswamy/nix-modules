@@ -46,3 +46,18 @@ if functions -q fish_right_prompt; and not functions -q __omp_rprompt_inner
         end
     end
 end
+
+# Move the trailing `❯` onto its own line when the one-line prompt leaves
+# under 30 columns to type in. Otherwise fish truncates an over-wide prompt
+# to `…` and each streaming repaint strands another `…` line.
+if functions -q fish_prompt; and not functions -q __omp_prompt_inner
+    functions -c fish_prompt __omp_prompt_inner
+    function fish_prompt
+        set -l prompt (__omp_prompt_inner | string collect)
+        set -l last_line (string split \n -- $prompt)[-1]
+        if test (string length --visible -- $last_line) -gt (math $COLUMNS - 30)
+            set prompt (string replace -r '(?s)❯(?!.*❯)' \n'❯' -- $prompt | string collect)
+        end
+        echo -n $prompt
+    end
+end
