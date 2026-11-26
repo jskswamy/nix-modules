@@ -1,26 +1,34 @@
 # Oh My Posh configuration (~/.config/oh-my-posh/config.toml)
 # Managed by nix-modules (tools.oh-my-posh).
 #
-# Keeps module parity with tools.starship while leveraging Oh My Posh's
-# streaming renderer, per-segment caching, native transient prompts,
-# width-aware right prompts, and interactive command tooltips.
+# Two lines: context on the first, a bare ❯ on the second, toolchain in
+# fish's right prompt. Plain text, with rounded pills reserved for alerts
+# (client repo, prod contexts, failed command).
 
 "$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
 version = 4
 final_space = true
 # Full repo and branch live in the title so the prompt can abbreviate them.
-console_title_template = "{{ if .Root }}⚡ {{ end }}{{ if .Segments.Contains \"Git\" }}{{ .Segments.Git.RepoName }} · {{ .Segments.Git.Ref }}{{ else }}{{ .Folder }}{{ end }}"
+# The Rex session label (POSH_REX) leads when it names something else.
+console_title_template = '{{ $rex := .Env.POSH_REX }}{{ if .Root }}⚡ {{ end }}{{ if .Segments.Contains "Git" }}{{ if and $rex (not (contains .Segments.Git.RepoName $rex)) }}{{ $rex }} ▸ {{ end }}{{ .Segments.Git.RepoName }} · {{ .Segments.Git.Ref }}{{ else }}{{ if $rex }}{{ $rex }} ▸ {{ end }}{{ .Folder }}{{ end }}'
 shell_integration = true
 streaming = 50
 tooltips_action = "replace"
+
+# Repo contexts (REPO_CONTEXT*, exported by tools.fish's repo-context hook
+# from tools.fish.repoContext) colour the pill and swap the accent.
+[palette]
+  context = '{{ if .Env.REPO_CONTEXT_COLOR }}{{ .Env.REPO_CONTEXT_COLOR }}{{ else }}#fab387{{ end }}'
+  accent = '{{ if .Env.REPO_CONTEXT }}p:context{{ else }}cyan{{ end }}'
+  ok = '{{ if .Env.REPO_CONTEXT }}p:context{{ else }}green{{ end }}'
 
 [transient_prompt]
   background = "transparent"
   foreground_templates = [
     "{{ if gt .Code 0 }}red{{ end }}",
-    "{{ if eq .Code 0 }}green{{ end }}",
+    "{{ if eq .Code 0 }}p:ok{{ end }}",
   ]
-  template = "❯ "
+  template = '<darkGray>{{ now | date "15:04" }}</> ❯ '
 
 [secondary_prompt]
   background = "transparent"
@@ -28,35 +36,86 @@ tooltips_action = "replace"
   template = "❯ "
 
 # ---------------------------------------------------------------------------
-# Left prompt (core context — mirrors starship.toml)
+# Line one: where am I, and what is risky about it
 # ---------------------------------------------------------------------------
 [[blocks]]
   type = "prompt"
   alignment = "left"
 
   [[blocks.segments]]
-    type = "text"
+    type = "session"
     style = "plain"
     foreground = "yellow"
-    template = "{{ if .Env.REPO_CONTEXT }}🔰 {{ end }}"
+    template = '{{ if .SSHSession }}{{ .UserName }}@{{ .HostName }} {{ end }}'
+
+  [[blocks.segments]]
+    type = "text"
+    style = "diamond"
+    leading_diamond = ""
+    trailing_diamond = " "
+    foreground = "#1e1e2e"
+    background = "p:context"
+    template = '{{ if .Env.REPO_CONTEXT }}{{ with .Env.REPO_CONTEXT_ICON }}{{ . }} {{ end }}{{ .Env.REPO_CONTEXT }}{{ end }}'
+
+  # aide exports AIDE_SANDBOX/AIDE_PROFILE into the shells it launches.
+  [[blocks.segments]]
+    type = "text"
+    style = "plain"
+    foreground = "lightYellow"
+    template = '{{ if eq .Env.AIDE_SANDBOX "on" }}🛡 {{ .Env.AIDE_PROFILE }} {{ end }}'
+
+  # Production cloud contexts stay on screen; everything else is a tooltip.
+  [[blocks.segments]]
+    type = "kubectl"
+    style = "diamond"
+    leading_diamond = ""
+    trailing_diamond = " "
+    foreground = "#1e1e2e"
+    background = "#f38ba8"
+    template = '{{ if regexMatch "(?i)prod" .Context }}k8s {{ .Context }}{{ if .Namespace }}/{{ .Namespace }}{{ end }}{{ end }}'
+
+    [blocks.segments.options]
+      parse_kubeconfig = true
+
+  [[blocks.segments]]
+    type = "aws"
+    style = "diamond"
+    leading_diamond = ""
+    trailing_diamond = " "
+    foreground = "#1e1e2e"
+    background = "#f38ba8"
+    template = '{{ if regexMatch "(?i)prod" .Profile }}aws {{ .Profile }}{{ end }}'
+
+  # In a jj repo this replaces the git segment (gated on it below).
+  [[blocks.segments]]
+    type = "jujutsu"
+    style = "plain"
+    foreground = "magenta"
+    template = '<p:accent>at </><darkGray>{{ .Folder }}</>{{ if .ClosestBookmarks }} {{ .ClosestBookmarks }}{{ end }} {{ .ChangeIDPrefix }}<darkGray>{{ .ChangeIDRest }}</>{{ if .Working.Changed }} <p:accent>[{{ .Working.String }}]</>{{ end }} '
+
+    # 30.9 still needs fetch_status; newer releases fetch from the template.
+    [blocks.segments.options]
+      fetch_status = true
+      change_id_min_len = 4
 
   [[blocks.segments]]
     type = "git"
     style = "plain"
     foreground = "magenta"
-    template = "<cyan>at </cyan><darkGray>{{ .RepoName }}</darkGray>{{ if .RelativeDir }}<cyan>/{{ .RelativeDir }}</cyan>{{ end }} {{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <cyan>[{{ if .Staging.Changed }}<green>++({{ add .Staging.Added .Staging.Modified .Staging.Deleted }})</green>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</cyan>{{ end }}{{ if .Merge }} <red>MERGING</red>{{ end }}{{ if .Rebase }} <red>REBASING</red>{{ end }}{{ if .CherryPick }} <red>CHERRY-PICK</red>{{ end }} "
+    template = '{{ if not (.Segments.Contains "Jujutsu") }}<p:accent>at </><darkGray>{{ .RepoName }}</>{{ if .IsWorkTree }}<p:accent> ⎇</>{{ else if gt .WorktreeCount 0 }}<darkGray> ⎇{{ .WorktreeCount }}</>{{ end }}{{ if .RelativeDir }}<p:accent>/{{ .RelativeDir }}</>{{ end }} {{ .HEAD }}{{ if or .Working.Changed .Staging.Changed (gt .Ahead 0) (gt .Behind 0) (gt .StashCount 0) }} <p:accent>[{{ if .Staging.Changed }}<green>++({{ add .Staging.Added .Staging.Modified .Staging.Deleted }})</>{{ end }}{{ if .Working.Changed }}{{ end }}{{ if gt .StashCount 0 }}{{ end }}{{ if gt .Ahead 0 }}⇡{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}⇣{{ .Behind }}{{ end }}]</>{{ end }}{{ if .Merge }} <red>MERGING</>{{ end }}{{ if .Rebase }} <red>REBASING</>{{ end }}{{ if .CherryPick }} <red>CHERRY-PICK</>{{ end }} {{ end }}'
 
     [blocks.segments.options]
       fetch_status = true
       fetch_upstream_icon = false
-      # `<type>/<id>-<description>` shows as `<type>/<id>`; anything else is cut at 30.
-      branch_template = "{{ $id := regexFind \"^[^/]+/([A-Za-z]+-)?[0-9]+\" .Branch }}{{ if $id }}{{ $id }}{{ else if gt (len .Branch) 30 }}{{ trunc 29 .Branch }}…{{ else }}{{ .Branch }}{{ end }}"
+      # Known `<type>/` prefixes become an icon, then `<type>/<id>-<description>`
+      # shows as `<type>/<id>` (or `<icon> <id>`); anything else is cut at 30.
+      branch_template = '{{ $b := .Branch }}{{ $i := "" }}{{ range $re, $g := dict "^(feature|feat)/" "✨" "^(fix|bugfix)/" "🩹" "^hotfix/" "🔥" "^release/" "🚀" "^chore/" "🧹" "^(renovate|dependabot|claude)/" "🤖" }}{{ if regexMatch $re $b }}{{ $i = $g }}{{ end }}{{ end }}{{ if $i }}{{ $b = printf "%s %s" $i (regexReplaceAll "^[^/]+/" $b "") }}{{ end }}{{ $id := regexFind "^([^ ]+ |[^/]+/)([A-Za-z]+-)?[0-9]+" $b }}{{ if $id }}{{ $id }}{{ else if gt (len $b) 30 }}{{ trunc 29 $b }}…{{ else }}{{ $b }}{{ end }}'
 
   [[blocks.segments]]
     type = "path"
     style = "plain"
-    foreground = "cyan"
-    template = "{{ if not (.Segments.Contains \"Git\") }}at {{ .Path }}{{ if not .Writable }} {{ end }} {{ end }}"
+    foreground = "p:accent"
+    template = '{{ if not (or (.Segments.Contains "Git") (.Segments.Contains "Jujutsu")) }}at {{ .Path }}{{ if not .Writable }} {{ end }} {{ end }}'
 
     [blocks.segments.options]
       style = "agnoster_short"
@@ -86,25 +145,37 @@ tooltips_action = "replace"
       threshold = 2000
       style = "roundrock"
 
+  # `reason` names the failure (SIGINT, SIGKILL, ...) instead of a bare code.
   [[blocks.segments]]
     type = "status"
-    style = "plain"
-    foreground = "red"
-    template = "🔴 "
+    style = "diamond"
+    leading_diamond = ""
+    trailing_diamond = " "
+    foreground = "#1e1e2e"
+    background = "#f38ba8"
+    template = "{{ if .Executed }}{{ reason .Code }}{{ end }}"
+
+# ---------------------------------------------------------------------------
+# Line two: the prompt character
+# ---------------------------------------------------------------------------
+[[blocks]]
+  type = "prompt"
+  alignment = "left"
+  newline = true
 
   [[blocks.segments]]
     type = "text"
     style = "plain"
     foreground_templates = [
       "{{ if gt .Code 0 }}red{{ end }}",
-      "{{ if eq .Code 0 }}green{{ end }}",
+      "{{ if eq .Code 0 }}p:ok{{ end }}",
     ]
     template = "❯"
 
 # ---------------------------------------------------------------------------
-# Right prompt (width-gated in Fish via ~/.config/fish/oh-my-posh.fish so
-# narrow panes < 100 cols hide rprompt without triggering per-segment
-# TerminalWidth probes, while keeping tooltips working on narrow panes)
+# Right prompt: toolchain and low battery. Fish places it itself, so it
+# follows resizes; the guard in oh-my-posh.fish hides it under 100 cols while
+# still letting command tooltips render.
 # ---------------------------------------------------------------------------
 [[blocks]]
   type = "rprompt"
@@ -113,13 +184,23 @@ tooltips_action = "replace"
     type = "text"
     style = "plain"
     foreground = "blue"
-    template = "{{ if .Env.POSH_NIX_FLAKE }}❄ {{ end }}"
+    template = '{{ if .Env.POSH_NIX_FLAKE }} ❄{{ if .Env.POSH_FLAKE_AGE }} <yellow>{{ .Env.POSH_FLAKE_AGE }}d</>{{ end }}{{ end }}'
+
+  [[blocks.segments]]
+    type = "project"
+    style = "plain"
+    foreground = "darkGray"
+    template = '{{ if .Name }}  {{ .Name }}{{ if .Version }}@{{ .Version }}{{ end }}{{ end }}'
+
+    [blocks.segments.cache]
+      duration = "1m"
+      strategy = "folder"
 
   [[blocks.segments]]
     type = "go"
     style = "plain"
     foreground = "cyan"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -129,7 +210,7 @@ tooltips_action = "replace"
     type = "node"
     style = "plain"
     foreground = "green"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -139,7 +220,7 @@ tooltips_action = "replace"
     type = "bun"
     style = "plain"
     foreground = "red"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -149,7 +230,7 @@ tooltips_action = "replace"
     type = "deno"
     style = "plain"
     foreground = "green"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -159,7 +240,7 @@ tooltips_action = "replace"
     type = "ruby"
     style = "plain"
     foreground = "red"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -169,7 +250,7 @@ tooltips_action = "replace"
     type = "rust"
     style = "plain"
     foreground = "red"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
@@ -179,11 +260,20 @@ tooltips_action = "replace"
     type = "java"
     style = "plain"
     foreground = "red"
-    template = " {{ .Full }} "
+    template = "  {{ .Full }}"
 
     [blocks.segments.cache]
       duration = "1m"
       strategy = "folder"
+
+  [[blocks.segments]]
+    type = "time"
+    style = "plain"
+    foreground = "darkGray"
+    template = " {{ .CurrentDate | date .Format }}"
+
+    [blocks.segments.options]
+      time_format = "15:04"
 
   [[blocks.segments]]
     type = "battery"
@@ -205,6 +295,13 @@ tooltips_action = "replace"
   foreground = "cyan"
   tips = ["aide"]
   template = "{{ if .Env.POSH_AIDE }}{{ .Env.POSH_AIDE }}{{ end }}"
+
+[[tooltips]]
+  type = "text"
+  style = "plain"
+  foreground = "magenta"
+  tips = ["bd"]
+  template = "{{ if .Env.POSH_BEADS }}◈ {{ .Env.POSH_BEADS }}{{ end }}"
 
 [[tooltips]]
   type = "text"
