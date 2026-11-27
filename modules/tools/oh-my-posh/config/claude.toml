@@ -41,7 +41,7 @@ version = 4
       gauge_marked_char = "▰"
       gauge_unmarked_char = "▱"
 
-# Line two: plan rate limits, shown only when Claude Code sends them.
+# Line two: plan rate limits and prompt cache status, shown only when Claude Code sends them.
 [[blocks]]
   type = "prompt"
   alignment = "left"
@@ -51,4 +51,11 @@ version = 4
     type = "claude"
     style = "plain"
     foreground = "darkGray"
-    template = '{{ if gt .FiveHourResetsIn 0 }}5h {{ .FiveHourGauge }} {{ .FiveHourUsage }}% ↻{{ .FiveHourResetsAt | date "15:04" }}{{ end }}{{ if gt .SevenDayResetsIn 0 }}  7d {{ .SevenDayGauge }} {{ .SevenDayUsage }}%{{ end }}'
+    template = '''
+{{- $hasLimits := or (gt .FiveHourResetsIn 0) (gt .SevenDayResetsIn 0) -}}
+{{- if gt .FiveHourResetsIn 0 }}5h {{ .FiveHourGauge }} {{ .FiveHourUsage }}% ↻{{ .FiveHourResetsAt | date "15:04" }}{{ end -}}
+{{- if gt .SevenDayResetsIn 0 }}{{ if gt .FiveHourResetsIn 0 }}  {{ end }}7d {{ .SevenDayGauge }} {{ .SevenDayUsage }}%{{ end -}}
+{{- if and .PromptCache .PromptCache.CachingObserved -}}
+  {{- if $hasLimits }} │ {{ end -}}
+  cache {{ if .PromptCache.Warm }}<{{ if lt .PromptCacheExpiresIn.Seconds 60.0 }}yellow{{ else }}green{{ end }}>warm</> {{ .PromptCacheHitRatio }}%{{ if gt .PromptCacheExpiresIn.Seconds 0.0 }} {{ $m := div (int .PromptCacheExpiresIn.Seconds) 60 }}{{ $s := mod (int .PromptCacheExpiresIn.Seconds) 60 }}⏱{{ if gt $m 0 }}{{ $m }}m{{ end }}{{ printf "%02ds" $s }}{{ end }}{{ else }}<red>cold</> {{ .PromptCacheHitRatio }}%{{ if .PromptCache.LastMissCause }}{{ if .PromptCache.LastMissCause.Causes }} ({{ index .PromptCache.LastMissCause.Causes 0 }}){{ end }}{{ end }}{{ end -}}
+{{- end -}}'''
