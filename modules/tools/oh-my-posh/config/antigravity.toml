@@ -43,7 +43,7 @@ version = 4
       gauge_marked_char = "▰"
       gauge_unmarked_char = "▱"
 
-# Line two: plan quota, shown only when Antigravity sends it.
+# Line two: plan quota and last-turn cache hit ratio, shown when Antigravity sends them.
 [[blocks]]
   type = "prompt"
   alignment = "left"
@@ -58,24 +58,37 @@ version = 4
 {{- $gw := index .Quota "gemini-weekly" -}}
 {{- $t5 := index .Quota "3p-5h" -}}
 {{- $tw := index .Quota "3p-weekly" -}}
-{{- $hasG := or $g5 $gw -}}
-{{- $hasT := or $t5 $tw -}}
+{{- $hasG5 := or $g5.RemainingFraction $g5.ResetTime -}}
+{{- $hasGW := or $gw.RemainingFraction $gw.ResetTime -}}
+{{- $hasT5 := or $t5.RemainingFraction $t5.ResetTime -}}
+{{- $hasTW := or $tw.RemainingFraction $tw.ResetTime -}}
+{{- $hasG := or $hasG5 $hasGW -}}
+{{- $hasT := or $hasT5 $hasTW -}}
+{{- $hasQuota := gt (len .Quota) 0 -}}
 {{- if $hasG -}}
   <#8ab4f8>gemini</>
-  {{- with $g5 }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
-  {{- if and $g5 $gw }} ·{{ end -}}
-  {{- with $gw }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
+  {{- if $hasG5 }}{{ with $g5.RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $g5.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
+  {{- if and $hasG5 $hasGW }} ·{{ end -}}
+  {{- if $hasGW }}{{ with $gw.RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $gw.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
 {{- end -}}
 {{- if and $hasG $hasT }} │ {{ end -}}
 {{- if $hasT -}}
   <#d97757>3p</>
-  {{- with $t5 }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
-  {{- if and $t5 $tw }} ·{{ end -}}
-  {{- with $tw }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
+  {{- if $hasT5 }}{{ with $t5.RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $t5.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
+  {{- if and $hasT5 $hasTW }} ·{{ end -}}
+  {{- if $hasTW }}{{ with $tw.RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $tw.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
 {{- end -}}
 {{- range $id, $q := .Quota -}}
   {{- if and (ne $id "gemini-5h") (ne $id "gemini-weekly") (ne $id "3p-5h") (ne $id "3p-weekly") -}}
     {{- if or $hasG $hasT }} │ {{ end -}}
     {{ $id }}{{ with $q.RemainingFraction }}{{ $p := mulf . 100 }} <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $q.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}
+  {{- end -}}
+{{- end -}}
+{{- with .ContextWindow.CurrentUsage -}}
+  {{- $tot := add .InputTokens .CacheCreationInputTokens .CacheReadInputTokens -}}
+  {{- if gt $tot 0 -}}
+    {{- $hit := div (mul .CacheReadInputTokens 100) $tot -}}
+    {{- if $hasQuota }} │ {{ end -}}
+    cache <{{ if lt $hit 30 }}red{{ else if lt $hit 70 }}yellow{{ else }}green{{ end }}>{{ $hit }}%</>
   {{- end -}}
 {{- end -}}'''
