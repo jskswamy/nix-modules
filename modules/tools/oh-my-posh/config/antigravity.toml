@@ -53,4 +53,29 @@ version = 4
     type = "antigravity"
     style = "plain"
     foreground = "darkGray"
-    template = '{{ range $id, $q := .Quota }}{{ with $q.RemainingFraction }}{{ $id }} {{ printf "%.0f" (mulf . 100) }}% left{{ end }}{{ with $q.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}  {{ end }}'
+    template = '''
+{{- $g5 := index .Quota "gemini-5h" -}}
+{{- $gw := index .Quota "gemini-weekly" -}}
+{{- $t5 := index .Quota "3p-5h" -}}
+{{- $tw := index .Quota "3p-weekly" -}}
+{{- $hasG := or $g5 $gw -}}
+{{- $hasT := or $t5 $tw -}}
+{{- if $hasG -}}
+  <#8ab4f8>gemini</>
+  {{- with $g5 }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
+  {{- if and $g5 $gw }} ·{{ end -}}
+  {{- with $gw }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
+{{- end -}}
+{{- if and $hasG $hasT }} │ {{ end -}}
+{{- if $hasT -}}
+  <#d97757>3p</>
+  {{- with $t5 }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 5h <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}{{ end -}}
+  {{- if and $t5 $tw }} ·{{ end -}}
+  {{- with $tw }}{{ with .RemainingFraction }}{{ $p := mulf . 100 }} 7d <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with .ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "Mon 15:04" }}{{ end }}{{ end -}}
+{{- end -}}
+{{- range $id, $q := .Quota -}}
+  {{- if and (ne $id "gemini-5h") (ne $id "gemini-weekly") (ne $id "3p-5h") (ne $id "3p-weekly") -}}
+    {{- if or $hasG $hasT }} │ {{ end -}}
+    {{ $id }}{{ with $q.RemainingFraction }}{{ $p := mulf . 100 }} <{{ if le $p 20.0 }}red{{ else if le $p 50.0 }}yellow{{ else }}green{{ end }}>{{ printf "%.0f" $p }}%</>{{ end }}{{ with $q.ResetTime }} ↻{{ toDate "2006-01-02T15:04:05Z07:00" . | date "15:04" }}{{ end }}
+  {{- end -}}
+{{- end -}}'''
